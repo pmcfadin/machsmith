@@ -1,5 +1,6 @@
 //! `msx-harness`: checks and times LLM-written assembly against rustc builds of CQLite kernels.
 
+pub mod build;
 pub mod guard;
 pub mod loader;
 pub mod spec;
