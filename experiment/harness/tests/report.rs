@@ -42,14 +42,6 @@ fn fixture(tag: &str) -> PathBuf {
     let mut final_rec = common("L000042", "final");
     final_rec["kernel"] = "vint".into();
     final_rec["status"] = "OK".into();
-    let ledger: Vec<Value> = vec![
-        attempt("L000040", 1, Value::Null, "LINT_FAILED", Value::Null),
-        attempt("L000041", 2, 1.into(), "PASS", search),
-        final_rec,
-    ];
-    let text: String = ledger.iter().map(|r| format!("{r}\n")).collect();
-    std::fs::write(results.join("ledger.jsonl"), text).unwrap();
-
     let verdicts = json!([
         { "cand": "B.asm", "base": "A.r3", "interval": iv(0.912, 0.901, 0.923), "verdict": "WON" },
         { "cand": "A.r3", "base": "A.r2", "interval": iv(0.943, 0.942, 0.944), "verdict": "WON" },
@@ -71,6 +63,17 @@ fn fixture(tag: &str) -> PathBuf {
             "medians": { "A.r3": med(11.0), "B.asm": med(10.0) },
         },
     });
+    for (k, v) in fin.as_object().unwrap() {
+        final_rec[k] = v.clone();
+    }
+    let ledger: Vec<Value> = vec![
+        attempt("L000040", 1, Value::Null, "LINT_FAILED", Value::Null),
+        attempt("L000041", 2, 1.into(), "PASS", search),
+        final_rec,
+    ];
+    let text: String = ledger.iter().map(|r| format!("{r}\n")).collect();
+    std::fs::write(results.join("ledger.jsonl"), text).unwrap();
+
     std::fs::write(results.join("final/vint.json"), serde_json::to_string_pretty(&fin).unwrap()).unwrap();
     root
 }
@@ -97,6 +100,8 @@ fn report_prints_verdict_row_history_label_and_no_entry() {
     // a narrow interval gets the fewest decimals (3 to 5) at which lo and hi differ
     assert!(out.contains("| B.asm vs A.r2 | 0.8051 | 0.8047–0.8055 | WON | L000042 |"), "{out}");
     assert!(out.contains("| B.asm vs A.r1 | 0.80512 | 0.80511–0.80514 | WON | L000042 |"), "{out}");
+    // asm entered, rust has no entry: the direct comparison says NO_ENTRY, not ENTERED
+    assert!(out.contains("| B.asm vs B.rust | – | – | NO_ENTRY | L000042 |"), "{out}");
     assert!(out.contains("provisional (search phase)"), "{out}");
     assert!(out.contains("NO_ENTRY"), "{out}");
     // a row without a measured verdict for an arm that has no entry says so
@@ -134,4 +139,20 @@ fn report_prints_incidents_file_when_present() {
     let out = String::from_utf8_lossy(&report(&root).stdout).into_owned();
     assert!(out.contains("bursty builds"), "{out}");
     assert!(!out.contains("no incidents file"), "{out}");
+}
+
+#[test]
+fn report_warns_when_final_file_differs_from_ledger_and_skips_bad_lines() {
+    let root = fixture("warn");
+    let l = root.join("experiment/results/ledger.jsonl");
+    let mut t = std::fs::read_to_string(&l).unwrap();
+    t.push_str("not json\n");
+    std::fs::write(&l, t).unwrap();
+    let f = root.join("experiment/results/final/vint.json");
+    let mut j: Value = serde_json::from_str(&std::fs::read_to_string(&f).unwrap()).unwrap();
+    j["band"] = json!(0.5);
+    std::fs::write(&f, j.to_string()).unwrap();
+    let out = String::from_utf8_lossy(&report(&root).stdout).into_owned();
+    assert!(out.contains("1 ledger line(s) are not valid JSON"), "{out}");
+    assert!(out.contains("field `band` differs from ledger record L000042"), "{out}");
 }

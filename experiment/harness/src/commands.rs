@@ -999,7 +999,8 @@ fn fnum_iv(i: &Value) -> (String, String) {
     let (Some(p), Some(lo), Some(hi)) = (i["point"].as_f64(), i["lo"].as_f64(), i["hi"].as_f64()) else { return ("–".into(), "–".into()) };
     let mut dec = 3;
     while dec < 5 {
-        let r = |x: f64| format!("{x:.dec$}");
+        // round to `dec` decimals and compare as numbers (not as strings)
+        let r = |x: f64| format!("{x:.dec$}").parse::<f64>().unwrap_or(x);
         let (a, b, c) = (r(lo), r(hi), r(p));
         if a != b && a <= c && c <= b {
             break;
@@ -1057,8 +1058,8 @@ fn verdict_row(fin: &Value, id: &str, cand: &str, base: &str) -> String {
         None => {
             let rust_in = fin["arms"]["rust"]["status"] == "ENTERED";
             let why = match (cand, base) {
-                ("B.asm", _) => arm_status("asm"),
                 ("B.rust", _) | (_, "B.rust") if !rust_in => arm_status("rust"),
+                ("B.asm", _) => arm_status("asm"),
                 ("B.rust.r2", _) if rust_in => "OMITTED".into(),
                 ("B.rust.r2", _) => arm_status("rust"),
                 _ => "n/a".into(),
@@ -1077,6 +1078,16 @@ fn kernel_section(name: &str, fin: &Value, ledger: &[Value], out: &mut String) {
         Some(l) if l == id => {}
         Some(l) => out.push_str(&format!("WARNING: final/{name}.json is {id} but the latest OK final in the ledger is {l}.\n\n")),
         None => out.push_str(&format!("WARNING: the ledger holds no OK final record for {name}; final/{name}.json says {id}.\n\n")),
+    }
+    if let Some(rec) = ledger.iter().find(|r| r["id"] == id && r["kind"] == "final") {
+        for f in ["status", "verdicts", "band", "nulls", "boundary_tax", "arms"] {
+            if rec[f] != fin[f] {
+                out.push_str(&format!("WARNING: final/{name}.json field `{f}` differs from ledger record {id}.\n\n"));
+            }
+        }
+        if rec["measure"]["medians"] != fin["measure"]["medians"] {
+            out.push_str(&format!("WARNING: final/{name}.json medians differ from ledger record {id}.\n\n"));
+        }
     }
     out.push_str(&format!("Status: {}.", fin["status"].as_str().unwrap_or("unknown")));
     if let Some(rv) = fin["rustc_version"].as_str() {
@@ -1288,6 +1299,10 @@ pub fn report() -> Result<String, String> {
     let results = ledger_file.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from("."));
     let recs = ledger::read_all();
     let mut out = String::from("# msx report\n\n");
+    let lines = std::fs::read_to_string(&ledger_file).map_or(0, |t| t.lines().filter(|l| !l.trim().is_empty()).count());
+    if lines != recs.len() {
+        out.push_str(&format!("WARNING: {} ledger line(s) are not valid JSON and were skipped.\n\n", lines - recs.len()));
+    }
     ceiling_section(&results, &mut out);
 
     let mut finals: Vec<(String, Value)> = Vec::new();
