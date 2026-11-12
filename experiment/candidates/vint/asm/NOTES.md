@@ -1,0 +1,3 @@
+# Notes
+
+attempt-01: Branch-light rewrite. Empty -> 0; first byte < 0x80 -> store, return 1 (81% of inputs). Otherwise extra = lzcnt(~(b<<24)); error if len < extra+1. When len >= 8 (and extra < 8) one movbe 8-byte load from ptr (always in bounds), shift right by 64-8*total, and bzhi with 7*total bits to drop the marker bits; 0xFF lead does a single movbe at ptr+1 (len >= 9 checked). When len < 8 a byte loop accumulates the bytes, then the same bzhi. Expected to beat the compiler's copy-into-stack-buffer approach (store-forwarding, branching on width). Result: PASS, 0.83x of A.r3 provisional (9.11 vs 11.0 cycles/op, 27 vs 42 instructions/op). No further attempts used.
