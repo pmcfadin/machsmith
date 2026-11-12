@@ -1,0 +1,542 @@
+{
+  "bench": "decode",
+  "cqlite_commit": "2e5b7a4cf6abe6f51b7677ecb7199e2cab087c0e",
+  "samples": 620706,
+  "buckets": {
+    "own_decoding": 0.0547489471666135,
+    "allocator": 0.03391460691535123,
+    "memcpy": 0.0012969102924734093,
+    "decompression": 0.0,
+    "checksum": 0.0,
+    "sync": 1.1277480804116602e-05,
+    "other_cqlite": 0.13587431086536944,
+    "bench_harness": 0.0027098175303605894,
+    "other": 0.7714441297490278
+  },
+  "top_functions": [
+    {
+      "function": "<u8 as core::slice::cmp::SlicePartialEq<u8>>::equal_same_length",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+      "bucket": "other",
+      "share": 0.24315376361755808,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth",
+        "_RNvCshPoZ6lgO6UP_14rustc_demangle12try_demangle",
+        "_RNvXs_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters5chainINtB4_5ChainINtNtNtB8_7sources4once4OnceReEINtNtNtBa_3str4iter5SplitcEENtNtNtB8_6traits8iterator8Iterator4nextCs8z9S3wLEKOK_5pprof"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::types::comparator::ComparatorType, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.19159634351850957,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing10bench_shimNtNtB6_5types13SSTableReader22decode_value_for_bench",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core5types10comparatorNtB2_14ComparatorType13from_cql_type"
+      ]
+    },
+    {
+      "function": "<cqlite_core::schema::CqlType>::parse_with_depth",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other_cqlite",
+      "share": 0.1266718865292103,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth"
+      ]
+    },
+    {
+      "function": "core::ptr::read_volatile::<cqlite_core::types::Value>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.07738285114047552,
+      "physical_symbols": [
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iterNtNtCsl0N2sVMW1Sy_11cqlite_core5types5ValueNCNCNvNtCs7P5gA5s5Q2w_6decode11decode_impl11bench_typess_00EB1I_",
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iteruNCNCNvNtCs7P5gA5s5Q2w_6decode11decode_impl13bench_row_sets_00EB12_"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::schema::CqlType, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.048937822415120846,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing10bench_shimNtNtB6_5types13SSTableReader22decode_value_for_bench",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::comparator_value_parsing::parse_value_with_comparator_at_depth",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/comparator_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 0.04878315982123582,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::types::Value, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.031208011522363244,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsingNtNtB6_5types13SSTableReader16parse_list_value",
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing20parse_set_value_withNCNvMB2_NtNtB6_5types13SSTableReader15parse_set_value0EBc_",
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing22parse_tuple_value_withNCNvMB2_NtNtB6_5types13SSTableReader17parse_tuple_value0EBc_",
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing23parse_frozen_inner_with",
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing10bench_shimNtNtB6_5types13SSTableReader22decode_value_for_bench"
+      ]
+    },
+    {
+      "function": "<u64>::swap_bytes",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 0.029909490161203534,
+      "physical_symbols": [
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7P5gA5s5Q2w_6decode17bench_vint_decode00EB10_",
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::types::Value, cqlite_core::error::Error>>::expect",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.028050316897210596,
+      "physical_symbols": [
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iterNtNtCsl0N2sVMW1Sy_11cqlite_core5types5ValueNCNCNvNtCs7P5gA5s5Q2w_6decode11decode_impl11bench_typess_00EB1I_",
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iteruNCNCNvNtCs7P5gA5s5Q2w_6decode11decode_impl13bench_row_sets_00EB12_"
+      ]
+    },
+    {
+      "function": "malloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.026415082180613687,
+      "physical_symbols": [
+        "malloc"
+      ]
+    },
+    {
+      "function": "<str>::to_lowercase",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/str.rs",
+      "bucket": "other",
+      "share": 0.014731612067548888,
+      "physical_symbols": [
+        "_RNvMs3_NtCscdodAO9FK5_5alloc3stre12to_lowercase"
+      ]
+    },
+    {
+      "function": "core::ptr::drop_glue::<cqlite_core::types::Value>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.01221351171085828,
+      "physical_symbols": [
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsl0N2sVMW1Sy_11cqlite_core5types5ValueECs7P5gA5s5Q2w_6decode"
+      ]
+    },
+    {
+      "function": "alloc::str::convert_while_ascii",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/str.rs",
+      "bucket": "other",
+      "share": 0.008085953736551604,
+      "physical_symbols": [
+        "_RNvMs3_NtCscdodAO9FK5_5alloc3stre12to_lowercase"
+      ]
+    },
+    {
+      "function": "<core::str::pattern::MultiCharEqSearcher<cqlite_core::schema::vector_type::split_leading_identifier::{closure#0}> as core::str::pattern::Searcher>::next_match",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/pattern.rs",
+      "bucket": "other",
+      "share": 0.007344862140852513,
+      "physical_symbols": [
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6schema11vector_type24split_leading_identifier"
+      ]
+    },
+    {
+      "function": "<serde_json::de::SeqAccess<serde_json::read::StrRead> as serde_core::de::SeqAccess>::next_element_seed::<core::marker::PhantomData<serde_json::value::Value>>",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/lib.rs",
+      "bucket": "other",
+      "share": 0.007244975882301766,
+      "physical_symbols": [
+        "_RINvXNtNtCsg8ACtaeShVX_10serde_json5value2deNtB5_5ValueNtNtCsjyNpC1TyHH4_10serde_core2de11Deserialize11deserializeQINtNtB7_2de12DeserializerNtNtB7_4read7StrReadEECsl0N2sVMW1Sy_11cqlite_core"
+      ]
+    },
+    {
+      "function": "<u8>::is_ascii_uppercase",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/mod.rs",
+      "bucket": "other",
+      "share": 0.006734267108743914,
+      "physical_symbols": [
+        "_RNvMs3_NtCscdodAO9FK5_5alloc3stre12to_lowercase",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::custom_scalar::decode_custom_scalar",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/custom_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.005281083153699175,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "<[u8] as core::cmp::PartialEq>::eq",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+      "bucket": "other",
+      "share": 0.0048106510972988825,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth",
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab250",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.004005116754147696,
+      "physical_symbols": [
+        "libc_malloc_internal_ab250"
+      ]
+    },
+    {
+      "function": "alloc::fmt::format::format_inner",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/fmt.rs",
+      "bucket": "other",
+      "share": 0.003984172861225765,
+      "physical_symbols": [
+        "_RNvNvNtCscdodAO9FK5_5alloc3fmt6format12format_inner"
+      ]
+    },
+    {
+      "function": "core::slice::index::get_offset_len_noubcheck::<u8>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/index.rs",
+      "bucket": "other",
+      "share": 0.0037054579784954553,
+      "physical_symbols": [
+        "_RNvMs3_NtCscdodAO9FK5_5alloc3stre12to_lowercase",
+        "_RNvMsu_NtNtCs4NRVxsYgnAr_4core3str7patternNtB5_11StrSearcher3new"
+      ]
+    },
+    {
+      "function": "<cqlite_core::types::comparator::ComparatorType>::from_cql_type",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/types/comparator.rs",
+      "bucket": "other_cqlite",
+      "share": 0.003380022103862376,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core5types10comparatorNtB2_14ComparatorType13from_cql_type"
+      ]
+    },
+    {
+      "function": "core::str::validations::next_code_point::<core::slice::iter::Iter<u8>>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/validations.rs",
+      "bucket": "other",
+      "share": 0.003307524012978769,
+      "physical_symbols": [
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6schema11vector_type24split_leading_identifier",
+        "_RINvMNtCs4NRVxsYgnAr_4core3stre12trim_matchesNvMNtNtB5_4char7methodsc13is_whitespaceECs8z9S3wLEKOK_5pprof",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType21split_top_level_types",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth"
+      ]
+    },
+    {
+      "function": "core::ptr::write::<cqlite_core::types::comparator::ComparatorType>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.00295469997067855,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core5types10comparatorNtB2_14ComparatorType13from_cql_type"
+      ]
+    },
+    {
+      "function": "<alloc::boxed::Box<cqlite_core::types::comparator::ComparatorType>>::new",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/boxed.rs",
+      "bucket": "other",
+      "share": 0.002895090429285362,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core5types10comparatorNtB2_14ComparatorType13from_cql_type"
+      ]
+    },
+    {
+      "function": "cqlite_core::schema::vector_type::split_leading_identifier",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/schema/vector_type.rs",
+      "bucket": "other_cqlite",
+      "share": 0.002800037376793522,
+      "physical_symbols": [
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6schema11vector_type24split_leading_identifier"
+      ]
+    },
+    {
+      "function": "<core::str::iter::CharIndices as core::iter::traits::iterator::Iterator>::next",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/iter.rs",
+      "bucket": "other",
+      "share": 0.002067001124525943,
+      "physical_symbols": [
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6schema11vector_type24split_leading_identifier",
+        "_RINvMNtCs4NRVxsYgnAr_4core3stre12trim_matchesNvMNtNtB5_4char7methodsc13is_whitespaceECs8z9S3wLEKOK_5pprof",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType21split_top_level_types"
+      ]
+    },
+    {
+      "function": "<str>::is_char_boundary",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/mod.rs",
+      "bucket": "other",
+      "share": 0.0019203938740724271,
+      "physical_symbols": [
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6schema11vector_type24split_leading_identifier",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType21split_top_level_types"
+      ]
+    },
+    {
+      "function": "<bytes::bytes::Bytes as core::ops::drop::Drop>::drop",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bytes-1.12.1/src/bytes.rs",
+      "bucket": "other",
+      "share": 0.001828562958953192,
+      "physical_symbols": [
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsl0N2sVMW1Sy_11cqlite_core5types5ValueECs7P5gA5s5Q2w_6decode"
+      ]
+    },
+    {
+      "function": "<serde_json::read::StrRead>::new",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/read.rs",
+      "bucket": "other",
+      "share": 0.0018205076155216801,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "<str>::trim_matches::<<char>::is_whitespace>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/mod.rs",
+      "bucket": "other",
+      "share": 0.0018011747912860517,
+      "physical_symbols": [
+        "_RINvMNtCs4NRVxsYgnAr_4core3stre12trim_matchesNvMNtNtB5_4char7methodsc13is_whitespaceECs8z9S3wLEKOK_5pprof"
+      ]
+    },
+    {
+      "function": "cfree",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.0017705644862463065,
+      "physical_symbols": [
+        "cfree"
+      ]
+    },
+    {
+      "function": "serde_json::de::from_trait::<serde_json::read::StrRead, serde_json::value::Value>",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/lib.rs",
+      "bucket": "other",
+      "share": 0.0017141770822257235,
+      "physical_symbols": [
+        "_RINvNtCsg8ACtaeShVX_10serde_json2de10from_traitNtNtB4_4read7StrReadNtNtB4_5value5ValueECsl0N2sVMW1Sy_11cqlite_core"
+      ]
+    },
+    {
+      "function": "<alloc::raw_vec::RawVecInner>::finish_grow",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/raw_vec/mod.rs",
+      "bucket": "other",
+      "share": 0.0017093438761668165,
+      "physical_symbols": [
+        "_RNvMs4_NtCscdodAO9FK5_5alloc7raw_vecNtB5_11RawVecInner11finish_growB7_",
+        "_RNvMs4_NtCscdodAO9FK5_5alloc7raw_vecNtB5_11RawVecInner11finish_growCsl0N2sVMW1Sy_11cqlite_core",
+        "_RNvMs4_NtCscdodAO9FK5_5alloc7raw_vecNtB5_11RawVecInner11finish_growCsg8ACtaeShVX_10serde_json"
+      ]
+    },
+    {
+      "function": "<core::alloc::layout::Layout>::is_size_alignment_valid",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/str.rs",
+      "bucket": "other",
+      "share": 0.0016706782276955595,
+      "physical_symbols": [
+        "_RNvMs3_NtCscdodAO9FK5_5alloc3stre12to_lowercase"
+      ]
+    },
+    {
+      "function": "realloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.0015965690681256505,
+      "physical_symbols": [
+        "realloc"
+      ]
+    },
+    {
+      "function": "<char>::is_whitespace",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/char/methods.rs",
+      "bucket": "other",
+      "share": 0.001387130138906342,
+      "physical_symbols": [
+        "_RINvMNtCs4NRVxsYgnAr_4core3stre12trim_matchesNvMNtNtB5_4char7methodsc13is_whitespaceECs8z9S3wLEKOK_5pprof"
+      ]
+    },
+    {
+      "function": "__memcpy_ifunc_target",
+      "source_file": "",
+      "bucket": "memcpy",
+      "share": 0.001287243880355595,
+      "physical_symbols": [
+        "__memcpy_ifunc_target"
+      ]
+    },
+    {
+      "function": "core::ptr::write::<serde_json::value::Value>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.0012324675450213144,
+      "physical_symbols": [
+        "_RINvXNtNtCsg8ACtaeShVX_10serde_json5value2deNtB5_5ValueNtNtCsjyNpC1TyHH4_10serde_core2de11Deserialize11deserializeQINtNtB7_2de12DeserializerNtNtB7_4read7StrReadEECsl0N2sVMW1Sy_11cqlite_core"
+      ]
+    },
+    {
+      "function": "<alloc::boxed::Box<serde_json::value::Value>>::new",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/boxed.rs",
+      "bucket": "other",
+      "share": 0.0012018572399815693,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    }
+  ],
+  "own_decoding_top": [
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::comparator_value_parsing::parse_value_with_comparator_at_depth",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/comparator_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 0.04878315982123582,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::custom_scalar::decode_custom_scalar",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/custom_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.005281083153699175,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing36parse_value_with_comparator_at_depth"
+      ]
+    },
+    {
+      "function": "cqlite_core::parser::vint::decode_unsigned",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/parser/vint.rs",
+      "bucket": "own_decoding",
+      "share": 0.0004349885453016404,
+      "physical_symbols": [
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7P5gA5s5Q2w_6decode17bench_vint_decode00EB10_",
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing20parse_set_value_withNCNvMB2_NtNtB6_5types13SSTableReader15parse_set_value0EBc_",
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing20parse_map_value_withNCNvMB2_NtNtB6_5types13SSTableReader15parse_map_value0EBc_"
+      ]
+    },
+    {
+      "function": "cqlite_core::parser::vint::zigzag_decode",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/parser/vint.rs",
+      "bucket": "own_decoding",
+      "share": 0.00010794160198225891,
+      "physical_symbols": [
+        "_RINvMNtCs1finRcXxZAM_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7P5gA5s5Q2w_6decode17bench_vint_decode00EB10_"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::comparator_value_parsing::parse_value_with_comparator",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/comparator_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 4.1887785843861664e-05,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsingNtNtB6_5types13SSTableReader36parse_value_with_comparator_at_depth",
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing10bench_shimNtNtB6_5types13SSTableReader22decode_value_for_bench"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::value_parsing::parse_tuple_value_with::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::parse_tuple_value::{closure#0}>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/iter/macros.rs",
+      "bucket": "own_decoding",
+      "share": 2.738816766714032e-05,
+      "physical_symbols": [
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing22parse_tuple_value_withNCNvMB2_NtNtB6_5types13SSTableReader17parse_tuple_value0EBc_"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::read_element",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.611068686302372e-05,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing12read_element"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::value_parsing::parse_list_value_with::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::parse_list_value::{closure#0}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.1277480804116602e-05,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsingNtNtB6_5types13SSTableReader16parse_list_value"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::decode_elements::<cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::parse_frozen_inner_with::{closure#0}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.1277480804116602e-05,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing23parse_frozen_inner_with"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::read_i32_be",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.1277480804116602e-05,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing11read_i32_be"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::read_count",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 8.05534343151186e-06,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing10read_count"
+      ]
+    },
+    {
+      "function": "cqlite_core::parser::vint::parse_vint_length",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/parser/vint.rs",
+      "bucket": "own_decoding",
+      "share": 4.833206058907116e-06,
+      "physical_symbols": [
+        "_RINvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsing20parse_map_value_withNCNvMB2_NtNtB6_5types13SSTableReader15parse_map_value0EBc_",
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing13value_parsingNtNtB6_5types13SSTableReader16parse_list_value"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::comparator_value_parsing::parse_duration_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/lib.rs",
+      "bucket": "own_decoding",
+      "share": 3.2221373726047435e-06,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing24comparator_value_parsing20parse_duration_value"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::reject_trailing",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.6110686863023717e-06,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing23parse_frozen_inner_with"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::parse_frozen_list_value_with::<cqlite_core::storage::sstable::reader::parsing::frozen_value_parsing::parse_frozen_inner_with::{closure#0}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/frozen_value_parsing.rs",
+      "bucket": "own_decoding",
+      "share": 1.6110686863023717e-06,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing20frozen_value_parsing23parse_frozen_inner_with"
+      ]
+    }
+  ]
+}

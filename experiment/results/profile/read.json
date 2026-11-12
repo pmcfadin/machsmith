@@ -1,0 +1,572 @@
+{
+  "bench": "read",
+  "cqlite_commit": "2e5b7a4cf6abe6f51b7677ecb7199e2cab087c0e",
+  "samples": 191607,
+  "buckets": {
+    "own_decoding": 0.05760749868219846,
+    "allocator": 0.3058395570099213,
+    "memcpy": 0.07308188114212946,
+    "decompression": 0.003731596444806296,
+    "checksum": 9.916130412771976e-05,
+    "sync": 0.016940925957819913,
+    "other_cqlite": 0.07514339246478469,
+    "bench_harness": 0.02411707296706279,
+    "other": 0.4434389140271493
+  },
+  "top_functions": [
+    {
+      "function": "malloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.12162394902065164,
+      "physical_symbols": [
+        "malloc"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab250",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.08784125840913955,
+      "physical_symbols": [
+        "libc_malloc_internal_ab250"
+      ]
+    },
+    {
+      "function": "__memcpy_ifunc_target",
+      "source_file": "",
+      "bucket": "memcpy",
+      "share": 0.0720746110528321,
+      "physical_symbols": [
+        "__memcpy_ifunc_target"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<str> as core::clone::Clone>::clone",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.06477320765942789,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl",
+        "_RNvXs_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder16timestamp_policyNtB4_15TimestampPolicyNtNtB6_16partition_driver22SlidingPartitionPolicy11on_data_row",
+        "_RNvNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached",
+        "_RNvXsa_NtCscdodAO9FK5_5alloc3vecINtB5_3VecNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query16select_optimizer13ExecutionStepENtNtCs4NRVxsYgnAr_4core5clone5Clone5cloneCs7wdNVdgGDvu_4read",
+        "_RNvXs3_NtNtCsl0N2sVMW1Sy_11cqlite_core5query10select_astNtB5_15SelectStatementNtNtCs4NRVxsYgnAr_4core5clone5Clone5clone"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_a9c90",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.036553988111081535,
+      "physical_symbols": [
+        "libc_malloc_internal_a9c90"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<str> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.033636558163323886,
+      "physical_symbols": [
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query6result8QueryRowECs7wdNVdgGDvu_4read",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsl0N2sVMW1Sy_11cqlite_core5types7ScanRowEBF_",
+        "_RNvNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtB8_5types13SSTableReader26bti_collect_partition_rows",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder13ColumnToParseEEB1j_"
+      ]
+    },
+    {
+      "function": "<cqlite_core::types::Value>::into_owned",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/types.rs",
+      "bucket": "other_cqlite",
+      "share": 0.028099182180191747,
+      "physical_symbols": [
+        "_RNvMs3_NtCsl0N2sVMW1Sy_11cqlite_core5typesNtB5_5Value10into_owned"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab650",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.027973925796030415,
+      "physical_symbols": [
+        "libc_malloc_internal_ab650"
+      ]
+    },
+    {
+      "function": "<u8 as core::slice::cmp::SlicePartialEq<u8>>::equal_same_length",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+      "bucket": "other",
+      "share": 0.026857056370591888,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser23parse_clustering_prefix",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder3udtNtB4_24V5CompressedLegacyParser17is_complex_column",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder9cell_kindNtB2_8CellKind9from_type",
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder9raw_value9reportingNtB6_24V5CompressedLegacyParser36parse_value_from_raw_bytes_reporting",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema15cql_type_parserNtB4_7CqlType16parse_with_depth"
+      ]
+    },
+    {
+      "function": "<u64>::swap_bytes",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 0.020265439154101887,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser18parse_row_metadata",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser31read_vint_length_prefixed_bytes",
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser26parse_complex_column_inner",
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6parser4vint10parse_vint",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::types::Value, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.01809954751131222,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order",
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser24parse_complex_cell_value",
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core7storage19partition_key_codec28decode_partition_key_columns",
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser26parse_complex_column_inner",
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_column13cell_path_keyNtB6_24V5CompressedLegacyParser28decode_reporting_consumption"
+      ]
+    },
+    {
+      "function": "realloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.015469163443924282,
+      "physical_symbols": [
+        "realloc"
+      ]
+    },
+    {
+      "function": "cqlite_core::memory::estimate_value_size",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/memory/mod.rs",
+      "bucket": "other_cqlite",
+      "share": 0.011419207022707939,
+      "physical_symbols": [
+        "_RNvNtCsl0N2sVMW1Sy_11cqlite_core6memory19estimate_value_size"
+      ]
+    },
+    {
+      "function": "<std::sys::sync::mutex::futex::Mutex>::lock",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/std/src/sys/sync/mutex/futex.rs",
+      "bucket": "sync",
+      "share": 0.010777268053881121,
+      "physical_symbols": [
+        "_RNvMs1_NtNtCsl0N2sVMW1Sy_11cqlite_core7storage5cacheNtB5_22DecompressedChunkCache3get",
+        "_RNvMs2_NtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage5cache17global_key_offsetNtB5_20GlobalKeyOffsetCache3get",
+        "_RNCNvMs1_NtCsl0N2sVMW1Sy_11cqlite_core6schemaNtB7_13SchemaManager20find_schema_by_table0Cs7wdNVdgGDvu_4read",
+        "_RNvMNtNtNtCs3uWZ9JlRjwS_5tokio4util4rand2rtNtB2_16RngSeedGenerator9next_seed",
+        "_RNCNvMNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor14limit_pushdownNtB6_14SelectExecutor20capped_fallback_scan0Cs7wdNVdgGDvu_4read"
+      ]
+    },
+    {
+      "function": "bytes::bytes::release_shared",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bytes-1.12.1/src/bytes.rs",
+      "bucket": "other",
+      "share": 0.010411936933410575,
+      "physical_symbols": [
+        "_RNvNtCsaYM1zvJNVSk_5bytes5bytes11shared_drop"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_a9bb0",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.010328432677303021,
+      "physical_symbols": [
+        "libc_malloc_internal_a9bb0"
+      ]
+    },
+    {
+      "function": "<rustc_demangle::v0::Printer>::print_path",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rustc-demangle-0.1.28/src/v0.rs",
+      "bucket": "bench_harness",
+      "share": 0.00883057508337378,
+      "physical_symbols": [
+        "_RNvMs4_NtCshPoZ6lgO6UP_14rustc_demangle2v0NtB5_7Printer10print_path"
+      ]
+    },
+    {
+      "function": "__bcmp_ifunc_target",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.008674004603172117,
+      "physical_symbols": [
+        "__bcmp_ifunc_target"
+      ]
+    },
+    {
+      "function": "core::sync::atomic::atomic_add::<usize, usize>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+      "bucket": "other",
+      "share": 0.008658347555151952,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtB8_5types13SSTableReader26bti_collect_partition_rows",
+        "_RNCINvMs0_NtCs7CVOdPC3hXj_8arc_swap4debtNtB8_4Debt7pay_allINtNtCs4NRVxsYgnAr_4core6option6OptionINtNtCscdodAO9FK5_5alloc4sync3ArcNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query11access_path10AccessPathEENCNvXs3_NtNtBa_8strategy6hybridINtB3f_14HybridStrategyNtB3f_13DefaultConfigEINtNtB3h_6sealed13InnerStrategyBU_E16wait_for_readers0E0B29_",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder10block_emitNtB4_24V5CompressedLegacyParser11parse_block",
+        "_RNCNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader11data_access10sequentialNtNtB8_5types13SSTableReader15sequential_scan0Cs7wdNVdgGDvu_4read"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<[u8]> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.008152103002499909,
+      "physical_symbols": [
+        "_RNCNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtBa_5types13SSTableReader26bti_collect_partition_rowss0_0Bg_",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query6result8QueryRowECs7wdNVdgGDvu_4read",
+        "_RNCNvMs0_NtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstableNtB7_14SSTableManager25scan_partition_clustering0Cs7wdNVdgGDvu_4read",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor9row_build17PartitionKeyCacheECs7wdNVdgGDvu_4read",
+        "_RNvXs_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder16timestamp_policyNtB4_15TimestampPolicyNtNtB6_16partition_driver22SlidingPartitionPolicy17on_partition_open"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_value_from_raw_bytes_reporting",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/raw_value/reporting.rs",
+      "bucket": "own_decoding",
+      "share": 0.008089474810419243,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder9raw_value9reportingNtB6_24V5CompressedLegacyParser36parse_value_from_raw_bytes_reporting"
+      ]
+    },
+    {
+      "function": "bytes::bytes::shallow_clone_arc",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bytes-1.12.1/src/bytes.rs",
+      "bucket": "other",
+      "share": 0.007708486641928531,
+      "physical_symbols": [
+        "_RNvNtCsaYM1zvJNVSk_5bytes5bytes12shared_clone"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.007014357513034492,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser23parse_clustering_prefix"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/vuint_length.rs",
+      "bucket": "own_decoding",
+      "share": 0.006403732640248008,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder12vuint_length26checked_vuint_exact_length"
+      ]
+    },
+    {
+      "function": "<std::sys::sync::mutex::futex::Mutex>::unlock",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/std/src/sys/sync/mutex/futex.rs",
+      "bucket": "sync",
+      "share": 0.006148000855918625,
+      "physical_symbols": [
+        "_RNvMs2_NtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage5cache17global_key_offsetNtB5_20GlobalKeyOffsetCache3get",
+        "_RNvMs1_NtNtCsl0N2sVMW1Sy_11cqlite_core7storage5cacheNtB5_22DecompressedChunkCache3get",
+        "_RNvMNtNtCs3uWZ9JlRjwS_5tokio4sync15batch_semaphoreNtB2_9Semaphore18add_permits_locked",
+        "_RNvMNtNtNtCs3uWZ9JlRjwS_5tokio4util4rand2rtNtB2_16RngSeedGenerator9next_seed",
+        "_RNvMNtNtCs3uWZ9JlRjwS_5tokio4time5clockNtB2_5Clock3now"
+      ]
+    },
+    {
+      "function": "bytes::bytes::shallow_clone_vec",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bytes-1.12.1/src/bytes.rs",
+      "bucket": "other",
+      "share": 0.0061271247918917365,
+      "physical_symbols": [
+        "_RNvNtCsaYM1zvJNVSk_5bytes5bytes17shallow_clone_vec"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Weak<[u8], &alloc::alloc::Global> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.005975773327696796,
+      "physical_symbols": [
+        "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcShE9drop_slowCs2RBXaACtQjS_14regex_automata"
+      ]
+    },
+    {
+      "function": "core::ptr::write::<cqlite_core::types::Value>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.0058974880875959645,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser23parse_clustering_prefix",
+        "_RINvNtNtCscdodAO9FK5_5alloc3vec16in_place_collect18from_iter_in_placeINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters3map3MapINtNtB4_9into_iter8IntoIterNtNtCsl0N2sVMW1Sy_11cqlite_core5types5ValueENvMs3_B2m_B2k_10into_ownedEB2k_EB2o_",
+        "_RNvNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor6lookup25classify_partition_lookup",
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser26parse_complex_column_inner"
+      ]
+    },
+    {
+      "function": "<core::result::Result<(&str, cqlite_core::schema::CqlType), nom::internal::Err<nom::error::Error<&str>>> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible, nom::internal::Err<nom::error::Error<&str>>>>>::from_residual",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.005553033031152306,
+      "physical_symbols": [
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6parser13complex_typesNtB2_17ComplexTypeParser23parse_cql_type_internal",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0s4_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0s6_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0s5_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0s9_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_"
+      ]
+    },
+    {
+      "function": "<core::mem::maybe_uninit::MaybeUninit<cqlite_core::schema::Column>>::write",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/mem/maybe_uninit.rs",
+      "bucket": "other",
+      "share": 0.005292082230816202,
+      "physical_symbols": [
+        "_RNvXsa_NtCscdodAO9FK5_5alloc3vecINtB5_3VecNtNtCsl0N2sVMW1Sy_11cqlite_core6schema6ColumnENtNtCs4NRVxsYgnAr_4core5clone5Clone5cloneBI_",
+        "_RNvXs3_NtCsl0N2sVMW1Sy_11cqlite_core6schemaNtB5_11TableSchemaNtNtCs4NRVxsYgnAr_4core5clone5Clone5clone"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs",
+      "bucket": "own_decoding",
+      "share": 0.005161606830648149,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+      ]
+    },
+    {
+      "function": "<core::result::Result<(&str, &str), nom::internal::Err<nom::error::Error<&str>>> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.004775399646150715,
+      "physical_symbols": [
+        "_RNvXs0_NtCscw2uecgJokQ_3nom6branchTNCINvNtB7_10combinator3mapReTBX_BX_cBX_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeBX_cEB1a_INtNtB7_5error5ErrorBX_ENCINvNtB7_8sequence5tupleBX_BZ_B23_TNCINvNtNtB7_5bytes8complete11tag_no_caseBX_BX_B23_E0INvNtNtB7_9character8complete11multispace0BX_B23_ENCINvB3U_4charBX_B23_E0B3R_NCNCNvMNtNtB1e_6parser13complex_typesNtB5d_17ComplexTypeParser21parse_collection_type00B3R_B4F_EE0NCB58_s_0E0NCIBA_BX_BZ_B1a_B23_NCIB2u_BX_BZ_B23_TB31_B3R_B4F_B3R_NCB58_s0_0B3R_B4F_EE0NCB58_s1_0E0NCIBA_BX_TBX_BX_cBX_B1a_BX_cBX_B1a_BX_cEB1a_B23_NCIB2u_BX_B8p_B23_TB31_B3R_B4F_B3R_NCB58_s2_0B3R_B4F_B3R_NCB58_s3_0B3R_B4F_EE0NCB58_s4_0E0EINtB5_3AltBX_B1a_B23_E6choiceB1e_",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6parser13complex_typesNtB2_17ComplexTypeParser23parse_cql_type_internal",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtB7_6branch3altBY_BY_B1N_TNCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0B2H_EE0NCNCNvMNtNtB17_6parser13complex_typesNtB3L_17ComplexTypeParser20parse_primitive_type0s7_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0s4_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_",
+        "_RNvXsa_NtCscw2uecgJokQ_3nom8internalNCINvNtB7_10combinator3mapReBY_NtNtCsl0N2sVMW1Sy_11cqlite_core6schema7CqlTypeINtNtB7_5error5ErrorBY_ENCINvNtNtB7_5bytes8complete11tag_no_caseBY_BY_B1N_E0NCNCNvMNtNtB17_6parser13complex_typesNtB38_17ComplexTypeParser20parse_primitive_type0sd_0E0INtB5_6ParserBY_B13_B1N_E5parseB17_"
+      ]
+    },
+    {
+      "function": "core::iter::adapters::filter::filter_fold::<u64, u64, <cqlite_core::storage::sstable::reader::types::SSTableReader>::successor_partition_offset::{closure#0}::{closure#1}, core::iter::traits::iterator::Iterator::min_by::fold<u64, <u64 as core::cmp::Ord>::cmp>::{closure#0}>::{closure#0}",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/iter/adapters/filter.rs",
+      "bucket": "other",
+      "share": 0.004681457358029717,
+      "physical_symbols": [
+        "_RNCNvMNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader19partition_successorNtNtB6_5types13SSTableReader26successor_partition_offset0Cs7wdNVdgGDvu_4read"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.00458751506990872,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "[unknown]",
+      "source_file": "",
+      "bucket": "bench_harness",
+      "share": 0.00431612623755917,
+      "physical_symbols": [
+        "[unknown]"
+      ]
+    },
+    {
+      "function": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/option.rs",
+      "bucket": "other_cqlite",
+      "share": 0.004216964933431451,
+      "physical_symbols": [
+        "_RNvNtNtNtCsl0N2sVMW1Sy_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached"
+      ]
+    },
+    {
+      "function": "[unknown]",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.003882947909001237,
+      "physical_symbols": [
+        "[unknown]"
+      ]
+    },
+    {
+      "function": "core::core_arch::x86::sse2::_mm_movemask_epi8",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/../../stdarch/crates/core_arch/src/x86/sse2.rs",
+      "bucket": "other",
+      "share": 0.003768129556853351,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoderNtB2_19RowColumnResolution5build",
+        "_RINvMs1_NtCsgQfI1edjipl_9hashbrown3mapINtB6_7HashMapNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage5cache17global_key_offset18GenerationIdentityINtCs7fpSC7UVwcp_3lru8LruCacheINtNtCscdodAO9FK5_5alloc5boxed3BoxShENtBQ_5EntryENtNtNtCs2AWtUsOyxgP_3std4hash6random11RandomStateE7get_mutBO_EBW_",
+        "_RNvMs1_NtCsgQfI1edjipl_9hashbrown3mapINtB5_7HashMapINtNtCscdodAO9FK5_5alloc3vec3VechEuNtNtNtCs2AWtUsOyxgP_3std4hash6random11RandomStateE6insertCsl0N2sVMW1Sy_11cqlite_core",
+        "_RNvMNtNtCsl0N2sVMW1Sy_11cqlite_core6schema12udt_registryNtB2_11UdtRegistry7get_udt",
+        "_RNvXs0_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3mapINtB5_3MapINtNtB7_6filter6FilterINtNtNtBb_5slice4iter4IterNtNtNtCsl0N2sVMW1Sy_11cqlite_core6parser6header10ColumnInfoENCNCNvMNtNtNtNtNtB1O_7storage7sstable6reader7parsing11row_decoderNtB2N_19RowColumnResolution5build00ENCB2I_s_0ENtNtNtB9_6traits8iterator8Iterator4nextB1O_"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.003481083676483636,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCs1finRcXxZAM_9criterion",
+        "_RINvYNtNtNtCs2AWtUsOyxgP_3std4hash6random11RandomStateNtNtCs4NRVxsYgnAr_4core4hash11BuildHasher8hash_oneRNtNtCs8z9S3wLEKOK_5pprof6frames6FramesEB1J_"
+      ]
+    },
+    {
+      "function": "libc_func_98630",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.003319294180275251,
+      "physical_symbols": [
+        "libc_func_98630"
+      ]
+    }
+  ],
+  "own_decoding_top": [
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_value_from_raw_bytes_reporting",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/raw_value/reporting.rs",
+      "bucket": "own_decoding",
+      "share": 0.008089474810419243,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder9raw_value9reportingNtB6_24V5CompressedLegacyParser36parse_value_from_raw_bytes_reporting"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.007014357513034492,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser23parse_clustering_prefix"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/vuint_length.rs",
+      "bucket": "own_decoding",
+      "share": 0.006403732640248008,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder12vuint_length26checked_vuint_exact_length"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs",
+      "bucket": "own_decoding",
+      "share": 0.005161606830648149,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.00458751506990872,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs",
+      "bucket": "own_decoding",
+      "share": 0.0031418476360467,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtB8_5types13SSTableReader26bti_collect_partition_rows"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::is_complex_column",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/udt.rs",
+      "bucket": "own_decoding",
+      "share": 0.002813049627623208,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder3udtNtB4_24V5CompressedLegacyParser17is_complex_column"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::cell_kind::CellKind>::from_type",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_kind.rs",
+      "bucket": "own_decoding",
+      "share": 0.0026930122594685997,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder9cell_kindNtB2_8CellKind9from_type"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_path_key_reporting",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column/cell_path_key.rs",
+      "bucket": "own_decoding",
+      "share": 0.0021606726267829465,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_column13cell_path_keyNtB6_24V5CompressedLegacyParser29parse_cell_path_key_reporting"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column_inner",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column.rs",
+      "bucket": "own_decoding",
+      "share": 0.0017118372502048463,
+      "physical_symbols": [
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser26parse_complex_column_inner"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_reporting_consumption",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column/cell_path_key.rs",
+      "bucket": "own_decoding",
+      "share": 0.0013882582577880765,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_column13cell_path_keyNtB6_24V5CompressedLegacyParser28decode_reporting_consumption"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_cell_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column.rs",
+      "bucket": "own_decoding",
+      "share": 0.0009602989452368651,
+      "physical_symbols": [
+        "_RNvMs0_NtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder14complex_columnNtB7_24V5CompressedLegacyParser24parse_complex_cell_value"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs",
+      "bucket": "own_decoding",
+      "share": 0.0009133278011763662,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder10block_emitNtB4_24V5CompressedLegacyParser11parse_block"
+      ]
+    },
+    {
+      "function": "cqlite_core::parser::vint::decode_unsigned",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/parser/vint.rs",
+      "bucket": "own_decoding",
+      "share": 0.0009081087851696441,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser18parse_row_metadata",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser31read_vint_length_prefixed_bytes",
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6parser4vint10parse_vint",
+        "_RNvNtNtCsl0N2sVMW1Sy_11cqlite_core6parser4vint11parse_vuint",
+        "_RNvMNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::block_partition_header",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed/partition_header_arm.rs",
+      "bucket": "own_decoding",
+      "share": 0.0009081087851696441,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsl0N2sVMW1Sy_11cqlite_core7storage7sstable6reader7parsing11row_decoder19block_emit_windowed20partition_header_armNtB6_24V5CompressedLegacyParser22block_partition_header"
+      ]
+    }
+  ]
+}
