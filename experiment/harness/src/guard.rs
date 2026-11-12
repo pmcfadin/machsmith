@@ -129,3 +129,18 @@ impl Drop for OutSlot {
         }
     }
 }
+
+thread_local! {
+    static SLOTS: core::cell::RefCell<[Option<OutSlot>; 3]> = const { core::cell::RefCell::new([None, None, None]) };
+}
+
+/// Runs `f` with this thread's cached `OutSlot` of `words` words (created on first use), so the
+/// per-call mmap/mprotect/munmap of `OutSlot::new` is paid once. Callers re-`arm` it per call.
+pub fn with_slot<R>(words: usize, f: impl FnOnce(&mut OutSlot) -> R) -> R {
+    assert!((1..=3).contains(&words));
+    SLOTS.with(|c| {
+        let mut slots = c.borrow_mut();
+        let slot = slots[words - 1].get_or_insert_with(|| OutSlot::new(words));
+        f(slot)
+    })
+}

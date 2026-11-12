@@ -1,6 +1,5 @@
 //! `index_framing`: `u32 msx_index_framing(const u8 *ptr, size_t len, FramingOut *out)`.
 
-use crate::guard::OutSlot;
 use crate::spec::*;
 use crate::tramp::{call4, AbiViolation};
 use rand_core::RngCore;
@@ -47,11 +46,12 @@ impl KernelSpec for IndexFramingSpec {
     }
 
     unsafe fn run_case(&self, f: RawFn, input: *const u8, len: usize, _aux: u64) -> Result<OutRec, AbiViolation> {
-        let mut slot = OutSlot::new(2);
+        crate::guard::with_slot(2, |slot| {
         let p = slot.arm();
         let ret = call4(f, input as u64, len as u64, p as u64, GARBAGE_D)? & 0xFFFF_FFFF; // u32 return
         let (out, written) = slot.take();
         Ok(OutRec { ret, out, out_written: written as u64 })
+        })
     }
 
     unsafe fn run_chain(&self, f: RawFn, chunk: &[u8]) -> (u64, u64) {

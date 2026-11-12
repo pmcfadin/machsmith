@@ -3,7 +3,6 @@
 //! The input of a case is `n * 16` bytes of `Transition` (byte at offset 0, seven padding
 //! bytes, child `u64` at offset 8); `aux` carries the `byte` argument (upper 24 bits garbage).
 
-use crate::guard::OutSlot;
 use crate::spec::*;
 use crate::tramp::{call4, AbiViolation};
 use rand_chacha::ChaCha8Rng;
@@ -64,7 +63,7 @@ impl KernelSpec for BtiSparseFindSpec {
     }
 
     unsafe fn run_case(&self, f: RawFn, input: *const u8, len: usize, aux: u64) -> Result<OutRec, AbiViolation> {
-        let mut slot = OutSlot::new(1);
+        crate::guard::with_slot(1, |slot| {
         let p = slot.arm();
         // `byte` is a 32-bit argument: the upper half of its register is undefined, so fill it with garbage.
         let c = (aux & 0xFFFF_FFFF) | (splitmix(aux) << 32);
@@ -72,6 +71,7 @@ impl KernelSpec for BtiSparseFindSpec {
         let ret = call4(f, input as u64, (len / 16) as u64, c, d)? & 0xFFFF_FFFF; // u32 return
         let (out, written) = slot.take();
         Ok(OutRec { ret, out, out_written: written as u64 })
+        })
     }
 
     unsafe fn run_chain(&self, f: RawFn, chunk: &[u8]) -> (u64, u64) {

@@ -1,6 +1,5 @@
 //! `vint`: `size_t msx_vint(const u8 *ptr, size_t len, u64 *out)`.
 
-use crate::guard::OutSlot;
 use crate::spec::*;
 use crate::tramp::{call4, AbiViolation};
 use rand_core::RngCore;
@@ -28,11 +27,12 @@ impl KernelSpec for VintSpec {
     }
 
     unsafe fn run_case(&self, f: RawFn, input: *const u8, len: usize, _aux: u64) -> Result<OutRec, AbiViolation> {
-        let mut slot = OutSlot::new(1);
+        crate::guard::with_slot(1, |slot| {
         let p = slot.arm();
         let ret = call4(f, input as u64, len as u64, p as u64, GARBAGE_D)?;
         let (out, written) = slot.take();
         Ok(OutRec { ret, out, out_written: written as u64 })
+        })
     }
 
     unsafe fn run_chain(&self, f: RawFn, chunk: &[u8]) -> (u64, u64) {

@@ -11,7 +11,6 @@ use crate::spec::{kernel, load_segment, manifest_segments, traces_dir, KernelSpe
 use crate::tramp::AbiViolation;
 use sha2::{Digest, Sha256};
 use std::os::unix::process::ExitStatusExt;
-use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
@@ -100,13 +99,36 @@ fn phase_name(phase: Phase) -> &'static str {
 }
 
 // ---- case generation (shared by parent and child; fully deterministic) ----
+//
+// The case sequence for (kernel, phase, seed) is: all edge cases, then `n` random cases made of
+// consecutive blocks of RANDOM_BLOCK cases (block j drawn from the sub-stream `sub_seed(seed, j)`),
+// then every trace case of the split's segments (none for a kernel without a MANIFEST). A batch
+// is a window of BATCH_CASES consecutive cases; producing it never replays earlier random blocks,
+// so the cost of a batch does not grow with its index. Nothing here unwinds (the release profile
+// aborts on panic).
 
-/// Edge cases, then `n` random cases, then every trace case of the split's segments.
-/// A kernel without a traces directory contributes no trace cases.
-fn generate(k: &dyn KernelSpec, reference: RawFn, split: &str, seed: u64, n: u64, sink: &mut dyn FnMut(&[u8], u64)) -> Result<(), String> {
-    k.edge_cases(sink);
-    k.random_cases(seed, n, sink);
-    if traces_dir().join(k.name()).join("MANIFEST.json").is_file() {
+const RANDOM_BLOCK: u64 = 65_536;
+
+fn sub_seed(seed: u64, block: u64) -> u64 {
+    if block == 0 {
+        seed
+    } else {
+        crate::spec::splitmix(seed ^ block.wrapping_mul(0x9E37_79B9_7F4A_7C15))
+    }
+}
+
+fn edge_count(k: &dyn KernelSpec) -> u64 {
+    let mut c = 0u64;
+    k.edge_cases(&mut |_, _| c += 1);
+    c
+}
+
+fn has_traces(k: &dyn KernelSpec) -> bool {
+    traces_dir().join(k.name()).join("MANIFEST.json").is_file()
+}
+
+fn trace_stage(k: &dyn KernelSpec, reference: RawFn, split: &str, sink: &mut dyn FnMut(&[u8], u64)) -> Result<(), String> {
+    if has_traces(k) {
         for seg in manifest_segments(k.name(), Some(split))? {
             let buf = load_segment(&seg.path).map_err(|e| format!("{}: {e}", seg.path.display()))?;
             unsafe { k.trace_cases(reference, &buf, sink) };
@@ -115,10 +137,7 @@ fn generate(k: &dyn KernelSpec, reference: RawFn, split: &str, seed: u64, n: u64
     Ok(())
 }
 
-struct StopGeneration;
-
-/// Calls `f(index_in_batch, input, aux)` for each case of batch `batch`, then stops generating.
-/// Returns the number of cases in the batch.
+/// Calls `f(index_in_batch, input, aux)` for each case of batch `batch`. Returns the number of cases.
 fn for_batch(
     k: &dyn KernelSpec,
     reference: RawFn,
@@ -129,30 +148,48 @@ fn for_batch(
     f: &mut dyn FnMut(usize, &[u8], u64),
 ) -> Result<u64, String> {
     let (start, end) = (batch * BATCH_CASES, (batch + 1) * BATCH_CASES);
-    let mut g = 0u64;
-    let r = catch_unwind(AssertUnwindSafe(|| {
-        generate(k, reference, split, seed, n, &mut |inp, aux| {
-            if g >= end {
-                resume_unwind(Box::new(StopGeneration));
-            }
-            if g >= start {
-                f((g - start) as usize, inp, aux);
-            }
+    let mut emitted = 0u64;
+    let mut emit = |g: u64, inp: &[u8], aux: u64| {
+        if g >= start && g < end {
+            f((g - start) as usize, inp, aux);
+            emitted += 1;
+        }
+    };
+    let e = edge_count(k);
+    if start < e {
+        let mut g = 0u64;
+        k.edge_cases(&mut |i, a| {
+            emit(g, i, a);
             g += 1;
-        })
-    }));
-    match r {
-        Ok(res) => res?,
-        Err(p) if p.is::<StopGeneration>() => {}
-        Err(p) => resume_unwind(p),
+        });
     }
-    Ok(g.min(end).saturating_sub(start))
+    let r_end = e + n;
+    if end > e && start < r_end {
+        let first = (start.max(e) - e) / RANDOM_BLOCK;
+        let last = (end.min(r_end) - 1 - e) / RANDOM_BLOCK;
+        for j in first..=last {
+            let mut g = e + j * RANDOM_BLOCK;
+            let len = (n - j * RANDOM_BLOCK).min(RANDOM_BLOCK);
+            k.random_cases(sub_seed(seed, j), len, &mut |i, a| {
+                emit(g, i, a);
+                g += 1;
+            });
+        }
+    }
+    if end > r_end {
+        let mut g = r_end;
+        trace_stage(k, reference, split, &mut |i, a| {
+            emit(g, i, a);
+            g += 1;
+        })?;
+    }
+    Ok(emitted)
 }
 
-fn count_cases(k: &dyn KernelSpec, reference: RawFn, split: &str, seed: u64, n: u64) -> Result<u64, String> {
-    let mut c = 0u64;
-    generate(k, reference, split, seed, n, &mut |_, _| c += 1)?;
-    Ok(c)
+fn count_cases(k: &dyn KernelSpec, reference: RawFn, split: &str, n: u64) -> Result<u64, String> {
+    let mut t = 0u64;
+    trace_stage(k, reference, split, &mut |_, _| t += 1)?;
+    Ok(edge_count(k) + n + t)
 }
 
 // ---- guard buffers ----
@@ -402,7 +439,7 @@ pub fn try_check(kernel_name: &str, so: &Path, phase: Phase, seed_file: Option<&
     }
     let ref_lib = Lib::open(&ref_path)?;
     let reference = ref_lib.sym(k.symbol()).ok_or("A.r1 lacks the kernel symbol")?;
-    let total = count_cases(k, reference, split, seed, n)?;
+    let total = count_cases(k, reference, split, n)?;
     let batches = total.div_ceil(BATCH_CASES);
     let msx = msx_binary()?;
     let tmpdir = work().join("tmp");
@@ -421,8 +458,11 @@ pub fn try_check(kernel_name: &str, so: &Path, phase: Phase, seed_file: Option<&
             let f = std::fs::File::create(&shm).map_err(|e| e.to_string())?;
             f.set_len((HEADER + SLOT * 2 * cases as usize) as u64).map_err(|e| e.to_string())?;
         }
+        let errlog = shm.with_extension("err");
+        let errfile = std::fs::File::create(&errlog).map_err(|e| e.to_string())?;
         let end = run_child(
             Command::new(&msx)
+                .stderr(Stdio::from(errfile))
                 .arg("__check-child")
                 .args(["--kernel", kernel_name, "--phase", phase_name(phase)])
                 .arg("--so")
@@ -435,6 +475,9 @@ pub fn try_check(kernel_name: &str, so: &Path, phase: Phase, seed_file: Option<&
         let data = std::fs::read(&shm);
         let _ = std::fs::remove_file(&shm);
         let end = end?;
+        if !matches!(end, ChildEnd::ExitCode(_)) {
+            let _ = std::fs::remove_file(&errlog);
+        }
         let data = data.map_err(|e| e.to_string())?;
         let u64_at = |off: usize| u64::from_le_bytes(data[off..off + 8].try_into().unwrap());
         let progress = u64_at(0);
@@ -445,12 +488,13 @@ pub fn try_check(kernel_name: &str, so: &Path, phase: Phase, seed_file: Option<&
             ChildEnd::TimedOut => Some(("TIMEOUT", None)),
             ChildEnd::Signal(s) => Some(("OOB_OR_CRASH", Some(s))),
             ChildEnd::ExitCode(c) => {
-                eprintln!("msx check: child exited with code {c}");
-                Some(("OOB_OR_CRASH", None))
+                let msg = std::fs::read_to_string(&errlog).unwrap_or_default();
+                let _ = std::fs::remove_file(&errlog);
+                return Err(format!("check child exited with code {c} (candidate could not be loaded or the checker failed): {}", msg.trim()));
             }
         };
         if let Some((verdict, signal)) = early {
-            let at = if matches!(end, ChildEnd::ExitCode(_)) { 0 } else { progress as usize };
+            let at = progress as usize;
             let mut failure = None;
             for_batch(k, reference, split, seed, n, batch, &mut |idx, input, aux| {
                 if idx == at / 2 {

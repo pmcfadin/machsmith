@@ -120,5 +120,17 @@ fn a_r1_passes_against_itself() {
     assert_eq!(r.cases_run, 2 * (33_280 + 2_000_000 + search_ops));
 }
 
-#[allow(dead_code)]
-fn _unused(_: PathBuf) {}
+#[test]
+fn unloadable_candidates_are_tool_errors() {
+    use msx_harness::check::try_check;
+    setup();
+    // exports `fixture`, not `msx_vint`
+    let so = support::assemble_fixture("ok_sum.s");
+    let e = try_check("vint", &so, Phase::Search, None).unwrap_err();
+    assert!(e.contains("could not be loaded") && e.contains("msx_vint"), "{e}");
+    // not an ELF file
+    let bogus: PathBuf = scratch("bogus").join("bogus.so");
+    std::fs::write(&bogus, b"not an elf file").unwrap();
+    let e = try_check("vint", &bogus, Phase::Search, None).unwrap_err();
+    assert!(e.contains("could not be loaded") && e.contains("bogus.so"), "{e}");
+}
