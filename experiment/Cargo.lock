@@ -85,6 +85,7 @@ name = "msx-harness"
 version = "0.1.0"
 dependencies = [
  "libc",
+ "msx-kernels",
  "rand_chacha",
  "rand_core",
  "serde",
