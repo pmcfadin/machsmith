@@ -38,7 +38,14 @@ CQLite calls `parse_big_index_entry_framing` on the index bytes at the start of 
 
 ## 7. Input statistics
 
-(Filled in by Task 4.)
+Search split only: 84 segments in total after deduplication; the search split holds 1,920 entries in 52,116 bytes. Each segment is one whole BIG `Index.db` file from CQLite's test datasets, walked as a chain of entries. Inputs repeat within a sample (small trace: 1,920 operations).
+
+| quantity (bytes) | min | p10 | p25 | p50 | p75 | p90 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| key length | 4 | 16 | 16 | 16 | 26 | 35 | 38 | 38 |
+| promoted-index length | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 235 |
+
+Keys are short (the median is 16 bytes) and at least 99% of entries have no promoted index (length 0), so the typical entry is a 2-byte key length, a short key, one data-offset varint and a one-byte zero promoted length.
 
 ## 8. Source
 
@@ -62,7 +69,7 @@ pub fn parse_vuint(input: &[u8]) -> IResult<&[u8], u64> {
 From `cqlite-core/src/storage/sstable/index_reader/parse.rs` (`parse_big_index_entry_framing`, commit `2e5b7a4c`):
 
 ```rust
-#[inline(always)] // added on the copy; CQLite's function has no inline attribute, and plain #[inline] left it out of line
+#[inline(always)] // added on the copy so the function is part of the exported function; CQLite's has no inline attribute
 pub fn parse_big_index_entry_framing(input: &[u8]) -> IResult<&[u8], (usize, u64)> {
     let original_len = input.len();
     let (input, key_len) = be_u16(input)?;
@@ -142,7 +149,7 @@ pub unsafe extern "C" fn msx_index_framing(ptr: *const u8, len: usize, out: *mut
 }
 ```
 
-## Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
+### Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
 
 - Code size of `msx_index_framing`: 368 bytes.
 - Outgoing calls: besides the calls the admissibility contract allows, two calls to panic paths that the compiler could not prove dead: `core::panicking::panic_fmt` (from `split_at` inside nom's `take`) and `core::slice::index::slice_index_fail` (from slicing the input past the second VInt). Neither is reachable: `take` is entered only after `key_len <= remaining` was checked, and the slice is taken only after `input.len() >= leading_ones + 1` was checked. A seeded random test over 10,000 inputs of length 0 to 40 exercises the function with panics enabled and finds none.

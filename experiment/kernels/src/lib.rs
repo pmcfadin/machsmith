@@ -7,6 +7,7 @@
 
 pub mod bti_sparse_find;
 pub mod index_framing;
+pub mod traces;
 pub mod vint;
 
 /// One step of the chain checksum shared by every kernel.

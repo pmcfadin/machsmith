@@ -1,0 +1,187 @@
+{
+  "kernel": "vint",
+  "cqlite_commit": "2e5b7a4cf6abe6f51b7677ecb7199e2cab087c0e",
+  "capture_commands": [
+    "experiment/trace-capture/capture.sh (see experiment/trace-capture/README.md for every command line)",
+    "msx-trace-manifest --raw work/traces-raw --datasets <datasets root> --out experiment/traces"
+  ],
+  "format": "stream",
+  "segments": [
+    {
+      "file": "search/0000.seg",
+      "origin": "cache_operations/borrow_trait_lookup",
+      "split": "search",
+      "sha256": "becf3f5f28d97c3293de4510fdbb27e732fbd459d1287865a5d12f5b6beaf9cf",
+      "bytes": 185,
+      "ops": 100
+    },
+    {
+      "file": "search/0001.seg",
+      "origin": "m1_comprehensive/full_validation_suite",
+      "split": "search",
+      "sha256": "dff406494518ec703ba81a932bd35626a8f9616efb1460a1acd5c012ea94687d",
+      "bytes": 82253,
+      "ops": 52012
+    },
+    {
+      "file": "search/0002.seg",
+      "origin": "m1_memory_usage/read_largest_sstable_10x",
+      "split": "search",
+      "sha256": "c17f8bb9fd9f6492e947bc85bfa471ae6fadc6def287a7b051a1e072d57dc343",
+      "bytes": 269226,
+      "ops": 170610
+    },
+    {
+      "file": "search/0003.seg",
+      "origin": "m1_multi_sstable_read_throughput/read_multiple_sstables_parallel",
+      "split": "search",
+      "sha256": "e5109c742f3f62f64025d280b4c5a7201b9530f79bbb5ed85bb0ff361e921a57",
+      "bytes": 86920,
+      "ops": 64968
+    },
+    {
+      "file": "holdout/0004.seg",
+      "origin": "m1_partition_lookup_cold/position_0",
+      "split": "holdout",
+      "sha256": "1020bc06cc51b17efdbaf04adbe22452c0ce366e27d6356d4245c2847fe1ebdf",
+      "bytes": 296,
+      "ops": 160
+    },
+    {
+      "file": "search/0005.seg",
+      "origin": "m1_sequential_memory/read_all_sstables_3x_sequential",
+      "split": "search",
+      "sha256": "5994ece9418825fc65b04f00b128b22766f789d6d4e415883a3935699207584c",
+      "bytes": 260168,
+      "ops": 194584
+    },
+    {
+      "file": "search/0006.seg",
+      "origin": "m1_sstable_read_throughput/read_all_sstables",
+      "split": "search",
+      "sha256": "e5375d14cefb3a6f50350462f8e02a4822b219c5f3358dd4e90aa21de85eccd2",
+      "bytes": 86920,
+      "ops": 64968
+    },
+    {
+      "file": "search/0007.seg",
+      "origin": "read/clustering_point_bti",
+      "split": "search",
+      "sha256": "9f44d46e51384d14d6c0e47864472e2311e252ea47b9898233ca9c982adb714b",
+      "bytes": 101799,
+      "ops": 70982
+    },
+    {
+      "file": "search/0008.seg",
+      "origin": "read/clustering_point_bti",
+      "split": "search",
+      "sha256": "dc2082f1184d7489cd32fb2f019b9d67de07c3e46b7645f5e367b79f2184261c",
+      "bytes": 5440,
+      "ops": 4236
+    },
+    {
+      "file": "search/0009.seg",
+      "origin": "read/clustering_point_bti",
+      "split": "search",
+      "sha256": "ebbafcfbf51ad090b0fd6e0f593e762edf1ef2867f9afdb9dd9c08694143e09c",
+      "bytes": 27076,
+      "ops": 17117
+    },
+    {
+      "file": "search/0010.seg",
+      "origin": "read/clustering_range_bti",
+      "split": "search",
+      "sha256": "560848742415334fe4b9d881ca77607bd78d715ff4d3a32d1e202e41dc7178b6",
+      "bytes": 101495,
+      "ops": 70830
+    },
+    {
+      "file": "holdout/0011.seg",
+      "origin": "read/clustering_slice",
+      "split": "holdout",
+      "sha256": "4c5dae865062b399e8d927c759723e71463c1da8b0fad333b73bc9e317e27912",
+      "bytes": 100574,
+      "ops": 70366
+    },
+    {
+      "file": "holdout/0012.seg",
+      "origin": "read/full_scan",
+      "split": "holdout",
+      "sha256": "431552bc2b7d175f08f4ab84a5aada6bfc2cda5b1e17294e48a7a2a80608a38a",
+      "bytes": 127416,
+      "ops": 87366
+    },
+    {
+      "file": "search/0013.seg",
+      "origin": "read/get_partition_big",
+      "split": "search",
+      "sha256": "f4273e2172bff6b9c412efec2a0cde1882916176fe11eca789f0e2b16c1beaad",
+      "bytes": 100601,
+      "ops": 70383
+    },
+    {
+      "file": "search/0014.seg",
+      "origin": "read/get_partition_bti",
+      "split": "search",
+      "sha256": "fc42b89c54a9c655c2dd07173f6f8333d2a31e32a228ff4917d793970b1c027c",
+      "bytes": 100579,
+      "ops": 70370
+    },
+    {
+      "file": "search/0015.seg",
+      "origin": "read/point_lookup_repeated",
+      "split": "search",
+      "sha256": "f356243f60a26414481b90177ffd73a9b1275aea9fb6db4ef3dfe82d668405cf",
+      "bytes": 100579,
+      "ops": 70370
+    },
+    {
+      "file": "search/0016.seg",
+      "origin": "read/type_heavy",
+      "split": "search",
+      "sha256": "8fe4a37fe9be5eeea75cb39b12b997cbca4c0c9ff3498660acc5e7d46aefaa14",
+      "bytes": 140986,
+      "ops": 103369
+    }
+  ],
+  "excluded": [],
+  "duplicates_dropped": 26,
+  "totals": {
+    "search_ops": 1024899,
+    "holdout_ops": 157892,
+    "search_bytes": 1464227,
+    "holdout_bytes": 228286
+  },
+  "small_trace": {
+    "search": false,
+    "holdout": true
+  },
+  "histograms": {
+    "holdout": {
+      "ops_by_encoded_length": {
+        "1": 126812,
+        "2": 11720,
+        "3": 14338,
+        "4": 0,
+        "5": 2,
+        "6": 130,
+        "7": 4890,
+        "8": 0,
+        "9": 0
+      }
+    },
+    "search": {
+      "ops_by_encoded_length": {
+        "1": 831277,
+        "2": 71512,
+        "3": 91004,
+        "4": 0,
+        "5": 11,
+        "6": 806,
+        "7": 30289,
+        "8": 0,
+        "9": 0
+      }
+    }
+  }
+}

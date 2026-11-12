@@ -99,6 +99,9 @@ dependencies = [
  "nom",
  "rand_chacha",
  "rand_core",
+ "serde",
+ "serde_json",
+ "sha2",
 ]
 
 [[package]]

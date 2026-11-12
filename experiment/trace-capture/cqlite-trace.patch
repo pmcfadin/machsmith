@@ -1,0 +1,184 @@
+diff --git a/cqlite-core/src/lib.rs b/cqlite-core/src/lib.rs
+index d1fc9400..9f788043 100644
+--- a/cqlite-core/src/lib.rs
++++ b/cqlite-core/src/lib.rs
+@@ -10,6 +10,7 @@
+ // regress.
+ #![deny(clippy::large_enum_variant)]
+ 
++pub mod msx_trace;
+ pub mod config;
+ pub mod config_removed_keys;
+ pub mod cql;
+diff --git a/cqlite-core/src/msx_trace.rs b/cqlite-core/src/msx_trace.rs
+new file mode 100644
+index 00000000..6c0119e9
+--- /dev/null
++++ b/cqlite-core/src/msx_trace.rs
+@@ -0,0 +1,130 @@
++//! Experiment-only input tracing (machsmith). Inactive unless `MSX_TRACE_DIR` is set.
++//!
++//! Per thread, one in-memory buffer per kernel. Buffers are appended to
++//! `$MSX_TRACE_DIR/<kernel>.<thread-seq>.bin` when the thread exits and at process exit.
++
++use std::cell::RefCell;
++use std::io::Write;
++use std::sync::atomic::{AtomicUsize, Ordering};
++use std::sync::{Arc, Mutex, OnceLock};
++
++const KERNELS: [&str; 2] = ["vint", "bti_sparse_find"];
++const VINT: usize = 0;
++const BTI: usize = 1;
++
++struct Buf {
++    seq: usize,
++    bufs: [Vec<u8>; 2],
++}
++
++static DIR: OnceLock<Option<std::path::PathBuf>> = OnceLock::new();
++static ACTIVE: OnceLock<bool> = OnceLock::new();
++static SEQ: AtomicUsize = AtomicUsize::new(0);
++static REGISTRY: Mutex<Vec<Arc<Mutex<Buf>>>> = Mutex::new(Vec::new());
++
++extern "C" {
++    fn atexit(cb: extern "C" fn()) -> i32;
++}
++
++extern "C" fn flush_all_at_exit() {
++    if let Ok(reg) = REGISTRY.lock() {
++        for b in reg.iter() {
++            flush(b);
++        }
++    }
++}
++
++fn flush(b: &Arc<Mutex<Buf>>) {
++    let Some(Some(dir)) = DIR.get() else { return };
++    let Ok(mut g) = b.lock() else { return };
++    let seq = g.seq;
++    for (i, name) in KERNELS.iter().enumerate() {
++        if g.bufs[i].is_empty() {
++            continue;
++        }
++        let path = dir.join(format!("{name}.{seq:04}.bin"));
++        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
++            let _ = f.write_all(&g.bufs[i]);
++        }
++        g.bufs[i].clear();
++    }
++}
++
++struct Local(Arc<Mutex<Buf>>);
++
++impl Drop for Local {
++    fn drop(&mut self) {
++        flush(&self.0);
++    }
++}
++
++thread_local! {
++    static LOCAL: RefCell<Option<Local>> = const { RefCell::new(None) };
++}
++
++#[inline]
++fn active() -> bool {
++    *ACTIVE.get_or_init(|| {
++        let dir = std::env::var_os("MSX_TRACE_DIR").map(std::path::PathBuf::from);
++        let on = dir.is_some();
++        if let Some(d) = &dir {
++            let _ = std::fs::create_dir_all(d);
++            unsafe {
++                atexit(flush_all_at_exit);
++            }
++        }
++        let _ = DIR.set(dir);
++        on
++    })
++}
++
++fn with_buf(kernel: usize, f: impl FnOnce(&mut Vec<u8>)) {
++    let _ = LOCAL.try_with(|cell| {
++        let mut slot = cell.borrow_mut();
++        let local = slot.get_or_insert_with(|| {
++            let b = Arc::new(Mutex::new(Buf {
++                seq: SEQ.fetch_add(1, Ordering::Relaxed),
++                bufs: [Vec::new(), Vec::new()],
++            }));
++            if let Ok(mut reg) = REGISTRY.lock() {
++                reg.push(b.clone());
++            }
++            Local(b)
++        });
++        let r = local.0.lock();
++        if let Ok(mut g) = r {
++            f(&mut g.bufs[kernel]);
++        }
++    });
++}
++
++/// Record the bytes consumed by one successful `decode_unsigned`.
++#[inline]
++pub fn vint(consumed: &[u8]) {
++    if active() {
++        with_buf(VINT, |b| b.extend_from_slice(consumed));
++    }
++}
++
++/// Record one `Sparse` lookup: `[u32 LE n][u32 LE byte][n x 16]`, each element
++/// `[byte][7 zero bytes][u64 LE child]`.
++#[inline]
++pub fn bti_sparse(transitions: &[(u8, u64)], byte: u8) {
++    if active() {
++        with_buf(BTI, |b| {
++            b.extend_from_slice(&(transitions.len() as u32).to_le_bytes());
++            b.extend_from_slice(&(byte as u32).to_le_bytes());
++            for (tb, child) in transitions {
++                b.push(*tb);
++                b.extend_from_slice(&[0u8; 7]);
++                b.extend_from_slice(&child.to_le_bytes());
++            }
++        });
++    }
++}
++
++/// True when tracing is on (lets callers skip building the record).
++#[inline]
++pub fn enabled() -> bool {
++    active()
++}
+diff --git a/cqlite-core/src/parser/vint.rs b/cqlite-core/src/parser/vint.rs
+index 91cb37a6..b2d916b4 100644
+--- a/cqlite-core/src/parser/vint.rs
++++ b/cqlite-core/src/parser/vint.rs
+@@ -48,6 +48,7 @@ pub fn decode_unsigned(input: &[u8]) -> Result<(u64, usize), VIntError> {
+     }
+     if extra == 0 {
+         // Single byte: 0xxxxxxx
++        crate::msx_trace::vint(&input[..1]);
+         return Ok((first as u64, 1));
+     }
+     // Load the `extra` continuation bytes as the low bits of a u64 via ONE
+@@ -69,6 +70,7 @@ pub fn decode_unsigned(input: &[u8]) -> Result<(u64, usize), VIntError> {
+         // shift overflow.
+         ((first as u64 & mask) << (extra * 8)) | tail
+     };
++    crate::msx_trace::vint(&input[..total]);
+     Ok((value, total))
+ }
+ 
+diff --git a/cqlite-core/src/storage/sstable/bti/node.rs b/cqlite-core/src/storage/sstable/bti/node.rs
+index 659ba59d..96451868 100644
+--- a/cqlite-core/src/storage/sstable/bti/node.rs
++++ b/cqlite-core/src/storage/sstable/bti/node.rs
+@@ -303,6 +303,11 @@ impl BtiNode {
+             }
+ 
+             BtiNodeData::Sparse { transitions } => {
++                if crate::msx_trace::enabled() {
++                    let v: Vec<(u8, u64)> =
++                        transitions.iter().map(|t| (t.byte, t.child.distance)).collect();
++                    crate::msx_trace::bti_sparse(&v, byte);
++                }
+                 // Binary search on sorted transitions
+                 transitions
+                     .binary_search_by_key(&byte, |t| t.byte)

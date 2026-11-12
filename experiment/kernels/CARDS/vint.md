@@ -38,7 +38,21 @@ CQLite calls `decode_unsigned` on a slice that starts at the current position an
 
 ## 7. Input statistics
 
-(Filled in by Task 4.)
+Search split only (17 segments after deduplication, 26 duplicates dropped, taken from CQLite's `read`, `partition_lookup` and `m1_performance` bench cases, one process per case). 1,024,899 operations, 1,464,227 bytes.
+
+| encoded length (bytes) | operations | share |
+|---|---|---|
+| 1 | 831,277 | 81.11% |
+| 2 | 71,512 | 6.98% |
+| 3 | 91,004 | 8.88% |
+| 4 | 0 | 0.00% |
+| 5 | 11 | 0.00% |
+| 6 | 806 | 0.08% |
+| 7 | 30,289 | 2.96% |
+| 8 | 0 | 0.00% |
+| 9 | 0 | 0.00% |
+
+81% of varints are one byte; three-byte and two-byte encodings make up most of the rest, and nothing longer than seven bytes occurs.
 
 ## 8. Source
 
@@ -106,7 +120,7 @@ pub unsafe extern "C" fn msx_vint(ptr: *const u8, len: usize, out: *mut u64) -> 
 }
 ```
 
-## Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
+### Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
 
 - Code size of `msx_vint`: 186 bytes.
 - Outgoing calls: only those the admissibility contract allows. No panic call is present.

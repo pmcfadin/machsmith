@@ -17,7 +17,7 @@ pub fn parse_vuint(input: &[u8]) -> IResult<&[u8], u64> {
 }
 // END VERBATIM
 
-#[inline(always)] // added on the copy; CQLite's function has no inline attribute, and plain #[inline] left it out of line
+#[inline(always)] // added on the copy so the function is part of the exported function; CQLite's has no inline attribute
 // BEGIN VERBATIM cqlite-core/src/storage/sstable/index_reader/parse.rs :: parse_big_index_entry_framing @ 2e5b7a4c
 pub fn parse_big_index_entry_framing(input: &[u8]) -> IResult<&[u8], (usize, u64)> {
     let original_len = input.len();

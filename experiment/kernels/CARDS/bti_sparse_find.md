@@ -40,7 +40,7 @@ CQLite walks a trie from the root: at each sparse node it calls `find_child` wit
 
 ## 7. Input statistics
 
-(Filled in by Task 4.)
+Dropped: no recorded calls. `BtiNode::find_child` is only called from unit tests in the local CQLite checkout; the read path uses `find_child_offset`, which none of the traced bench cases routes through this function. Fewer than 2,000 calls were recorded (0), so the kernel was dropped from the experiment (see `SELECTION.md`).
 
 ## 8. Source
 
@@ -71,7 +71,7 @@ pub unsafe extern "C" fn msx_bti_sparse_find(t: *const Transition, n: usize, byt
 
 where `find_sparse(transitions, byte)` is the verbatim expression above applied to `transitions` and `byte`.
 
-## Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
+### Compiler output (12 November 2026, rustc 1.97.1, release, `lto = "fat"`, `panic = "abort"`)
 
 - Code size of `msx_bti_sparse_find`: 96 bytes.
 - Outgoing calls: none.

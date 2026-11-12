@@ -96,3 +96,17 @@ two panic call sites (`split_at` in nom's `take`, and a slice-range index for th
 remaining input after the second varint); both are guarded by checks the compiler
 did not fold away, and neither is reachable from any input. No input class is excluded
 from the case generators.
+
+## 6. Trace capture outcome (Task 4)
+
+- `bti_sparse_find`: **dropped: only 0 recorded calls in the local data.** The hook in
+  `BtiNode::find_child` (`Sparse` arm) never fired in any of the 23 traced bench cases:
+  in CQLite at `2e5b7a4c` that method is called only from unit tests; the read path
+  descends the trie with `find_child_offset`. Its crate code and card are kept; no
+  traces directory exists; the rest of the plan runs with two kernels (`vint`,
+  `index_framing`). No inputs were synthesized.
+- `vint`: 1,182,791 recorded operations (search 1,024,899, holdout 157,892); above the
+  200,000 limit, no limitation; the holdout split is a small trace.
+- `index_framing`: 4,551 entries after deduplication (search 1,920, holdout 2,631), both
+  splits small traces.
+
