@@ -65,7 +65,9 @@ impl KernelSpec for IndexFramingSpec {
             acc = fold(acc, o.promoted_len);
             ops += 1;
             let step = o.framing_len.saturating_add(o.promoted_len);
-            if step > (len - off) as u64 {
+            // A zero step would loop forever; a step past the end ends the stream (as in the kernel's
+            // own chain). A divergence from the reference is reported by the comparison.
+            if step == 0 || step > (len - off) as u64 {
                 break;
             }
             off += step as usize;
@@ -102,6 +104,11 @@ impl KernelSpec for IndexFramingSpec {
         while parse(seg.as_ptr().add(off), seg.len() - off, &mut o) == 0 {
             // The call reads only the framing bytes; hand exactly those to the kernel under test.
             sink(&seg[off..off + o.framing_len as usize], 0);
+            // The same call with the trailing context of the stream (rest of the segment, capped).
+            let rest = (seg.len() - off).min(TRAILING_CONTEXT_MAX);
+            if rest > o.framing_len as usize {
+                sink(&seg[off..off + rest], 0);
+            }
             let step = o.framing_len.saturating_add(o.promoted_len);
             if step > (seg.len() - off) as u64 {
                 break;
@@ -164,6 +171,13 @@ impl KernelSpec for IndexFramingSpec {
                 if r.next_u32() & 1 == 1 {
                     let cut = below(&mut r, buf.len() as u64 + 1) as usize;
                     buf.truncate(cut);
+                }
+                // Half of the entries are followed by more bytes, as in an index stream.
+                if r.next_u32() & 1 == 1 {
+                    let extra = below(&mut r, 257) as usize;
+                    let at = buf.len();
+                    buf.resize(at + extra, 0);
+                    r.fill_bytes(&mut buf[at..]);
                 }
             }
             sink(&buf, 0);

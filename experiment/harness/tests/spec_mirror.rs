@@ -87,17 +87,55 @@ fn chunks_account_for_every_op() {
     }
 }
 
+/// Each traced op is emitted exactly, and again with the trailing context of the stream (the rest
+/// of the segment capped at 4096 bytes) whenever there is any, so a fast path that is gated on a
+/// long `len` is exercised by the check.
 #[test]
-fn trace_cases_yield_exactly_ops() {
+fn trace_cases_yield_each_op_exactly_and_with_trailing_context() {
     for k in kernels_with_traces() {
         let a = reference(k.name());
+        let (mut longest, mut total_cases, mut total_ops) = (0usize, 0u64, 0u64);
         for s in manifest_segments(k.name(), Some("search")).unwrap() {
             let seg = load_segment(&s.path).unwrap();
-            let mut n = 0u64;
-            unsafe { k.trace_cases(a, &seg, &mut |_, _| n += 1) };
-            assert_eq!(n, s.ops, "{} {}", k.name(), s.file);
+            let mut lens: Vec<usize> = Vec::new();
+            unsafe { k.trace_cases(a, &seg, &mut |b, _| lens.push(b.len())) };
+            assert!(lens.len() as u64 >= s.ops, "{} {}", k.name(), s.file);
+            (total_cases, total_ops) = (total_cases + lens.len() as u64, total_ops + s.ops);
+            assert!(lens.len() as u64 <= 2 * s.ops, "{} {}", k.name(), s.file);
+            assert!(lens.iter().all(|&l| l <= 4096), "{} {}", k.name(), s.file);
+            longest = longest.max(*lens.iter().max().unwrap());
+        }
+        assert!(total_cases > total_ops, "{}: no trailing-context cases ({total_cases} cases, {total_ops} ops)", k.name());
+        // with context: far longer than any single op (a vint is at most 9 bytes)
+        assert_eq!(longest, 4096, "{}: no case with a full 4096-byte trailing context", k.name());
+    }
+}
+
+#[test]
+fn random_cases_cover_long_lengths_and_trailing_bytes() {
+    // vint: random byte strings up to 256 bytes
+    let vint = kernel("vint").unwrap();
+    let mut max = 0usize;
+    vint.random_cases(0x5EED_0001, 20_000, &mut |b, _| max = max.max(b.len()));
+    assert!((200..=256).contains(&max), "longest vint random case is {max} bytes");
+    // index_framing: the reference stops at the entry, so an input longer than framing_len has trailing bytes
+    let k = kernel("index_framing").unwrap();
+    let a = reference("index_framing");
+    let (mut with_trailing, mut parsed) = (0u32, 0u32);
+    let mut cases = Vec::new();
+    k.random_cases(0x5EED_0001, 20_000, &mut |b, _| cases.push(b.to_vec()));
+    for b in cases {
+        let mut o = [0u64; 2];
+        let f: unsafe extern "C" fn(*const u8, usize, *mut u64) -> u32 = unsafe { core::mem::transmute(a) };
+        if unsafe { f(b.as_ptr(), b.len(), o.as_mut_ptr()) } == 0 {
+            parsed += 1;
+            if (o[0] as usize) < b.len() {
+                with_trailing += 1;
+            }
         }
     }
+    assert!(parsed > 1000, "{parsed}");
+    assert!(with_trailing * 4 > parsed, "only {with_trailing} of {parsed} parsed entries have trailing bytes");
 }
 
 fn collect_edge(k: &dyn KernelSpec) -> Vec<(Vec<u8>, u64)> {

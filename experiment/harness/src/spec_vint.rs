@@ -43,7 +43,9 @@ impl KernelSpec for VintSpec {
         loop {
             let mut v = 0u64;
             let used = decode(base.add(off), len - off, &mut v);
-            if used == 0 {
+            // A decoder that claims more bytes than remain would wrap `len - off`: stop, and let the
+            // comparison with the reference report the divergence.
+            if used == 0 || used > len - off {
                 break;
             }
             acc = fold(acc, v);
@@ -84,6 +86,12 @@ impl KernelSpec for VintSpec {
                 break;
             }
             sink(&seg[off..off + used], 0);
+            // The same call as the kernel meets it in a stream: `len` is the rest of the segment
+            // (capped), so a fast path gated on a long `len` is exercised.
+            let rest = (seg.len() - off).min(TRAILING_CONTEXT_MAX);
+            if rest > used {
+                sink(&seg[off..off + rest], 0);
+            }
             off += used;
         }
     }
@@ -111,11 +119,11 @@ impl KernelSpec for VintSpec {
 
     fn random_cases(&self, seed: u64, n: u64, sink: &mut dyn FnMut(&[u8], u64)) {
         let mut r = rng(seed);
-        let mut buf = Vec::with_capacity(80);
+        let mut buf = Vec::with_capacity(272);
         for i in 0..n {
             buf.clear();
             if i % 2 == 0 {
-                let len = below(&mut r, 65) as usize;
+                let len = below(&mut r, 257) as usize;
                 buf.resize(len, 0);
                 r.fill_bytes(&mut buf);
             } else {

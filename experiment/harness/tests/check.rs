@@ -69,6 +69,14 @@ fn wrong_fe_reports_shortest() {
     assert!(r.mismatches_in_batch > 0);
 }
 
+/// Gives up only when 200 or more bytes are available: invisible to a check that feeds each op
+/// alone (or at most 64 random bytes), found by cases with real trailing context.
+#[test]
+fn wrong_long_is_incorrect_with_trailing_context() {
+    let r = expect("wrong_long.s", "INCORRECT");
+    assert!(input_len(&r) >= 200, "caught at length {}", input_len(&r));
+}
+
 #[test]
 fn writes_on_error_is_incorrect() {
     let r = expect("writes_on_error.s", "INCORRECT");
@@ -117,7 +125,15 @@ fn a_r1_passes_against_itself() {
     let search_ops: u64 = manifest_segments("vint", Some("search")).unwrap().iter().map(|s| s.ops).sum();
     let r = check("vint", &a_path(Rung::R1), Phase::Search, None);
     assert_eq!(r.verdict, "PASS", "{r:#?}");
-    assert_eq!(r.cases_run, 2 * (33_280 + 2_000_000 + search_ops));
+    // every traced op, and again with its trailing context whenever the segment has more bytes
+    let mut trace_cases = 0u64;
+    for s in manifest_segments("vint", Some("search")).unwrap() {
+        let seg = msx_harness::spec::load_segment(&s.path).unwrap();
+        let k = msx_harness::kernel("vint").unwrap();
+        unsafe { k.trace_cases(msx_kernels::vint::msx_vint as msx_harness::RawFn, &seg, &mut |_, _| trace_cases += 1) };
+    }
+    assert!(trace_cases > search_ops && trace_cases <= 2 * search_ops, "{trace_cases} cases for {search_ops} ops");
+    assert_eq!(r.cases_run, 2 * (33_280 + 2_000_000 + trace_cases));
 }
 
 #[test]

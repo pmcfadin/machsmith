@@ -176,3 +176,7 @@ pub(crate) fn random_vint_value(r: &mut ChaCha8Rng, width: usize) -> u64 {
     let (lo, hi) = vint_range(width);
     lo + r.next_u64() % (hi - lo).saturating_add(1).max(1)
 }
+
+/// Longest input handed to a kernel together with real trailing context (see the specs'
+/// `trace_cases`): the rest of the segment, capped.
+pub(crate) const TRAILING_CONTEXT_MAX: usize = 4096;

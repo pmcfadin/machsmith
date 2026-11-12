@@ -5,6 +5,7 @@
   "overread1.s": "OOB_OR_CRASH",
   "underread1.s": "OOB_OR_CRASH",
   "wrong_fe.s": "INCORRECT",
+  "wrong_long.s": "INCORRECT",
   "writes_on_error.s": "INCORRECT",
   "clobber_rbx.s": "ABI_VIOLATION",
   "loop_ff.s": "TIMEOUT",
