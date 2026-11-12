@@ -4,7 +4,7 @@
 
 ## 1. Answer
 
-The threshold was T = 5% (T = max(5%, 2 x null band); the final null bands were 0.042% for `vint`, L000016, and 0.009% for `index_framing`, L000013), and the experiment ran on two kernels, because `bti_sparse_find` recorded 0 calls and was dropped. On `vint`, assembly written by the model beat `A.r3` (the compiler at its best on this machine) with ratio 0.867, interval 0.867–0.868, WON (L000016), and the Rust rewrite got nearly the same win: `B.rust` vs `A.r3` 0.890 WON, and `B.asm` vs `B.rust` 0.975 TIED (L000016). On `index_framing`, assembly beat `A.r3` narrowly: 0.943, interval 0.943–0.944, WON (L000013), a margin of less than one percentage point past T, while the Rust rewrite was TIED with `A.r3` at 0.983 and `B.asm` vs `B.rust` was TIED at 0.960 (L000013), so on that kernel the assembly's edge over the Rust rewrite cannot be claimed. Both arms used one counted attempt each, except the `index_framing` Rust agent, which used two; no candidate failed a correctness check (tested only), and nobody was disqualified (L000007 to L000011, L000013, L000016). These are isolated-kernel results measured with repeating inputs behind a function boundary, on one shared machine, for one model; the kernels are at most 0.09% of CQLite's own profile and `own_decoding` is at most 5.8% of any profiled workload, so no end-to-end CQLite speed-up is claimed. The row/cell category the owner asked for stayed unfilled: no such function meets the admissibility contract.
+The threshold was T = 5% (T = max(5%, 2 x null band); final null bands 0.042% for `vint`, L000016, and 0.009% for `index_framing`, L000013), and only two kernels ran, because `bti_sparse_find` recorded 0 calls and was dropped. On `vint`, model-written assembly beat `A.r3` (the best rung of the compiler ladder tried) at ratio 0.867, WON, and the Rust rewrite got nearly the same win: `B.rust` vs `A.r3` 0.890 WON, `B.asm` vs `B.rust` 0.975 TIED (L000016). On `index_framing`, assembly beat `A.r3` narrowly, 0.943 WON (L000013), but the win clears T by less than one percentage point, it is the same size as the unexplained boundary effect (`A.r3` vs `A.inline` is 0.939, below 1, L000013), and its interval is a bootstrap at one build placement that does not cover layout differences between binaries, so it is narrow and not robust to the harness's own structure. The Rust rewrite was TIED with `A.r3` there (0.983), and `B.asm` vs `B.rust` was TIED (0.960), so assembly's edge over the Rust rewrite cannot be claimed (L000013). Correctness is tested only, no candidate failed a check, nobody was disqualified, and these are isolated-kernel results on one machine for one model, so no end-to-end CQLite speed-up is claimed (L000007 to L000011, L000013, L000016). The row/cell category stayed unfilled, and the kernels' share of CQLite's profile is in section 3.
 
 ## 2. What was tested
 
@@ -18,7 +18,7 @@ The threshold was T = 5% (T = max(5%, 2 x null band); the final null bands were 
 |---|---|
 | `A.r1` | CQLite's code built like its release profile (opt-level 3, fat LTO, `codegen-units=1`, `panic=abort`, generic x86-64) |
 | `A.r2` | `A.r1` plus `-C target-cpu=znver5` |
-| `A.r3` | `A.r2` plus profile-guided optimization trained on the search inputs; "the compiler at its best" |
+| `A.r3` | `A.r2` plus profile-guided optimization trained on the search inputs; the best rung of the ladder tried (not a search of compiler options) |
 | `B.asm` | x86-64 assembly written by an LLM agent |
 | `B.rust` | a Rust rewrite by a different agent, built with the `A.r3` recipe; `B.rust.r2` is the same source built with the `A.r2` recipe (final exam only) |
 | `A.r3copy` | a second build of `A.r3`, byte-identical to it (same sha256); `A.r3copy` vs `A.r3` is the null |
@@ -75,22 +75,24 @@ The tables below are `msx report` output, unedited. The ratio is candidate / bas
 
 | comparison | ratio | 95% interval | verdict | ledger id |
 |---|---|---|---|---|
-| B.asm vs A.r1 | 0.805 | 0.805–0.805 | WON | L000016 |
-| B.asm vs A.r2 | 0.818 | 0.818–0.818 | WON | L000016 |
+| B.asm vs A.r1 | 0.8051 | 0.8047–0.8055 | WON | L000016 |
+| B.asm vs A.r2 | 0.8181 | 0.8178–0.8184 | WON | L000016 |
 | B.asm vs A.r3 | 0.867 | 0.867–0.868 | WON | L000016 |
 | B.rust vs A.r1 | 0.826 | 0.825–0.826 | WON | L000016 |
-| B.rust vs A.r2 | 0.839 | 0.839–0.839 | WON | L000016 |
-| B.rust vs A.r3 | 0.890 | 0.890–0.890 | WON | L000016 |
+| B.rust vs A.r2 | 0.8392 | 0.8389–0.8395 | WON | L000016 |
+| B.rust vs A.r3 | 0.8899 | 0.8896–0.8901 | WON | L000016 |
 | B.rust.r2 vs A.r2 | 0.848 | 0.848–0.849 | WON | L000016 |
 | B.asm vs B.rust | 0.975 | 0.974–0.975 | TIED | L000016 |
 | A.r2 vs A.r1 | 0.984 | 0.984–0.985 | TIED | L000016 |
-| A.r3 vs A.r2 | 0.943 | 0.943–0.943 | WON | L000016 |
+| A.r3 vs A.r2 | 0.9429 | 0.9426–0.9434 | WON | L000016 |
 | A.r3copy vs A.r3 (null) | 1.00019 | 0.99996–1.00042 | NULL | L000016 |
 | A.r3 vs A.inline (boundary tax) | 2.103 | 2.101–2.104 | BOUNDARY | L000016 |
 
 Null band, threshold and measurement conditions, as printed by `msx report`:
 
-Null band 0.00042 (0.042% of 1.0); T = 0.050 (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No `A.reasm` arm exists, so the only null is A.r3copy vs A.r3 (identical bytes).
+Null band 0.00042 (0.042% of 1.0); T = 0.050 (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No A.reasm null is present; the only null is A.r3copy vs A.r3.
+
+Intervals are a bootstrap over sessions at one build placement; they do not include layout variation between binaries.
 
 Measured on the holdout split, 30 sessions x 200 blocks, core 5, session reruns 1, inputs repeat: yes (small-trace mode). Rejected sessions: 1.
 
@@ -107,9 +109,9 @@ Counters (medians over the final exam's valid blocks):
 | B.rust | 9.96 | 27.72 | 0.0420 | 1.944 | L000016 |
 | B.rust.r2 | 10.07 | 27.69 | 0.0411 | 1.966 | L000016 |
 
-- **Attempts.** Each agent used one counted attempt and one submission: `B.asm` L000007, `B.rust` L000008. Neither failed a lint, a build or the correctness check (tested only; 8,166,128 cases in the search check, 40,698,122 in the final check, L000016).
+- **Attempts.** Each agent used one counted attempt and one submission: `B.asm` L000007, `B.rust` L000008. Neither failed a lint, a build or the correctness check (tested only; 40,698,122 cases in the final check, L000016).
 - **Small-trace mode.** The final exam ran on the holdout split, which for `vint` is a small trace (157,892 operations): inputs repeat (`repeat_r` 1, so each sample is one pass over the whole split with the segments shuffled; L000016). The branch predictor and the caches can learn the data across blocks, so these are warm-predictor numbers. The search phase for `vint` used non-repeating inputs; the final exam does not.
-- **Boundary tax.** Isolating this kernel behind a call costs 110%: `A.r3` takes 2.103 times the cycles per op of `A.inline` (11.20 against 5.32 cycles/op, L000016). The kernel is only a few cycles of work per call (5.32 cycles/op inlined), so a per-call cost that is invisible for a large function dominates here. I did not isolate the cause (a plausible contributor is the dependent chain through the `out` store and the returned length, which an inlined loop can keep in registers); the measurement says only that this kernel's isolated numbers cannot be carried into CQLite unchanged.
+- **Boundary tax.** Isolating this kernel behind a call costs 110%: `A.r3` takes 2.103 times the cycles per op of `A.inline` (11.20 against 5.32 cycles/op, L000016). `A.inline` also retires fewer instructions per op (24.40 against 41.60), so the tax conflates call cost with whatever else the compiler does differently when the kernel sits inside the loop. The cause was not investigated. Untested hypothesis: the call, the `out` store and the returned length form a dependent chain that an inlined loop avoids. The measurement says only that this kernel's isolated numbers cannot be carried into CQLite unchanged.
 - **The ladder.** `A.r2` vs `A.r1` is 0.984, TIED: `-C target-cpu=znver5` alone bought nothing the threshold can see. `A.r3` vs `A.r2` is 0.943, WON: profile-guided optimization was worth about 5.7% (L000016). The `A.r3` build trained on the search inputs also drives the `_chain` symbols, so `A.inline` is PGO-trained too.
 - **Rust at the weaker recipe.** `B.rust.r2` vs `A.r2` is 0.848, WON (L000016): the Rust rewrite keeps its win when built without PGO.
 
@@ -121,18 +123,20 @@ Counters (medians over the final exam's valid blocks):
 | B.asm vs A.r2 | 0.874 | 0.874–0.875 | WON | L000013 |
 | B.asm vs A.r3 | 0.943 | 0.943–0.944 | WON | L000013 |
 | B.rust vs A.r1 | 0.848 | 0.847–0.848 | WON | L000013 |
-| B.rust vs A.r2 | 0.911 | 0.911–0.911 | WON | L000013 |
-| B.rust vs A.r3 | 0.983 | 0.983–0.983 | TIED | L000013 |
-| B.rust.r2 vs A.r2 | 0.911 | 0.911–0.911 | WON | L000013 |
-| B.asm vs B.rust | 0.960 | 0.960–0.960 | TIED | L000013 |
-| A.r2 vs A.r1 | 0.930 | 0.930–0.930 | WON | L000013 |
-| A.r3 vs A.r2 | 0.927 | 0.927–0.927 | WON | L000013 |
+| B.rust vs A.r2 | 0.9112 | 0.9111–0.9113 | WON | L000013 |
+| B.rust vs A.r3 | 0.9828 | 0.9826–0.9830 | TIED | L000013 |
+| B.rust.r2 vs A.r2 | 0.9112 | 0.9111–0.9113 | WON | L000013 |
+| B.asm vs B.rust | 0.9597 | 0.9596–0.9599 | TIED | L000013 |
+| A.r2 vs A.r1 | 0.9302 | 0.9301–0.9303 | WON | L000013 |
+| A.r3 vs A.r2 | 0.9271 | 0.9270–0.9272 | WON | L000013 |
 | A.r3copy vs A.r3 (null) | 1.00001 | 0.99994–1.00009 | NULL | L000013 |
 | A.r3 vs A.inline (boundary tax) | 0.939 | 0.938–0.939 | BOUNDARY | L000013 |
 
 Null band, threshold and measurement conditions, as printed by `msx report`:
 
-Null band 0.00009 (0.009% of 1.0); T = 0.050 (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No `A.reasm` arm exists, so the only null is A.r3copy vs A.r3 (identical bytes).
+Null band 0.00009 (0.009% of 1.0); T = 0.050 (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No A.reasm null is present; the only null is A.r3copy vs A.r3.
+
+Intervals are a bootstrap over sessions at one build placement; they do not include layout variation between binaries.
 
 Measured on the holdout split, 30 sessions x 200 blocks, core 15, session reruns 0, inputs repeat: yes (small-trace mode). Rejected sessions: 0.
 
@@ -149,11 +153,11 @@ Counters (medians over the final exam's valid blocks):
 | B.rust | 24.88 | 48.60 | 0.0132 | 5.009 | L000013 |
 | B.rust.r2 | 24.88 | 48.60 | 0.0132 | 5.009 | L000013 |
 
-- **Attempts.** The assembly agent used one counted attempt (L000009). The Rust agent used two (L000010, L000011) and chose `attempt-01`; `attempt-02` is in the attempts history below. None failed a lint, a build or the correctness check (tested only; 4,759,932 cases in each search check, 40,762,802 in each final check, L000013).
+- **Attempts.** The assembly agent used one counted attempt (L000009). The Rust agent used two (L000010, L000011) and chose `attempt-01`; `attempt-02` is in the attempts history below. None failed a lint, a build or the correctness check (tested only; 40,762,802 cases in each final check, L000013).
 - **Small-trace mode.** Both splits are small traces (1,920 and 2,631 operations). The final exam repeats the whole split 20 times per sample (`repeat_r` 20, L000013), so the same few thousand inputs are replayed. The branch predictor can memorize them: branch misses are 0.0147 per op for `A.r3` and 0.0200 for `B.asm` (L000013), tiny in both cases, and the cycle counts describe warm-predictor, cache-resident behaviour. They say little about index entries seen once.
-- **Boundary tax.** The ratio of `A.r3` to `A.inline` is 0.939 (L000013): in this harness the isolated call is 6.1% cheaper than the inlined chain, so the tax is negative here, even though `A.inline` retires fewer instructions (66.48 against 83.75 per op). I did not investigate why; it is a reminder that code placement and the loop around a kernel move cycles by amounts comparable to the effects being claimed.
+- **Boundary tax.** The ratio of `A.r3` to `A.inline` is 0.939 (L000013): in this harness the isolated call is 6.1% cheaper than the inlined chain, so the tax is negative here, even though `A.inline` retires fewer instructions (66.48 against 83.75 per op). The cause was not investigated. The measured tax is of the same size as the claimed `B.asm` win (5.7%), so that win cannot be separated from the harness's own structure.
 - **The ladder.** `A.r2` vs `A.r1` is 0.930, WON, and `A.r3` vs `A.r2` is 0.927, WON (L000013): on this kernel both `target-cpu` and PGO were worth more than 7%.
-- **Rust at the weaker recipe.** `B.rust.r2` vs `A.r2` is 0.911, WON, the same as `B.rust` vs `A.r2` (L000013). `B.rust.r2` and `B.rust` are separate builds, but the instruction sequences of `msx_index_framing` in the two libraries are identical once addresses are normalized (a check I ran on the build outputs, not a ledger fact).
+- **Rust at the weaker recipe.** `B.rust.r2` vs `A.r2` is 0.911, WON, the same as `B.rust` vs `A.r2` (L000013). `B.rust.r2` and `B.rust` are separate builds; their `msx_index_framing` instruction sequences are identical once addresses are normalized (not a ledger fact; reproduce with `llvm-objdump -d --no-show-raw-insn --disassemble-symbols=msx_index_framing` on `cand.so` and `cand-r2.so` in `work/build/cand/index_framing/rust/attempt-01/`, address operands masked).
 - **Null.** `A.r3copy` vs `A.r3` is a null of identical bytes: it measures noise at one code placement and cannot reveal layout sensitivity between different binaries.
 
 ### Attempts history
@@ -259,11 +263,11 @@ Found during the run:
 
 Drawn only from what was observed here:
 
-- **Flag variable-length copies into a zero-initialised stack array** (`let mut be = [0u8; 8]; be[8 - n..].copy_from_slice(...)`, then `from_be_bytes`). The compiler emitted a `memcpy` call through the GOT in every rung (section 3) and both `vint` winners removed the buffer (overlapping loads, or one `movbe`).
-- **Flag functions whose common case needs no saved registers but whose entry pushes them anyway.** `A.r3`'s `msx_vint` pays `push`/`pop` and `lzcnt` on every call while 81% of the inputs are one byte; both winners put a frame-less fast path first. For Rust the tool can suggest `#[cold] #[inline(never)]` on the rare arm.
+- **Flag variable-length copies into a zero-initialised stack array** (`let mut be = [0u8; 8]; be[8 - n..].copy_from_slice(...)`, then `from_be_bytes`). The compiler emitted a `memcpy` call through the GOT in every rung (section 3; `BRIEF/A.r1.s`, `A.r2.s`, `A.r3.s`) and both `vint` winners removed the buffer (overlapping loads, or one `movbe`).
+- **Flag functions whose common case needs no saved registers but whose entry pushes them anyway.** `A.r3`'s `msx_vint` pays `push`/`pop` and `lzcnt` on every call while 81% of the search inputs are one byte (`CARDS/vint.md` section 7); both winners put a frame-less fast path first. For Rust the tool can suggest `#[cold] #[inline(never)]` on the rare arm.
 - **Flag panic and slice-index call sites the compiler could not prove away** in a small leaf function (the `split_at` and slice-range sites in `index_framing`), since they keep the frame and the callee-saved pushes alive.
 - **Do not gate on instruction count.** Instructions per op fell by 33.4 to 42.0% for the four candidates and cycles fell by 1.7 to 13.2% (L000013, L000016). On `index_framing`, `B.rust` retired the fewest instructions and was TIED. The tool should decide on cycles with an interval and show instructions only as explanation.
-- **Report the inlined baseline beside every isolated number.** The boundary tax ranged from 2.103 to 0.939; an isolated win of 5.7% is smaller than the effect of the loop around the kernel on either kernel.
+- **Report the inlined baseline beside every isolated number.** The boundary tax ranged from 2.103 to 0.939; on `index_framing` the isolated win (5.7%) is the same size as the unexplained tax (6.1% the other way), so it cannot be separated from harness structure.
 - **Say when inputs repeat.** Both final exams repeated their inputs. Branch misses moved the wrong way for the asm candidate on `index_framing` (+35.5%) while cycles improved; a tool that cannot tell whether the predictor learned the data will misread such changes.
 - **Try the cheap compiler levers first and report them as a ladder.** `target-cpu` was worth nothing on `vint` (0.984, TIED) and 7.0% on `index_framing` (0.930, WON); PGO was worth 5.7% and 7.3% (L000016, L000013). A hand-tuned candidate should be compared with the top rung, not the bottom one: `B.asm` on `vint` is 0.805 against `A.r1` and 0.867 against `A.r3`.
 - **Pair the Rust arm with every assembly arm.** It showed that the `vint` win is reachable from Rust (0.890 WON) and that the `index_framing` win is not demonstrably reachable (0.983 TIED), which is the question the tool should answer for each finding.
@@ -298,7 +302,7 @@ The ledger holds records L000001 to L000016; the final exams are L000013 (`index
 - Dates: 2026-11-12T04:02:02Z to 2026-11-12T07:04:17Z.
 - Tool sha256 d6baaec5585ac9073857b8eff557bf7ed64c9eef739c8aa7a9716baef04dd566: 2 records (L000001 to L000002).
 - Tool sha256 9007b7ac62f047885e85379961804a3ea26c5e26fa0f7462a1cbc6639e9f14bd: 14 records (L000003 to L000016).
-- This report was produced by a separate build of the tool, sha256 4748a57b4065a30a482571016d6270304069b5271e0be888dc06925b30269ef1 (it only reads files).
+- This report was produced by a separate build of the tool, sha256 b62f6fa3e4e8678a25e9b6ad5d45d4b3e9908f6a93aafd30b0ca97318ed0bb6b (it only reads files).
 - A hashes (16 records, L000001 to L000016): A.r1 a07c922f88cf05fca4065147724a01f6ef819f903f190781f509bc1a6f2ce889, A.r2 eeb71d93fb0a177c65a170d16b45338ca89b49143b5e51c54b477b0353925564, A.r3 bd4992937b1ccadcb8488770c05d2b8bcadead7ddb678a50eadc328140284fd7, A.r3copy bd4992937b1ccadcb8488770c05d2b8bcadead7ddb678a50eadc328140284fd7.
 - CQLite commit: 2e5b7a4cf6abe6f51b7677ecb7199e2cab087c0e.
 - Host: AMD RYZEN AI MAX+ 395 w/ Radeon 8060S, Linux 7.0.0-42-generic, governor powersave.

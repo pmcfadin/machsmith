@@ -993,6 +993,22 @@ fn fnum(v: &Value, dec: usize) -> String {
     v.as_f64().map_or("–".to_string(), |x| format!("{x:.dec$}"))
 }
 
+/// Point and interval at the fewest decimals (3 to 5) at which the rounded `lo` and `hi` differ and
+/// the rounded point lies between them. Returns `(point, "lo–hi")`.
+fn fnum_iv(i: &Value) -> (String, String) {
+    let (Some(p), Some(lo), Some(hi)) = (i["point"].as_f64(), i["lo"].as_f64(), i["hi"].as_f64()) else { return ("–".into(), "–".into()) };
+    let mut dec = 3;
+    while dec < 5 {
+        let r = |x: f64| format!("{x:.dec$}");
+        let (a, b, c) = (r(lo), r(hi), r(p));
+        if a != b && a <= c && c <= b {
+            break;
+        }
+        dec += 1;
+    }
+    (format!("{p:.dec$}"), format!("{lo:.dec$}–{hi:.dec$}"))
+}
+
 /// `0.901–0.923` from an `{lo, hi}` object.
 fn fspan(i: &Value, dec: usize) -> String {
     match (i["lo"].as_f64(), i["hi"].as_f64()) {
@@ -1034,17 +1050,19 @@ fn verdict_row(fin: &Value, id: &str, cand: &str, base: &str) -> String {
     let found = fin["verdicts"].as_array().and_then(|a| a.iter().find(|p| p["cand"] == cand && p["base"] == base));
     let arm_status = |arm: &str| fin["arms"][arm]["status"].as_str().unwrap_or("NO_ENTRY").to_string();
     match found {
-        Some(p) => format!("| {cand} vs {base} | {} | {} | {} | {id} |", fnum(&p["interval"]["point"], 3), fspan(&p["interval"], 3), p["verdict"].as_str().unwrap_or("–")),
+        Some(p) => {
+            let (pt, span) = fnum_iv(&p["interval"]);
+            format!("| {cand} vs {base} | {pt} | {span} | {} | {id} |", p["verdict"].as_str().unwrap_or("–"))
+        }
         None => {
-            let why = match cand {
-                "B.asm" => arm_status("asm"),
-                "B.rust" => arm_status("rust"),
-                "B.rust.r2" if fin["arms"]["rust"]["status"] == "ENTERED" => "OMITTED".into(),
-                "B.rust.r2" => arm_status("rust"),
+            let rust_in = fin["arms"]["rust"]["status"] == "ENTERED";
+            let why = match (cand, base) {
+                ("B.asm", _) => arm_status("asm"),
+                ("B.rust", _) | (_, "B.rust") if !rust_in => arm_status("rust"),
+                ("B.rust.r2", _) if rust_in => "OMITTED".into(),
+                ("B.rust.r2", _) => arm_status("rust"),
                 _ => "n/a".into(),
             };
-            let why = if why == "ENTERED" { "n/a".to_string() } else { why };
-            let why = if base == "B.rust" && fin["arms"]["rust"]["status"] != "ENTERED" { arm_status("rust") } else { why };
             format!("| {cand} vs {base} | – | – | {why} | {id} |")
         }
     }
@@ -1101,20 +1119,16 @@ fn kernel_section(name: &str, fin: &Value, ledger: &[Value], out: &mut String) {
     }
     let bt = &fin["boundary_tax"];
     if bt["interval"].is_object() {
-        out.push_str(&format!(
-            "| {} vs {} (boundary tax) | {} | {} | BOUNDARY | {id} |\n",
-            bt["cand"].as_str().unwrap_or("A.r3"),
-            bt["base"].as_str().unwrap_or("A.inline"),
-            fnum(&bt["interval"]["point"], 3),
-            fspan(&bt["interval"], 3)
-        ));
+        let (pt, span) = fnum_iv(&bt["interval"]);
+        out.push_str(&format!("| {} vs {} (boundary tax) | {pt} | {span} | BOUNDARY | {id} |\n", bt["cand"].as_str().unwrap_or("A.r3"), bt["base"].as_str().unwrap_or("A.inline")));
     }
     let m = &fin["measure"];
     out.push_str(&format!(
-        "\nNull band {} ({} of 1.0); T = {} (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No `A.reasm` arm exists, so the only null is A.r3copy vs A.r3 (identical bytes).\n",
+        "\nNull band {} ({} of 1.0); T = {} (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. {}\nIntervals are a bootstrap over sessions at one build placement; they do not include layout variation between binaries.\n",
         fnum(&fin["band"], 5),
         fin["band"].as_f64().map_or("–".into(), |b| format!("{:.3}%", b * 100.0)),
-        fnum(&fin["threshold"], 3)
+        fnum(&fin["threshold"], 3),
+        if fin["nulls"].as_object().is_some_and(|o| o.contains_key("A.reasm/A.r3")) { "Nulls: A.r3copy vs A.r3 and A.reasm vs A.r3." } else { "No A.reasm null is present; the only null is A.r3copy vs A.r3." }
     ));
     out.push_str(&format!(
         "\nMeasured on the {} split, {} sessions x {} blocks, core {}, session reruns {}, inputs repeat: {}.{}\n\n",
@@ -1161,7 +1175,10 @@ fn attempts_section(kernels: &[String], ledger: &[Value], out: &mut String) {
                 let verdict_s = r["verdict"].as_str().unwrap_or("–");
                 let pair = r["measure"]["pairs"].as_array().and_then(|a| a.iter().find(|p| p["cand"] == "cand" && p["base"] == "A.r3"));
                 let last = match pair {
-                    Some(p) => format!("{} ({})", fnum(&p["interval"]["point"], 3), fspan(&p["interval"], 3)),
+                    Some(p) => {
+                        let (pt, span) = fnum_iv(&p["interval"]);
+                        format!("{pt} ({span})")
+                    }
                     None => verdict_s.to_string(),
                 };
                 out.push_str(&format!(
@@ -1180,7 +1197,7 @@ fn incidents_section(results: &Path, ledger: &[Value], out: &mut String) {
     out.push_str("## 4. Incidents\n\nFrom the ledger (noise-gate failures and refusals):\n\n");
     let mut any = false;
     for r in ledger {
-        let noisy = r["noise_failure"] == true || r["kind"] == "refused" || r["pass"] == false && r["kind"] == "null";
+        let noisy = r["noise_failure"] == true || r["kind"] == "refused" || (r["pass"] == false && (r["kind"] == "null" || r["kind"] == "selftest"));
         if noisy {
             any = true;
             let detail = r["noise_detail"].as_str().or_else(|| r["reason"].as_str()).unwrap_or("");

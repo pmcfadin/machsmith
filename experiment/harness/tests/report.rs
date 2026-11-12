@@ -53,6 +53,8 @@ fn fixture(tag: &str) -> PathBuf {
     let verdicts = json!([
         { "cand": "B.asm", "base": "A.r3", "interval": iv(0.912, 0.901, 0.923), "verdict": "WON" },
         { "cand": "A.r3", "base": "A.r2", "interval": iv(0.943, 0.942, 0.944), "verdict": "WON" },
+        { "cand": "B.asm", "base": "A.r2", "interval": iv(0.8051, 0.8047, 0.8055), "verdict": "WON" },
+        { "cand": "B.asm", "base": "A.r1", "interval": iv(0.80512, 0.80511, 0.80514), "verdict": "WON" },
     ]);
     let med = |c: f64| json!({ "cycles_per_op": c, "instructions_per_op": 40.0, "branch_misses_per_op": 0.03, "ns_per_op": 2.0 });
     let fin = json!({
@@ -92,6 +94,9 @@ fn report_prints_verdict_row_history_label_and_no_entry() {
     assert!(o.status.success(), "{}\n{}", out, String::from_utf8_lossy(&o.stderr));
     assert!(out.contains("| B.asm vs A.r3 | 0.912 | 0.901–0.923 | WON | L000042 |"), "{out}");
     assert!(out.contains("| A.r3 vs A.r2 | 0.943 | 0.942–0.944 | WON | L000042 |"), "{out}");
+    // a narrow interval gets the fewest decimals (3 to 5) at which lo and hi differ
+    assert!(out.contains("| B.asm vs A.r2 | 0.8051 | 0.8047–0.8055 | WON | L000042 |"), "{out}");
+    assert!(out.contains("| B.asm vs A.r1 | 0.80512 | 0.80511–0.80514 | WON | L000042 |"), "{out}");
     assert!(out.contains("provisional (search phase)"), "{out}");
     assert!(out.contains("NO_ENTRY"), "{out}");
     // a row without a measured verdict for an arm that has no entry says so
