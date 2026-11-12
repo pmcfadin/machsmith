@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 pub type RawFn = *const core::ffi::c_void;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, serde::Serialize)]
 #[repr(C)]
 pub struct OutRec {
     pub ret: u64,

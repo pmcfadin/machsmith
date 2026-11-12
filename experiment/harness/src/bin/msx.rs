@@ -1,3 +1,4 @@
+use msx_harness::check::{child_main, phase_params, try_check, Phase};
 use msx_harness::build::{a_path, build_a, disassemble, sha256_hex, Rung};
 use msx_harness::loader::Lib;
 use msx_harness::spec::{kernel, kernels_with_traces, load_segment, manifest_segments, KernelSpec};
@@ -62,12 +63,29 @@ fn train(args: &[String]) -> Result<(), String> {
     Ok(())
 }
 
+fn check_cmd(args: &[String]) -> Result<(), String> {
+    let kernel = arg_after(args, "--kernel").ok_or("--kernel required")?;
+    let so = PathBuf::from(arg_after(args, "--so").ok_or("--so required")?);
+    let phase = match arg_after(args, "--phase").ok_or("--phase required")?.as_str() {
+        "search" => Phase::Search,
+        "final" => Phase::Final,
+        o => return Err(format!("bad --phase {o} (search|final)")),
+    };
+    let seed_from = arg_after(args, "--seed-from").map(PathBuf::from);
+    phase_params(phase, seed_from.as_deref())?;
+    let report = try_check(&kernel, &so, phase, seed_from.as_deref())?;
+    println!("{}", serde_json::to_string(&report).map_err(|e| e.to_string())?);
+    Ok(())
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let r = match args.get(1).map(String::as_str) {
         Some("rungs") if args.get(2).map(String::as_str) == Some("build") => rungs_build(),
         Some("__train") => train(&args),
-        _ => Err("usage: msx rungs build | msx __train --so PATH --kernels all|k,..".into()),
+        Some("check") => check_cmd(&args),
+        Some("__check-child") => child_main(&args),
+        _ => Err("usage: msx rungs build | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx __train --so PATH --kernels all|k,..".into()),
     };
     if let Err(e) = r {
         eprintln!("msx: {e}");

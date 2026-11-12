@@ -44,7 +44,7 @@ fn root() -> PathBuf {
     }
 }
 
-fn work() -> PathBuf {
+pub(crate) fn work() -> PathBuf {
     match std::env::var_os("MSX_WORK") {
         Some(w) => PathBuf::from(w),
         None => root().join("work"),
@@ -59,7 +59,7 @@ fn llvm_bin() -> PathBuf {
     PathBuf::from(String::from_utf8_lossy(&out.stdout).trim()).join("lib/rustlib/x86_64-unknown-linux-gnu/bin")
 }
 
-fn llvm(tool: &str) -> PathBuf {
+pub(crate) fn llvm(tool: &str) -> PathBuf {
     llvm_bin().join(tool)
 }
 

@@ -50,3 +50,28 @@ pub fn signal_of_child(body: impl FnOnce()) -> Option<i32> {
         }
     }
 }
+
+/// `experiment/selftest/vint/<file>`.
+pub fn selftest(file: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../selftest/vint").join(file)
+}
+
+/// A fresh scratch directory under `$MSX_WORK/tmp/`.
+pub fn scratch(tag: &str) -> PathBuf {
+    static N: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let d = work_dir().join("tmp").join(format!("t7-{}-{n}-{tag}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&d);
+    std::fs::create_dir_all(&d).unwrap();
+    d
+}
+
+/// Build a `selftest/vint` candidate (`.s` with the assembly path, `.rs` with the R2 Rust recipe).
+pub fn build_selftest(file: &str) -> Result<PathBuf, msx_harness::build::BuildError> {
+    let out = scratch(file);
+    if file.ends_with(".s") {
+        msx_harness::build::build_asm_candidate("vint", &selftest(file), &out)
+    } else {
+        msx_harness::build::build_rust_candidate("vint", &selftest(file), msx_harness::build::Rung::R2, &out)
+    }
+}
