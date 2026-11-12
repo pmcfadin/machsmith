@@ -1,0 +1,22 @@
+{
+  "arm": null,
+  "band": 0.0007357047670137895,
+  "id": "L000006",
+  "kernel": "index_framing",
+  "kind": "null",
+  "ledger_override": null,
+  "noise_failure": false,
+  "nulls": {
+    "A.r3copy/A.r3": {
+      "hi": 1.0000195166281056,
+      "lo": 0.9992642952329862,
+      "point": 0.9996897585516852
+    }
+  },
+  "pass": true,
+  "protocol_sizes": {
+    "blocks": 200,
+    "sessions": 30
+  },
+  "threshold": 0.05
+}

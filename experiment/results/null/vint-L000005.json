@@ -1,0 +1,22 @@
+{
+  "arm": null,
+  "band": 0.0002414334956428732,
+  "id": "L000005",
+  "kernel": "vint",
+  "kind": "null",
+  "ledger_override": null,
+  "noise_failure": false,
+  "nulls": {
+    "A.r3copy/A.r3": {
+      "hi": 1.0002414334956429,
+      "lo": 0.9999702311678348,
+      "point": 1.0001064670883806
+    }
+  },
+  "pass": true,
+  "protocol_sizes": {
+    "blocks": 200,
+    "sessions": 30
+  },
+  "threshold": 0.05
+}
