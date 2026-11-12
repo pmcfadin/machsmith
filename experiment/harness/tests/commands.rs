@@ -289,3 +289,10 @@ fn final_with_no_entries_records_no_entry_without_measuring() {
     assert!(l[0]["measure"].is_null());
     assert_eq!(l[0]["rerun_reason"], "none, first run");
 }
+
+#[test]
+fn ledger_lock_is_gitignored_in_the_real_repo() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let st = Command::new("git").arg("-C").arg(&root).args(["check-ignore", "-q", "experiment/results/ledger.lock"]).status().unwrap();
+    assert!(st.success(), "experiment/results/ledger.lock must be covered by .gitignore");
+}
