@@ -6,12 +6,12 @@
 //! `Err` that `main` turns into exit code 2 and writes no ledger record. A *verdict* (lint, build,
 //! check, budget, noise gate) is recorded and printed with exit code 0.
 
-use crate::build::{a_path, build_asm_candidate, build_rust_candidate, root, sha256_hex, work, Rung};
+use crate::build::{a_path, build_asm_candidate, build_rust_candidate, root, runtime_verdict_of_stage, rustc_version, sha256_hex, work, Rung};
 use crate::check::{try_check, CheckReport, Phase};
 use crate::ledger::{self, budget, COUNTED_ATTEMPTS, MAX_SUBMISSIONS};
 use crate::lint::{lint_object, lint_source, Arm};
 use crate::measure::{
-    run_protocol, size_override_active, Contestant, Protocol, RunResult, Split, FINAL_BLOCKS, FINAL_SESSIONS, NULL_BAND_MAX, SEARCH_BLOCKS,
+    is_candidate_name, run_protocol, size_override_active, Contestant, ContestantFailure, Protocol, RunResult, Split, FINAL_BLOCKS, FINAL_SESSIONS, NULL_BAND_MAX, SEARCH_BLOCKS,
     SEARCH_SESSIONS, THRESHOLD_FLOOR,
 };
 use crate::spec::{kernel, kernels_with_traces, KernelSpec};
@@ -96,6 +96,33 @@ fn refuse_size_override() -> Result<(), String> {
         return Err("MSX_SESSIONS/MSX_BLOCKS are set: size overrides never produce ledger records".into());
     }
     Ok(())
+}
+
+/// Environment variables that change how a candidate is checked, run or judged; they exist for
+/// tests and never for a ledgered run. (`MSX_LEDGER` is allowed and recorded instead.)
+pub const REFUSED_ENV: [&str; 4] = ["MSX_CHECK_TIMEOUT_SECS", "MSX_EXE", "MSX_BIN", "MSX_SELFTEST_DIR"];
+
+/// The members of `REFUSED_ENV` that `is_set` reports as set.
+pub fn refused_env_set(is_set: impl Fn(&str) -> bool) -> Vec<&'static str> {
+    REFUSED_ENV.iter().copied().filter(|n| is_set(n)).collect()
+}
+
+/// Size overrides and `REFUSED_ENV` make `attempt`, `null` and `final` refuse (exit 2, no record).
+fn refuse_overrides() -> Result<(), String> {
+    refuse_size_override()?;
+    let set = refused_env_set(|n| std::env::var_os(n).is_some());
+    if !set.is_empty() {
+        return Err(format!("{} set: these overrides never produce ledger records", set.join(", ")));
+    }
+    Ok(())
+}
+
+/// The `MSX_LEDGER` override, as recorded in every record the commands write.
+fn ledger_override() -> Value {
+    match std::env::var_os("MSX_LEDGER") {
+        Some(p) => Value::String(p.to_string_lossy().into_owned()),
+        None => Value::Null,
+    }
 }
 
 fn host_lock() -> Result<std::fs::File, String> {
@@ -187,7 +214,7 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
     // 1. identity and overrides
     let agent_id = nonempty_env("MSX_AGENT_ID")?;
     let model = nonempty_env("MSX_MODEL")?;
-    refuse_size_override()?;
+    refuse_overrides()?;
     let (kname, k) = traced_kernel(&[String::from("--kernel"), kname])?;
 
     let _host = host_lock()?;
@@ -232,6 +259,7 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
             "submission": submission, "counted_attempt": counted, "candidate_path": cand_rel,
             "candidate_sha256": sha, "verdict": verdict_s, "lint": [], "build": null, "check": null,
             "measure": null, "noise_failure": false, "protocol_sizes": null,
+            "rustc_version": rustc_version(), "ledger_override": ledger_override(),
         })
     };
     if b.submissions >= MAX_SUBMISSIONS || b.counted >= COUNTED_ATTEMPTS {
@@ -256,6 +284,22 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
         }))
     };
 
+    // A counted attempt that failed at run time before or after the check (the training run of a
+    // Rust candidate, the measurement). `fields` are merged into the record.
+    let counted_no = b.counted + 1;
+    let counted_failure = |verdict_s: &str, detail: &str, fields: Vec<(&str, Value)>| -> Result<Value, String> {
+        let mut rec = base(counted_no.into(), verdict_s);
+        for (k, v) in fields {
+            rec[k] = v;
+        }
+        ledger::append(rec)?;
+        let (cl, sl) = left(counted_no);
+        Ok(json!({
+            "submission": submission, "counted_attempt": counted_no, "counted_attempts_left": cl, "submissions_left": sl,
+            "verdict": verdict_s, "lint_errors": [], "build_stderr": null, "first_failure": null, "timing": null, "detail": detail,
+        }))
+    };
+
     // 5. lint, build, lint the object
     let errs = lint_source(arm, &path);
     if !errs.is_empty() {
@@ -269,6 +313,11 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
     let so = match built {
         Ok(so) => so,
         Err(e) if e.stage == "setup" => return Err(e.to_string()),
+        // The candidate's own code ran (PGO training) and crashed or hung: a counted attempt.
+        Err(e) if runtime_verdict_of_stage(e.stage).is_some() => {
+            let v = runtime_verdict_of_stage(e.stage).unwrap_or("OOB_OR_CRASH");
+            return counted_failure(v, &e.stderr, vec![("build", json!({ "stage": "train", "detail": e.stderr }))]);
+        }
         Err(e) => return free_failure("BUILD_FAILED", vec![], json!({ "stage": e.stage, "stderr": e.stderr })),
     };
     let errs = lint_object(arm, &kname, &so);
@@ -278,7 +327,6 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
 
     // 6. correctness (this attempt counts from here on). A tool error here writes no record.
     require_a(&[Rung::R1, Rung::R2, Rung::R3])?;
-    let counted_no = b.counted + 1;
     let report: CheckReport = try_check(&kname, &so, Phase::Search, None)?;
     let (cl, sl) = left(counted_no);
     let mut rec = base(counted_no.into(), &report.verdict);
@@ -344,7 +392,19 @@ pub fn attempt(args: &[String]) -> Result<Value, String> {
             out["detail"] = e.into();
             Ok(out)
         }
-        Err(e) => Err(e),
+        // The candidate diverged from the reference, died or hung while being timed: the check
+        // did not cover that input, but the attempt reached the check and counts.
+        Err(e) => match ContestantFailure::parse(&e).filter(|f| is_candidate_name(&f.contestant)) {
+            Some(f) => counted_failure(
+                &f.verdict,
+                &f.detail,
+                vec![
+                    ("check", serde_json::to_value(&report).map_err(|e| e.to_string())?),
+                    ("measure_failure", json!({ "contestant": f.contestant, "verdict": f.verdict, "detail": f.detail })),
+                ],
+            ),
+            None => Err(e),
+        },
     }
 }
 
@@ -380,7 +440,7 @@ fn nulls_json(nulls: &[(String, Interval)]) -> Value {
 
 pub fn null(args: &[String]) -> Result<Value, String> {
     let (kname, k) = traced_kernel(args)?;
-    refuse_size_override()?;
+    refuse_overrides()?;
     let _host = host_lock()?;
     require_a(&[Rung::R3, Rung::R3Copy])?;
     let reasm = reasm_path(&kname);
@@ -399,6 +459,7 @@ pub fn null(args: &[String]) -> Result<Value, String> {
                 "kind": "null", "kernel": kname, "arm": null, "nulls": nulls_json(&nulls), "band": band,
                 "threshold": threshold(band), "pass": pass, "noise_failure": false,
                 "measure": res, "protocol_sizes": sizes(Protocol::Final, Some(&res)),
+                "ledger_override": ledger_override(),
             });
             let id = ledger::append(rec.clone())?;
             rec.as_object_mut().map(|o| o.remove("measure"));
@@ -410,7 +471,7 @@ pub fn null(args: &[String]) -> Result<Value, String> {
             let rec = json!({
                 "kind": "null", "kernel": kname, "arm": null, "nulls": null, "band": null, "threshold": null,
                 "pass": false, "noise_failure": true, "noise_detail": e, "verdict": "NOISE_GATE_FAILED",
-                "measure": null, "protocol_sizes": sizes(Protocol::Final, None),
+                "measure": null, "protocol_sizes": sizes(Protocol::Final, None), "ledger_override": ledger_override(),
             });
             let id = ledger::append(rec.clone())?;
             let mut rec = rec;
@@ -438,20 +499,75 @@ struct Finalist {
     r2: Option<PathBuf>,
 }
 
+/// Why `final` may not run again: a final that issued verdicts (status `OK`) is never repeated; a
+/// rerun after a measured final needs a reason; and a rerun may not change any arm's pick (the
+/// attempt chosen in `FINAL.md`) from the latest final record. `picks` is `(arm, chosen attempt)`
+/// as `FINAL.md` names it now.
+pub fn check_rerun(ledger: &[Value], kernel: &str, picks: &[(&str, Option<u32>)], rerun_reason: Option<&str>) -> Result<(), String> {
+    let finals: Vec<&Value> = ledger.iter().filter(|r| r["kind"] == "final" && r["kernel"] == kernel).collect();
+    let Some(latest) = finals.last() else { return Ok(()) };
+    if finals.iter().any(|r| r["status"] == "OK") {
+        return Err(format!("the ledger already holds a final for {kernel} that issued verdicts; a second final is never allowed"));
+    }
+    let measured_before = finals.iter().any(|r| !r["measure"].is_null());
+    if measured_before && rerun_reason.map_or(true, |r| r.trim().is_empty()) {
+        return Err(format!(
+            "the ledger already holds a measured final for {kernel}; a rerun is legitimate only after a tool failure or NOISE_GATE_FAILED, and needs --rerun-reason TEXT"
+        ));
+    }
+    for (arm, pick) in picks {
+        let before = latest["arms"][*arm]["attempt"].as_u64().map(|n| n as u32);
+        if before != *pick {
+            let show = |p: Option<u32>| p.map_or("no pick".to_string(), |n| format!("attempt-{n:02}"));
+            return Err(format!(
+                "a rerun may not change the pick: {arm} was {} in {}, FINAL.md now says {}",
+                show(before),
+                latest["id"].as_str().unwrap_or("the previous final"),
+                show(*pick)
+            ));
+        }
+    }
+    Ok(())
+}
+
+/// The final record's noise-gate failure: status, the flag and the detail agree.
+pub fn mark_noise_gate_failed(rec: &mut Value, detail: String) {
+    rec["status"] = "NOISE_GATE_FAILED".into();
+    rec["noise_failure"] = Value::Bool(true);
+    rec["noise_detail"] = detail.into();
+}
+
+/// The R2-recipe build of the finalist's source (`B.rust.r2`) is a contestant too: it must pass the
+/// same object lint and final check as the entry, or it is left out of the measurement. `Err` is
+/// the reason to record.
+pub fn vet_r2(kernel: &str, r2_so: &Path, src: &Path) -> Result<(), String> {
+    let lint = lint_object(Arm::Rust, kernel, r2_so);
+    if !lint.is_empty() {
+        return Err(format!("lint: {}", lint.join("; ")));
+    }
+    match try_check(kernel, r2_so, Phase::Final, Some(src)) {
+        Ok(rep) if rep.verdict == "PASS" => Ok(()),
+        Ok(rep) => Err(format!("final check: {} ({})", rep.verdict, serde_json::to_string(&rep.first_failure).unwrap_or_default())),
+        Err(e) => Err(format!("check could not run: {e}")),
+    }
+}
+
 pub fn final_exam(args: &[String]) -> Result<Value, String> {
     let (kname, k) = traced_kernel(args)?;
     let rerun_reason = arg_after(args, "--rerun-reason");
-    refuse_size_override()?;
+    refuse_overrides()?;
     let _host = host_lock()?;
 
-    // 1. one measured final per kernel unless a rerun is justified
+    // 1. one final that issues verdicts per kernel; a rerun needs a reason and may not change picks
     let ledger_before = ledger::read_all();
-    let measured_before = ledger_before.iter().any(|r| r["kind"] == "final" && r["kernel"] == kname.as_str() && !r["measure"].is_null());
-    if measured_before && rerun_reason.as_deref().map_or(true, |r| r.trim().is_empty()) {
-        return Err(format!(
-            "the ledger already holds a measured final for {kname}; a rerun is legitimate only after a tool failure or NOISE_GATE_FAILED, and needs --rerun-reason TEXT"
-        ));
-    }
+    let picks: Vec<(&str, Option<u32>)> = ["asm", "rust"]
+        .iter()
+        .map(|a| {
+            let dir = root().join("experiment/candidates").join(&kname).join(a);
+            (*a, std::fs::read_to_string(dir.join("FINAL.md")).ok().and_then(|t| parse_final_md(&t)))
+        })
+        .collect();
+    check_rerun(&ledger_before, &kname, &picks, rerun_reason.as_deref())?;
 
     // 2-4. finalists
     let mut arms = serde_json::Map::new();
@@ -459,13 +575,13 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
     for arm in [Arm::Asm, Arm::Rust] {
         let arm_s = arm_name(arm);
         let dir = root().join("experiment/candidates").join(&kname).join(arm_s);
-        let no_entry = |why: String| json!({ "status": "NO_ENTRY", "reason": why });
+        let no_entry = |why: String, n: Option<u32>| json!({ "status": "NO_ENTRY", "reason": why, "attempt": n });
         let Ok(text) = std::fs::read_to_string(dir.join("FINAL.md")) else {
-            arms.insert(arm_s.into(), no_entry("FINAL.md is missing".into()));
+            arms.insert(arm_s.into(), no_entry("FINAL.md is missing".into(), None));
             continue;
         };
         let Some(n) = parse_final_md(&text) else {
-            arms.insert(arm_s.into(), no_entry("FINAL.md is not `FINAL: attempt-NN`".into()));
+            arms.insert(arm_s.into(), no_entry("FINAL.md is not `FINAL: attempt-NN`".into(), None));
             continue;
         };
         let Some(rec) = ledger_before
@@ -474,7 +590,7 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
             .find(|r| r["kind"] == "attempt" && r["kernel"] == kname.as_str() && r["arm"] == arm_s && r["submission"] == n)
             .filter(|r| r["verdict"] == "PASS")
         else {
-            arms.insert(arm_s.into(), no_entry(format!("attempt-{n:02} has no PASS record in the ledger")));
+            arms.insert(arm_s.into(), no_entry(format!("attempt-{n:02} has no PASS record in the ledger"), Some(n)));
             continue;
         };
         let cand_rel = rec["candidate_path"].as_str().ok_or("ledger record without candidate_path")?.to_string();
@@ -491,36 +607,57 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
             continue;
         }
         let out_dir = work().join("build/cand").join(&kname).join(arm_s).join(format!("attempt-{n:02}"));
-        let so = match arm {
+        let built = match arm {
             Arm::Asm => build_asm_candidate(&kname, &src, &out_dir),
             Arm::Rust => build_rust_candidate(&kname, &src, Rung::R3, &out_dir),
-        }
-        .map_err(|e| format!("rebuilding the finalist {}: {e}", cand_rel))?;
+        };
+        let so = match built {
+            Ok(so) => so,
+            // Its PGO training run crashed or hung this time: the candidate is disqualified.
+            Err(e) if runtime_verdict_of_stage(e.stage).is_some() => {
+                let v = runtime_verdict_of_stage(e.stage).unwrap_or("OOB_OR_CRASH");
+                arms.insert(arm_s.into(), disq(entry, format!("the PGO training run of the rebuild: {v}: {}", e.stderr)));
+                continue;
+            }
+            Err(e) => return Err(format!("rebuilding the finalist {}: {e}", cand_rel)),
+        };
         let report = try_check(&kname, &so, Phase::Final, Some(&src))?;
         entry["check"] = serde_json::to_value(&report).map_err(|e| e.to_string())?;
         if report.verdict != "PASS" {
             arms.insert(arm_s.into(), disq(entry, format!("final check: {}", report.verdict)));
             continue;
         }
-        let r2 = if arm == Arm::Rust {
-            Some(build_rust_candidate(&kname, &src, Rung::R2, &out_dir).map_err(|e| format!("building the r2 finalist: {e}"))?)
-        } else {
-            None
-        };
+        // The R2-recipe build of the same source is a contestant too (B.rust.r2): it gets the same
+        // lint and final check, and is left out of the measurement when it fails either.
+        let mut r2: Option<PathBuf> = None;
+        if arm == Arm::Rust {
+            let vetted = build_rust_candidate(&kname, &src, Rung::R2, &out_dir).map_err(|e| format!("build: {e}")).and_then(|so2| {
+                vet_r2(&kname, &so2, &src)?;
+                Ok(so2)
+            });
+            match vetted {
+                Ok(so2) => r2 = Some(so2),
+                Err(why) => entry["r2_omitted"] = why.into(),
+            }
+        }
         entry["status"] = "ENTERED".into();
         arms.insert(arm_s.into(), entry);
         finalists.push((arm, Finalist { so, r2 }));
     }
 
     let mut rec = json!({
-        "kind": "final", "kernel": kname, "arm": null, "arms": Value::Object(arms), "rerun_reason": rerun_reason,
+        "kind": "final", "kernel": kname, "arm": null, "arms": null, "rerun_reason": rerun_reason,
         "measure": null, "nulls": null, "band": null, "threshold": null, "verdicts": null, "boundary_tax": null,
         "noise_failure": false, "protocol_sizes": null, "status": "NO_FINALISTS",
+        "rustc_version": rustc_version(), "ledger_override": ledger_override(),
     });
 
     if !finalists.is_empty() {
         require_a(&[Rung::R1, Rung::R2, Rung::R3, Rung::R3Copy])?;
-        // 5. contestants
+    }
+    // 5. contestants; a finalist that diverges, crashes or hangs while being timed is disqualified
+    // (with the reason) and the protocol is run again without it.
+    while !finalists.is_empty() {
         let reasm = reasm_path(&kname);
         let with_reasm = reasm.is_file();
         let mut cs = vec![
@@ -557,8 +694,7 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
                 rec["measure"] = serde_json::to_value(&res).map_err(|e| e.to_string())?;
                 rec["protocol_sizes"] = sizes(Protocol::Final, Some(&res));
                 if band > NULL_BAND_MAX {
-                    rec["status"] = "NOISE_GATE_FAILED".into();
-                    rec["noise_detail"] = format!("null band {band:.4} > {NULL_BAND_MAX}").into();
+                    mark_noise_gate_failed(&mut rec, format!("null band {band:.4} > {NULL_BAND_MAX}"));
                 } else {
                     // 7. verdicts
                     rec["status"] = "OK".into();
@@ -579,17 +715,45 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
                     rec["verdicts"] = Value::Array(vs);
                     rec["boundary_tax"] = json!({ "cand": "A.r3", "base": "A.inline", "interval": iv(&res, "A.r3", "A.inline") });
                 }
+                break;
             }
             Err(e) if is_noise(&e) => {
-                rec["status"] = "NOISE_GATE_FAILED".into();
-                rec["noise_failure"] = Value::Bool(true);
-                rec["noise_detail"] = e.into();
+                mark_noise_gate_failed(&mut rec, e);
                 rec["protocol_sizes"] = sizes(Protocol::Final, None);
+                break;
             }
-            Err(e) => return Err(e),
+            Err(e) => {
+                let Some(f) = ContestantFailure::parse(&e).filter(|f| is_candidate_name(&f.contestant)) else { return Err(e) };
+                let why = format!("during measurement: {}: {}", f.verdict, f.detail);
+                let failure = json!({ "contestant": f.contestant, "verdict": f.verdict, "detail": f.detail });
+                match f.contestant.as_str() {
+                    "B.rust.r2" => {
+                        // only the R2 build of the Rust entry is out; B.rust stays
+                        if let Some(a) = arms.get_mut("rust") {
+                            a["r2_omitted"] = why.into();
+                            a["r2_measure_failure"] = failure;
+                        }
+                        for (arm, fin) in finalists.iter_mut() {
+                            if *arm == Arm::Rust {
+                                fin.r2 = None;
+                            }
+                        }
+                    }
+                    name => {
+                        let (arm, arm_s) = if name == "B.asm" { (Arm::Asm, "asm") } else { (Arm::Rust, "rust") };
+                        if let Some(a) = arms.get_mut(arm_s) {
+                            a["status"] = "DISQUALIFIED".into();
+                            a["reason"] = why.into();
+                            a["measure_failure"] = failure;
+                        }
+                        finalists.retain(|(x, _)| *x != arm);
+                    }
+                }
+            }
         }
     }
 
+    rec["arms"] = Value::Object(arms);
     let id = ledger::append(rec.clone())?;
     rec["id"] = id.into();
     write_json(&root().join("experiment/results/final").join(format!("{kname}.json")), &rec)?;
@@ -737,6 +901,11 @@ fn selftest_one(e: &SelftestEntry) -> Result<Value, String> {
     let so = match built {
         Ok(so) => so,
         Err(b) if b.stage == "setup" => return Err(b.to_string()),
+        Err(b) if runtime_verdict_of_stage(b.stage).is_some() => {
+            detail.insert("build_stage".into(), "train".into());
+            detail.insert("build_stderr".into(), b.stderr.into());
+            return Ok(finish(runtime_verdict_of_stage(b.stage).unwrap_or("OOB_OR_CRASH"), None, detail));
+        }
         Err(b) => {
             detail.insert("build_stage".into(), b.stage.into());
             detail.insert("build_stderr".into(), b.stderr.into());

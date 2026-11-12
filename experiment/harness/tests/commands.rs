@@ -74,7 +74,11 @@ fn msx(env: &Env, args: &[&str], identity: bool) -> Output {
         .env("MSX_WORK", &env.work)
         .env("MSX_LEDGER", env.root.join("experiment/results/ledger.jsonl"))
         .env_remove("MSX_SESSIONS")
-        .env_remove("MSX_BLOCKS");
+        .env_remove("MSX_BLOCKS")
+        .env_remove("MSX_CHECK_TIMEOUT_SECS")
+        .env_remove("MSX_EXE")
+        .env_remove("MSX_BIN")
+        .env_remove("MSX_SELFTEST_DIR");
     if identity {
         c.env("MSX_AGENT_ID", "agent-1").env("MSX_MODEL", "model-x");
     } else {
@@ -191,6 +195,36 @@ fn lint_failure_is_free_and_recorded() {
     assert!(l[0]["counted_attempt"].is_null());
     assert_eq!(l[0]["candidate_path"], "experiment/candidates/vint/asm/attempt-01.s");
     assert_eq!(l[0]["candidate_sha256"].as_str().unwrap().len(), 64);
+    // the toolchain and the ledger override are recorded
+    assert!(l[0]["rustc_version"].as_str().unwrap().contains("1.97.1"), "{}", l[0]["rustc_version"]);
+    assert_eq!(l[0]["ledger_override"], env.root.join("experiment/results/ledger.jsonl").to_string_lossy().as_ref());
+}
+
+#[test]
+fn check_and_tool_overrides_are_refused_without_a_record() {
+    let env = setup("env-overrides");
+    let f = Path::new("..").join(put(&env, "attempt-01.s", ".data\n"));
+    for var in ["MSX_CHECK_TIMEOUT_SECS", "MSX_EXE", "MSX_BIN", "MSX_SELFTEST_DIR"] {
+        for args in [
+            vec!["attempt", "--kernel", "vint", "--arm", "asm", "--file", f.to_str().unwrap()],
+            vec!["null", "--kernel", "vint"],
+            vec!["final", "--kernel", "vint"],
+        ] {
+            let mut c = Command::new(env!("CARGO_BIN_EXE_msx"));
+            c.current_dir(env.root.join("experiment"))
+                .args(&args)
+                .env("MSX_ROOT", &env.root)
+                .env("MSX_WORK", &env.work)
+                .env("MSX_LEDGER", env.root.join("experiment/results/ledger.jsonl"))
+                .env("MSX_AGENT_ID", "a")
+                .env("MSX_MODEL", "m")
+                .env(var, "1");
+            let o = c.output().unwrap();
+            assert_eq!(o.status.code(), Some(2), "{var} {args:?}: {}", String::from_utf8_lossy(&o.stderr));
+            assert!(String::from_utf8_lossy(&o.stderr).contains(var), "{var} {args:?}: {}", String::from_utf8_lossy(&o.stderr));
+            assert!(ledger(&env).is_empty(), "{var} {args:?} wrote a record");
+        }
+    }
 }
 
 #[test]
@@ -276,6 +310,36 @@ fn final_refuses_a_second_measured_final_without_a_reason() {
     assert_eq!(ledger(&env).len(), 1);
 }
 
+fn write_ledger(env: &Env, recs: &[serde_json::Value]) {
+    let text: String = recs.iter().map(|r| format!("{r}\n")).collect();
+    std::fs::write(env.root.join("experiment/results/ledger.jsonl"), text).unwrap();
+}
+
+#[test]
+fn final_is_refused_after_a_final_that_issued_verdicts_even_with_a_reason() {
+    let env = setup("final-ok-twice");
+    write_ledger(&env, &[serde_json::json!({"id": "L000001", "kind": "final", "kernel": "vint", "status": "OK", "measure": {"x": 1}})]);
+    let o = msx(&env, &["final", "--kernel", "vint", "--rerun-reason", "I would like another go"], true);
+    assert_eq!(o.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&o.stderr).contains("never allowed"), "{}", String::from_utf8_lossy(&o.stderr));
+    assert_eq!(ledger(&env).len(), 1);
+}
+
+#[test]
+fn a_rerun_cannot_pick_another_attempt() {
+    let env = setup("final-second-pick");
+    write_ledger(
+        &env,
+        &[serde_json::json!({"id": "L000001", "kind": "final", "kernel": "vint", "status": "NO_FINALISTS", "measure": null,
+            "arms": {"asm": {"status": "DISQUALIFIED", "attempt": 3}, "rust": {"status": "NO_ENTRY", "attempt": null}}})],
+    );
+    std::fs::write(env.root.join("experiment/candidates/vint/asm/FINAL.md"), "FINAL: attempt-04\n").unwrap();
+    let o = msx(&env, &["final", "--kernel", "vint", "--rerun-reason", "tool failure"], true);
+    assert_eq!(o.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&o.stderr).contains("may not change the pick"), "{}", String::from_utf8_lossy(&o.stderr));
+    assert_eq!(ledger(&env).len(), 1);
+}
+
 #[test]
 fn final_with_no_entries_records_no_entry_without_measuring() {
     let env = setup("final-noentry");
@@ -295,4 +359,32 @@ fn ledger_lock_is_gitignored_in_the_real_repo() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let st = Command::new("git").arg("-C").arg(&root).args(["check-ignore", "-q", "experiment/results/ledger.lock"]).status().unwrap();
     assert!(st.success(), "experiment/results/ledger.lock must be covered by .gitignore");
+}
+
+/// A candidate that is right for every input the check feeds (at most 4096 bytes) but fails on the
+/// long stream the measurement hands it: the attempt reached the check, so it is a recorded,
+/// counted INCORRECT, not a tool error.
+#[test]
+fn candidate_diverging_during_measurement_is_a_counted_attempt() {
+    static HW: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    let _g = HW.lock().unwrap_or_else(|e| e.into_inner());
+    let env = setup("measure-diverge");
+    let real_work = PathBuf::from(std::env::var("MSX_WORK").unwrap_or_else(|_| format!("{}/../../work", env!("CARGO_MANIFEST_DIR"))));
+    std::fs::create_dir_all(env.work.join("build")).unwrap();
+    std::os::unix::fs::symlink(real_work.join("build/A"), env.work.join("build/A")).unwrap();
+    let src = std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/cliff_len.s")).unwrap();
+    let f = put(&env, "attempt-01.s", &src);
+    let o = attempt(&env, &f);
+    assert_eq!(o.status.code(), Some(0), "{}", String::from_utf8_lossy(&o.stderr));
+    let out = stdout_json(&o);
+    assert_eq!(out["verdict"], "INCORRECT", "{out}");
+    assert_eq!(out["counted_attempt"], 1);
+    assert_eq!(out["counted_attempts_left"], 9);
+    let l = ledger(&env);
+    assert_eq!(l.len(), 1);
+    assert_eq!(l[0]["verdict"], "INCORRECT");
+    assert_eq!(l[0]["counted_attempt"], 1);
+    assert_eq!(l[0]["check"]["verdict"], "PASS");
+    assert_eq!(l[0]["measure_failure"]["contestant"], "cand");
+    assert_eq!(l[0]["measure_failure"]["verdict"], "INCORRECT");
 }

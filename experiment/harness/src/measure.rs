@@ -32,6 +32,53 @@ pub const SIBLING_OFFSET: usize = 16;
 pub const WARMUP_RUNS: usize = 3;
 pub const MAX_PAD: usize = 4095;
 pub const MAX_GAP_PAGES: u64 = 255;
+/// Wall-clock limit for one measurement session child.
+pub const SESSION_TIMEOUT_SECS: u64 = 1800;
+/// Exit code of a session child whose contestant diverged from the reference.
+pub const DIVERGED_EXIT: i32 = 4;
+
+/// A contestant that diverged from the reference, died by a signal or hung during measurement.
+/// Travels through `run_protocol`'s `Err(String)` as `CONTESTANT_FAILED|name|VERDICT|detail`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ContestantFailure {
+    pub contestant: String,
+    /// INCORRECT (divergence) | OOB_OR_CRASH (signal) | TIMEOUT
+    pub verdict: String,
+    pub detail: String,
+}
+
+impl ContestantFailure {
+    pub fn to_error(&self) -> String {
+        format!("CONTESTANT_FAILED|{}|{}|{}", self.contestant, self.verdict, self.detail)
+    }
+
+    pub fn parse(e: &str) -> Option<ContestantFailure> {
+        let rest = e.strip_prefix("CONTESTANT_FAILED|")?;
+        let mut it = rest.splitn(3, '|');
+        Some(ContestantFailure { contestant: it.next()?.into(), verdict: it.next()?.into(), detail: it.next()?.into() })
+    }
+}
+
+/// The contestants that are the agent's: a failure of any other contestant is a tool error.
+pub fn is_candidate_name(name: &str) -> bool {
+    name == "cand" || name.starts_with("B.")
+}
+
+/// A fresh 64-bit value for each `run_protocol` call (getrandom, else the clock).
+pub fn fresh_nonce() -> u64 {
+    let mut b = [0u8; 8];
+    let n = unsafe { libc::getrandom(b.as_mut_ptr() as *mut libc::c_void, 8, 0) };
+    if n == 8 {
+        return u64::from_le_bytes(b);
+    }
+    let t = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos() as u64).unwrap_or(0);
+    t ^ ((std::process::id() as u64) << 32)
+}
+
+/// Seed of session `si` after `reruns` rejected sessions, made unpredictable by the run's nonce.
+pub fn session_seed(si: u32, reruns: u32, nonce: u64) -> u64 {
+    (SESSION_SEED_BASE + si as u64 + 1000 * reruns as u64) ^ nonce
+}
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Contestant {
@@ -299,8 +346,28 @@ fn pin_to_core(core: usize) -> Result<(), String> {
     Ok(())
 }
 
-/// `msx __session --kernel K --split S --session I --seed N --core C --blocks B --contestants JSON`
-/// Prints `{samples, meta}` as JSON. Divergence from the reference is a hard error.
+/// A shared 8-byte mark that the child sets to the index of the contestant it is about to run, so
+/// the parent can say who was running when the child died or hung. `u64::MAX` = none.
+struct Progress(*mut u64);
+
+impl Progress {
+    fn open(path: &str) -> Result<Progress, String> {
+        use std::os::fd::AsRawFd;
+        let f = std::fs::OpenOptions::new().read(true).write(true).open(path).map_err(|e| format!("{path}: {e}"))?;
+        let p = unsafe { libc::mmap(core::ptr::null_mut(), 8, libc::PROT_READ | libc::PROT_WRITE, libc::MAP_SHARED, f.as_raw_fd(), 0) };
+        if p == libc::MAP_FAILED {
+            return Err(format!("mmap of {path} failed"));
+        }
+        Ok(Progress(p as *mut u64))
+    }
+    fn set(&self, i: u64) {
+        unsafe { self.0.write_volatile(i) };
+    }
+}
+
+/// `msx __session --kernel K --split S --session I --seed N --core C --blocks B --contestants JSON
+///  [--progress FILE]`
+/// Prints `{samples, meta}` as JSON. Divergence from the reference exits with `DIVERGED_EXIT`.
 pub fn session_main(args: &[String]) -> Result<(), String> {
     let kname = arg_after(args, "--kernel")?;
     let k = kernel(&kname).ok_or(format!("unknown kernel {kname}"))?;
@@ -313,6 +380,15 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
     let seed: u64 = arg_after(args, "--seed")?.parse().map_err(|e| format!("--seed: {e}"))?;
     let core: usize = arg_after(args, "--core")?.parse().map_err(|e| format!("--core: {e}"))?;
     let blocks: u32 = arg_after(args, "--blocks")?.parse().map_err(|e| format!("--blocks: {e}"))?;
+    let progress = match arg_after(args, "--progress") {
+        Ok(p) => Some(Progress::open(&p)?),
+        Err(_) => None,
+    };
+    let mark = |i: u64| {
+        if let Some(p) = &progress {
+            p.set(i);
+        }
+    };
     let contestants: Vec<Contestant> = serde_json::from_str(&arg_after(args, "--contestants")?).map_err(|e| format!("--contestants: {e}"))?;
     if contestants.is_empty() || blocks == 0 {
         return Err("need at least one contestant and one block".into());
@@ -322,6 +398,7 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
     pin_to_core(core)?;
     let counters = Counters::open()?;
 
+    mark(u64::MAX);
     // 2. reference first (never unloaded), then contestants in a seeded order with random gaps
     let ref_lib = Lib::open(&a_path(Rung::R1))?;
     let reference = ref_lib.sym(k.symbol()).ok_or("A.r1 lacks the kernel symbol")?;
@@ -423,7 +500,8 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
     }
 
     // 5. warm-up (unmeasured), every contestant
-    for r in &runners {
+    for (ci, r) in runners.iter().enumerate() {
+        mark(ci as u64);
         for _ in 0..WARMUP_RUNS {
             std::hint::black_box(unsafe { run_parts(r, k, &warm_parts) });
         }
@@ -436,6 +514,7 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
         let mut order: Vec<usize> = (0..contestants.len()).collect();
         shuffle(&mut order, &mut rng);
         for &ci in &order {
+            mark(ci as u64);
             touch(&inp.touch);
             let inv0 = involuntary_switches();
             let t0 = now_raw_ns();
@@ -445,10 +524,12 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
             let t1 = now_raw_ns();
             let inv1 = involuntary_switches();
             if (ops, sum) != inp.reference {
-                return Err(format!(
+                // The parent attributes this through the progress mark and the exit code.
+                eprintln!(
                     "contestant {} diverged during measurement (block {b}): got ops={ops} checksum={sum:#x}, reference ops={} checksum={:#x}",
                     contestants[ci].name, inp.reference.0, inp.reference.1
-                ));
+                );
+                std::process::exit(DIVERGED_EXIT);
             }
             let discard = if inv1 > inv0 {
                 Some(Discard::Preempted)
@@ -548,6 +629,8 @@ pub struct RunResult {
     pub inputs_repeat: bool,
     pub repeat_r: Option<u64>,
     pub reruns: u32,
+    /// Hex of the per-run value XORed into every session seed (the seeds are not reproducible).
+    pub nonce: String,
     pub medians: BTreeMap<String, Medians>,
     pub pairs: Vec<PairResult>,
     /// Accepted sessions.
@@ -634,6 +717,19 @@ pub fn size_override_active() -> bool {
 }
 
 pub fn run_protocol(kname: &str, contestants: &[Contestant], protocol: Protocol, split: Split) -> Result<RunResult, String> {
+    run_protocol_with(kname, contestants, protocol, split, std::time::Duration::from_secs(SESSION_TIMEOUT_SECS))
+}
+
+/// `run_protocol` with an explicit per-session wall-clock limit. A candidate (`cand`, `B.*`) that
+/// diverges, dies by a signal or exceeds the limit makes this return a `ContestantFailure` error
+/// (see `ContestantFailure::parse`); any other contestant failing is a plain tool error.
+pub fn run_protocol_with(
+    kname: &str,
+    contestants: &[Contestant],
+    protocol: Protocol,
+    split: Split,
+    session_timeout: std::time::Duration,
+) -> Result<RunResult, String> {
     let k = kernel(kname).ok_or(format!("unknown kernel {kname}"))?;
     if !crate::spec::kernels_with_traces().iter().any(|t| t.name() == kname) {
         return Err(format!("{kname}: no recorded traces, nothing to measure"));
@@ -670,30 +766,59 @@ pub fn run_protocol(kname: &str, contestants: &[Contestant], protocol: Protocol,
     let mut accepted: Vec<(SessionMeta, Vec<Sample>)> = Vec::new();
     let mut rejected: Vec<SessionMeta> = Vec::new();
     let (mut inputs_repeat, mut repeat_r) = (false, None);
+    let nonce = fresh_nonce();
+    let tmp = crate::build::work().join("tmp");
+    std::fs::create_dir_all(&tmp).map_err(|e| format!("{}: {e}", tmp.display()))?;
 
     let mut si = 0u32;
     while si < sessions_n {
         // 3. spawn
-        let seed = SESSION_SEED_BASE + si as u64 + 1000 * reruns as u64;
+        let seed = session_seed(si, reruns, nonce);
         let mut prng = ChaCha8Rng::seed_from_u64(seed ^ 0x5041_4421);
         let pad_len = (prng.next_u64() % (MAX_PAD as u64 + 1)) as usize;
         let pad = "x".repeat(pad_len);
         let sib = core + SIBLING_OFFSET;
         let before = read_proc_stat();
-        let out = std::process::Command::new(&exe)
-            .arg("__session")
+        let prog_path = tmp.join(format!("progress-{}-{si}-{reruns}.bin", std::process::id()));
+        std::fs::write(&prog_path, u64::MAX.to_le_bytes()).map_err(|e| format!("{}: {e}", prog_path.display()))?;
+        let mut cmd = std::process::Command::new(&exe);
+        cmd.arg("__session")
             .args(["--kernel", kname, "--split", split.as_str()])
             .args(["--session", &si.to_string(), "--seed", &seed.to_string()])
             .args(["--core", &core.to_string(), "--blocks", &blocks_n.to_string()])
             .args(["--contestants", &cjson])
-            .env("MSX_PAD", &pad)
-            .output()
-            .map_err(|e| format!("spawn {}: {e}", exe.display()))?;
+            .arg("--progress")
+            .arg(&prog_path)
+            .env("MSX_PAD", &pad);
+        let run = crate::build::run_with_timeout(&mut cmd, session_timeout).map_err(|e| format!("spawn {}: {e}", exe.display()));
+        let progress = std::fs::read(&prog_path).ok().and_then(|b| b.get(..8).map(|x| u64::from_le_bytes(x.try_into().unwrap())));
+        let _ = std::fs::remove_file(&prog_path);
+        let run = run?;
         let after = read_proc_stat();
-        if !out.status.success() {
-            return Err(format!("session {si} failed ({}): {}", out.status, String::from_utf8_lossy(&out.stderr).trim()));
+        let stderr_text = String::from_utf8_lossy(&run.stderr).trim().to_string();
+        let running = progress.and_then(|p| contestants.get(p as usize));
+        // A candidate that misbehaves is a result; anything else that goes wrong is a tool error.
+        let blame = |verdict: &str, detail: String| -> String {
+            match running {
+                Some(c) if is_candidate_name(&c.name) => ContestantFailure { contestant: c.name.clone(), verdict: verdict.into(), detail }.to_error(),
+                Some(c) => format!("session {si}: contestant {} ({verdict}): {detail}", c.name),
+                None => format!("session {si} ({verdict}): {detail}"),
+            }
+        };
+        let status = match run.status {
+            None => return Err(blame("TIMEOUT", format!("the session exceeded {} s", session_timeout.as_secs()))),
+            Some(st) => st,
+        };
+        if let Some(sig) = std::os::unix::process::ExitStatusExt::signal(&status) {
+            return Err(blame("OOB_OR_CRASH", format!("the session died of signal {sig}")));
         }
-        let child: ChildOutput = serde_json::from_slice(&out.stdout).map_err(|e| format!("session {si}: bad output: {e}"))?;
+        if status.code() == Some(DIVERGED_EXIT) {
+            return Err(blame("INCORRECT", stderr_text));
+        }
+        if !status.success() {
+            return Err(format!("session {si} failed ({status}): {stderr_text}"));
+        }
+        let child: ChildOutput = serde_json::from_slice(&run.stdout).map_err(|e| format!("session {si}: bad output: {e}"))?;
         let mut samples = child.samples;
         let cm = child.meta;
         inputs_repeat = cm.inputs_repeat;
@@ -803,6 +928,7 @@ pub fn run_protocol(kname: &str, contestants: &[Contestant], protocol: Protocol,
         inputs_repeat,
         repeat_r,
         reruns,
+        nonce: format!("{nonce:#018x}"),
         medians,
         pairs,
         sessions,

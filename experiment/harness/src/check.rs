@@ -355,7 +355,7 @@ pub fn child_main(args: &[String]) -> Result<(), String> {
 
 // ---- parent ----
 
-fn timeout_secs() -> u64 {
+pub fn timeout_secs() -> u64 {
     std::env::var("MSX_CHECK_TIMEOUT_SECS").ok().and_then(|s| s.parse().ok()).unwrap_or(CHECK_TIMEOUT_SECS)
 }
 

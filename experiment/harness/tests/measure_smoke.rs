@@ -72,3 +72,79 @@ fn contestant_with_reference_path_gets_its_own_mapping() {
     assert_eq!(again.sym("msx_vint").unwrap() as usize, r, "plain dlopen of the same path is deduplicated");
     assert_ne!(private.sym("msx_vint").unwrap() as usize, r, "private copy must map at its own address");
 }
+
+// ---- candidate failures during measurement (fix wave I1) ----
+
+mod support;
+use msx_harness::measure::{fresh_nonce, run_protocol_with, session_seed, ContestantFailure};
+
+fn small_sizes() {
+    std::env::set_var("MSX_SESSIONS", "2");
+    std::env::set_var("MSX_BLOCKS", "30");
+    std::env::set_var("MSX_EXE", env!("CARGO_BIN_EXE_msx"));
+}
+
+fn pair_with(name: &str, fixture: &str) -> Vec<Contestant> {
+    let so = support::build_fixture_candidate(fixture).unwrap_or_else(|e| panic!("{fixture}: {} {}", e.stage, e.stderr));
+    vec![
+        Contestant { name: "A.r1".into(), so: a_path(Rung::R1), symbol: "msx_vint".into(), is_chain: false },
+        Contestant { name: name.into(), so, symbol: "msx_vint".into(), is_chain: false },
+    ]
+}
+
+fn failure_of(cs: &[Contestant], secs: u64) -> Result<ContestantFailure, String> {
+    let e = match run_protocol_with("vint", cs, Protocol::Search, Split::Search, std::time::Duration::from_secs(secs)) {
+        Ok(_) => panic!("the run must fail"),
+        Err(e) => e,
+    };
+    ContestantFailure::parse(&e).ok_or(e)
+}
+
+#[test]
+fn a_diverging_candidate_is_attributed() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    small_sizes();
+    let f = failure_of(&pair_with("cand", "cliff_len.s"), 120).expect("a structured failure");
+    assert_eq!((f.contestant.as_str(), f.verdict.as_str()), ("cand", "INCORRECT"), "{f:?}");
+    assert!(f.detail.contains("diverged"), "{f:?}");
+}
+
+#[test]
+fn a_crashing_candidate_is_attributed() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    small_sizes();
+    let f = failure_of(&pair_with("B.asm", "vint_crash.s"), 120).expect("a structured failure");
+    assert_eq!((f.contestant.as_str(), f.verdict.as_str()), ("B.asm", "OOB_OR_CRASH"), "{f:?}");
+}
+
+#[test]
+fn a_hanging_candidate_times_out() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    small_sizes();
+    let f = failure_of(&pair_with("cand", "vint_hang.s"), 15).expect("a structured failure");
+    assert_eq!((f.contestant.as_str(), f.verdict.as_str()), ("cand", "TIMEOUT"), "{f:?}");
+}
+
+#[test]
+fn a_diverging_a_contestant_stays_a_tool_error() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    small_sizes();
+    let e = failure_of(&pair_with("A.r3", "cliff_len.s"), 120).expect_err("not a candidate failure");
+    assert!(e.contains("A.r3"), "{e}");
+}
+
+#[test]
+fn every_run_uses_its_own_session_seeds() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    small_sizes();
+    let cs = vec![Contestant { name: "r1".into(), so: a_path(Rung::R1), symbol: "msx_vint".into(), is_chain: false }];
+    let run = || run_protocol_with("vint", &cs, Protocol::Search, Split::Search, std::time::Duration::from_secs(300)).expect("run_protocol");
+    let (a, b) = (run(), run());
+    assert_ne!(a.nonce, b.nonce);
+    assert_ne!(a.sessions[0].seed, b.sessions[0].seed);
+    let n = u64::from_str_radix(a.nonce.trim_start_matches("0x"), 16).unwrap();
+    for s in &a.sessions {
+        assert_eq!(s.seed, session_seed(s.session, s.reruns_before, n));
+    }
+    let _ = fresh_nonce();
+}

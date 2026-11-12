@@ -34,6 +34,87 @@ fn err(stage: &'static str, msg: impl Into<String>) -> BuildError {
 
 const WRAPPER_LIB: &str = include_str!("../../candidate-wrapper/lib.rs");
 const ALIGN_FLAG: &str = "-C llvm-args=-align-all-functions=6";
+const TOOLCHAIN_TOML: &str = include_str!("../../rust-toolchain.toml");
+
+/// The toolchain channel pinned by `experiment/rust-toolchain.toml` (for example `1.97.1`).
+pub fn pinned_toolchain() -> String {
+    TOOLCHAIN_TOML
+        .lines()
+        .filter_map(|l| l.trim().strip_prefix("channel"))
+        .filter_map(|l| l.trim().strip_prefix('='))
+        .map(|v| v.trim().trim_matches('"').to_string())
+        .next()
+        .expect("rust-toolchain.toml has no channel")
+}
+
+/// `rustc` pinned to the experiment toolchain regardless of the working directory (rustup reads
+/// `rust-toolchain.toml` from the current directory upwards, and the harness runs rustc from
+/// build directories outside `experiment/`).
+pub fn rustc_command() -> Command {
+    let mut c = Command::new("rustc");
+    c.env("RUSTUP_TOOLCHAIN", pinned_toolchain());
+    c
+}
+
+/// `cargo` pinned to the experiment toolchain regardless of the working directory.
+pub fn cargo_command() -> Command {
+    let mut c = Command::new("cargo");
+    c.env("RUSTUP_TOOLCHAIN", pinned_toolchain());
+    c
+}
+
+/// `rustc -V` of the pinned toolchain, for the ledger.
+pub fn rustc_version() -> String {
+    static V: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    V.get_or_init(|| match rustc_command().arg("-V").output() {
+        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).trim().to_string(),
+        Ok(o) => format!("rustc -V failed: {}", String::from_utf8_lossy(&o.stderr).trim()),
+        Err(e) => format!("rustc -V failed: {e}"),
+    })
+    .clone()
+}
+
+/// Result of [`run_with_timeout`].
+pub struct TimedRun {
+    /// None when the process was killed for exceeding the time limit.
+    pub status: Option<std::process::ExitStatus>,
+    pub stdout: Vec<u8>,
+    pub stderr: Vec<u8>,
+}
+
+/// Runs `cmd` with piped output; kills it after `timeout` of wall-clock time.
+pub fn run_with_timeout(cmd: &mut Command, timeout: std::time::Duration) -> Result<TimedRun, String> {
+    use std::io::Read;
+    use std::process::Stdio;
+    let mut child = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("cannot run {:?}: {e}", cmd.get_program()))?;
+    fn drain(mut r: impl Read + Send + 'static) -> std::thread::JoinHandle<Vec<u8>> {
+        std::thread::spawn(move || {
+            let mut v = Vec::new();
+            let _ = r.read_to_end(&mut v);
+            v
+        })
+    }
+    let out_t = drain(child.stdout.take().expect("piped"));
+    let err_t = drain(child.stderr.take().expect("piped"));
+    let deadline = std::time::Instant::now() + timeout;
+    let status = loop {
+        match child.try_wait().map_err(|e| e.to_string())? {
+            Some(st) => break Some(st),
+            None if std::time::Instant::now() >= deadline => {
+                let _ = child.kill();
+                let _ = child.wait();
+                break None;
+            }
+            None => std::thread::sleep(std::time::Duration::from_millis(5)),
+        }
+    };
+    Ok(TimedRun { status, stdout: out_t.join().unwrap_or_default(), stderr: err_t.join().unwrap_or_default() })
+}
 
 // ---- locations ----
 
@@ -55,7 +136,7 @@ fn llvm_bin() -> PathBuf {
     if let Some(p) = std::env::var_os("MSX_LLVM_BIN") {
         return PathBuf::from(p);
     }
-    let out = Command::new("rustc").args(["--print", "sysroot"]).output().expect("rustc --print sysroot");
+    let out = rustc_command().args(["--print", "sysroot"]).output().expect("rustc --print sysroot");
     PathBuf::from(String::from_utf8_lossy(&out.stdout).trim()).join("lib/rustlib/x86_64-unknown-linux-gnu/bin")
 }
 
@@ -268,7 +349,7 @@ fn rustflags_r2() -> String {
 
 fn cargo_build(target_name: &str, rustflags: &str) -> Result<(PathBuf, String), BuildError> {
     let target = work().join("target").join(target_name);
-    let mut cmd = Command::new("cargo");
+    let mut cmd = cargo_command();
     cmd.args(["build", "--release", "--lib", "-p", "msx-kernels", "--manifest-path"])
         .arg(root().join("experiment/Cargo.toml"))
         .env_remove("CARGO_ENCODED_RUSTFLAGS")
@@ -316,7 +397,22 @@ fn train_and_merge(so: &Path, kernels: &str, raw: &Path, merged: &Path) -> Resul
         .arg(so)
         .args(["--kernels", kernels])
         .env("LLVM_PROFILE_FILE", raw.join("%m.profraw"));
-    run("train", &mut cmd)?;
+    // The training run executes the candidate: bound it, and tell a crash or a hang (a verdict on
+    // the candidate) apart from a failure of the tooling.
+    let timeout = std::time::Duration::from_secs(crate::check::timeout_secs());
+    let t = run_with_timeout(&mut cmd, timeout).map_err(|e| err("train", e))?;
+    match t.status {
+        None => return Err(err("train-timeout", format!("the training run exceeded {} s", timeout.as_secs()))),
+        Some(st) => {
+            use std::os::unix::process::ExitStatusExt;
+            if let Some(sig) = st.signal() {
+                return Err(err("train-crash", format!("the training run died of signal {sig}:\n{}", text(&t.stderr))));
+            }
+            if !st.success() {
+                return Err(err("train", format!("training failed ({st}):\n{}", text(&t.stderr))));
+            }
+        }
+    }
     let any = std::fs::read_dir(raw)
         .map_err(|e| err("train", e.to_string()))?
         .filter_map(|e| e.ok())
@@ -463,7 +559,7 @@ pub fn build_rust_candidate(kernel_name: &str, src: &Path, recipe: Rung, out_dir
         let _ = std::fs::remove_dir_all(&pgo);
         std::fs::create_dir_all(&raw).map_err(|e| err("setup", e.to_string()))?;
         let train_so = out_dir.join("train.so");
-        let mut cmd = Command::new("rustc");
+        let mut cmd = rustc_command();
         cmd.current_dir(&srcdir).args(["--crate-type", "cdylib", "--cfg", "msx_train"]);
         rustc_common(&mut cmd);
         cmd.arg("-C").arg(format!("profile-generate={}", raw.display())).arg("lib.rs").arg("-o").arg(&train_so);
@@ -474,7 +570,7 @@ pub fn build_rust_candidate(kernel_name: &str, src: &Path, recipe: Rung, out_dir
     }
 
     let archive = out_dir.join("cand.a");
-    let mut cmd = Command::new("rustc");
+    let mut cmd = rustc_command();
     cmd.current_dir(&srcdir).args(["--crate-type", "staticlib"]);
     rustc_common(&mut cmd);
     if let Some(m) = &profile_use {
@@ -505,6 +601,16 @@ pub fn build_rust_candidate(kernel_name: &str, src: &Path, recipe: Rung, out_dir
     )?;
     check_candidate_export(&so, kernel_name)?;
     Ok(so)
+}
+
+/// The check verdict a build failure at `stage` stands for, when it is the candidate's fault at
+/// run time (a counted attempt) rather than a free build failure.
+pub fn runtime_verdict_of_stage(stage: &str) -> Option<&'static str> {
+    match stage {
+        "train-crash" => Some("OOB_OR_CRASH"),
+        "train-timeout" => Some("TIMEOUT"),
+        _ => None,
+    }
 }
 
 // ---- helpers for the CLI ----
