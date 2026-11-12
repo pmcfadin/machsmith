@@ -14,5 +14,6 @@
   "indirect.s": "LINT_FAILED",
   "calls_out.s": "LINT_FAILED",
   "unsafe_overread.rs": "OOB_OR_CRASH",
-  "uses_asm.rs": "LINT_FAILED"
+  "uses_asm.rs": "LINT_FAILED",
+  "init_tag.s": "LINT_FAILED"
 }

@@ -75,3 +75,9 @@ pub fn build_selftest(file: &str) -> Result<PathBuf, msx_harness::build::BuildEr
         msx_harness::build::build_rust_candidate("vint", &selftest(file), msx_harness::build::Rung::R2, &out)
     }
 }
+
+/// Build `tests/fixtures/<name>` as an assembly candidate for vint (no source lint).
+pub fn build_fixture_candidate(name: &str) -> Result<PathBuf, msx_harness::build::BuildError> {
+    let src = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name);
+    msx_harness::build::build_asm_candidate("vint", &src, &scratch(name))
+}

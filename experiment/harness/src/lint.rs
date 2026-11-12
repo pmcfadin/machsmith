@@ -230,6 +230,8 @@ fn lint_rust_source(text: &str) -> Vec<String> {
                     bad("asm!");
                 } else if w == "naked" || w == "naked_asm" {
                     bad("naked");
+                } else if w == "link_section" {
+                    bad("link_section");
                 } else if matches!(w.as_str(), "include_bytes" | "include_str" | "include") && p(k + 1, '!') {
                     bad(&format!("{w}!"));
                 } else if w == "static" && id(k + 1) == Some("mut") {
@@ -280,6 +282,7 @@ struct Section {
     addr: u64,
     write: bool,
     exec: bool,
+    alloc: bool,
 }
 
 fn run_tool(tool: &str, args: &[&str], path: &Path) -> Result<String, String> {
@@ -300,7 +303,7 @@ fn parse_sections(t: &str) -> Vec<Section> {
     for line in t.lines() {
         let l = line.trim();
         if l == "Section {" {
-            cur = Some(Section { name: String::new(), size: 0, addr: 0, write: false, exec: false });
+            cur = Some(Section { name: String::new(), size: 0, addr: 0, write: false, exec: false, alloc: false });
         } else if let Some(s) = cur.as_mut() {
             if let Some(n) = l.strip_prefix("Name: ") {
                 s.name = n.rsplit_once(" (").map(|x| x.0).unwrap_or(n).to_string();
@@ -312,6 +315,8 @@ fn parse_sections(t: &str) -> Vec<Section> {
                 s.write = true;
             } else if l.starts_with("SHF_EXECINSTR") {
                 s.exec = true;
+            } else if l.starts_with("SHF_ALLOC") {
+                s.alloc = true;
             } else if l == "}" {
                 out.extend(cur.take());
             }
@@ -382,6 +387,36 @@ fn parse_insn(line: &str) -> Option<Insn<'_>> {
     Some(Insn { addr, mnemonic: m, operands, comment_addr, line: t })
 }
 
+/// Dynamic-table tags that make the loader run code before the kernel is called.
+const FORBIDDEN_DYNAMIC_TAGS: [&str; 6] = ["INIT", "FINI", "INIT_ARRAY", "FINI_ARRAY", "PREINIT_ARRAY", "PREINIT_ARRAYSZ"];
+
+/// Tag names of `llvm-readobj --dynamic-table` that are forbidden (see `FORBIDDEN_DYNAMIC_TAGS`).
+pub fn forbidden_dynamic_tags(t: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for line in t.lines() {
+        let f: Vec<&str> = line.split_whitespace().collect();
+        if f.len() >= 2 && f[0].starts_with("0x") && FORBIDDEN_DYNAMIC_TAGS.contains(&f[1]) && !out.contains(&f[1].to_string()) {
+            out.push(f[1].to_string());
+        }
+    }
+    out
+}
+
+/// Names that the dynamic linking machinery needs and that carry no kernel data.
+const LINKING_SECTIONS: [&str; 10] =
+    [".dynsym", ".dynstr", ".gnu.hash", ".hash", ".dynamic", ".rela.dyn", ".rela.plt", ".got", ".got.plt", ".eh_frame"];
+
+/// True for the sections that do not count against the read-only data cap.
+fn is_linking_section(name: &str) -> bool {
+    LINKING_SECTIONS.contains(&name) || name == ".eh_frame_hdr" || name.starts_with(".note.") || name == ".note" || name.starts_with(".gnu.version")
+}
+
+/// Bytes of read-only data: every allocated section that is neither executable nor writable, except
+/// the ones dynamic linking needs. A custom section name must not hide a table from the cap.
+fn read_only_bytes(secs: &[Section]) -> u64 {
+    secs.iter().filter(|s| s.alloc && !s.exec && !s.write && !is_linking_section(&s.name)).map(|s| s.size).sum()
+}
+
 fn is_branch(m: &str) -> bool {
     m.starts_with('j') || m.starts_with("call") || m.starts_with("loop")
 }
@@ -422,6 +457,16 @@ pub fn lint_object(arm: Arm, kernel: &str, so: &Path) -> Vec<String> {
             found = Some((addr, size, f[2].to_string()));
         }
     }
+    // Nothing but the kernel may be exported: another global (for example `_init`) is a way to run
+    // or hide code that the lint would not see as the kernel.
+    for line in nm.lines() {
+        let f: Vec<&str> = line.split_whitespace().collect();
+        if let Some(name) = f.last() {
+            if f.len() >= 3 && *name != symbol {
+                errs.push(format!("export: `{name}` is exported; only {symbol} may be: {}", line.trim()));
+            }
+        }
+    }
     match found {
         Some((addr, size, ty)) if matches!(ty.as_str(), "T" | "t" | "W" | "w") && size > 0 => {
             if addr % 64 != 0 {
@@ -440,6 +485,12 @@ pub fn lint_object(arm: Arm, kernel: &str, so: &Path) -> Vec<String> {
         Ok(l) if !l.is_empty() => errs.push(format!("NEEDED libraries are not allowed: {}", l.join(", "))),
         Ok(_) => {}
         Err(e) => errs.push(format!("lint: {e}")),
+    }
+
+    // load-time code (DT_INIT and friends have no section of their own)
+    let dynt = tool!(run_tool("llvm-readobj", &["--dynamic-table"], so));
+    for tag in forbidden_dynamic_tags(&dynt) {
+        errs.push(format!("dynamic tag DT_{tag} is present (load-time code is not allowed)"));
     }
 
     // undefined symbols
@@ -474,16 +525,12 @@ pub fn lint_object(arm: Arm, kernel: &str, so: &Path) -> Vec<String> {
 
     // sections
     let secs = parse_sections(&tool!(run_tool("llvm-readobj", &["--sections"], so)));
-    let mut rodata = 0u64;
     for s in &secs {
         if [".init", ".fini", ".init_array", ".fini_array", ".preinit_array", ".ctors", ".dtors"]
             .iter()
             .any(|b| has_prefix_name(&s.name, b))
         {
             errs.push(format!("initializer section {} is present", s.name));
-        }
-        if s.name.starts_with(".rodata") {
-            rodata += s.size;
         }
         let datalike = [".data", ".bss", ".tdata", ".tbss"].iter().any(|b| has_prefix_name(&s.name, b));
         if datalike && s.size > 0 {
@@ -492,9 +539,10 @@ pub fn lint_object(arm: Arm, kernel: &str, so: &Path) -> Vec<String> {
             errs.push(format!("writable section {} has size {}", s.name, s.size));
         }
     }
+    let rodata = read_only_bytes(&secs);
     let rodata_max = if arm == Arm::Asm { RODATA_MAX_ASM } else { RODATA_MAX_RUST };
     if rodata > rodata_max {
-        errs.push(format!(".rodata total is {rodata} bytes, limit {rodata_max}"));
+        errs.push(format!(".rodata (all read-only allocated sections) total is {rodata} bytes, limit {rodata_max}"));
     }
 
     // instructions

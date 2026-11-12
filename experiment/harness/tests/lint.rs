@@ -44,6 +44,35 @@ fn bigrodata_is_rejected() {
 }
 
 #[test]
+fn init_tag_is_rejected() {
+    // `_init` makes the linker emit DT_INIT without any .init section.
+    assert_rejected("init_tag.s", "DT_INIT");
+    assert_rejected("init_tag.s", "_init");
+}
+
+#[test]
+fn forbidden_dynamic_tags_are_parsed() {
+    let t = "DynamicSection [ (9 entries)\n  Tag Type Name/Value\n  0x000000000000000C INIT 0x1000\n  0x000000000000000D FINI 0x1010\n  0x0000000000000019 INIT_ARRAY 0x2000\n  0x000000000000001E FLAGS 0x0\n  0x0000000000000000 NULL 0x0\n]";
+    assert_eq!(msx_harness::lint::forbidden_dynamic_tags(t), vec!["INIT", "FINI", "INIT_ARRAY"]);
+    assert!(msx_harness::lint::forbidden_dynamic_tags("  0x0000000000000005 STRTAB 0x270\n").is_empty());
+}
+
+#[test]
+fn extra_exports_are_rejected() {
+    let so = support::build_fixture_candidate("extra_export.s").unwrap_or_else(|e| panic!("{} {}", e.stage, e.stderr));
+    let errs = lint_object(Arm::Asm, "vint", &so);
+    assert!(errs.iter().any(|e| e.contains("`helper` is exported")), "{errs:#?}");
+}
+
+#[test]
+fn custom_read_only_sections_count_against_the_cap() {
+    // 8192 bytes in `.mytable`, not `.rodata*`: over the 4096 limit for assembly.
+    let so = support::build_fixture_candidate("custom_section.s").unwrap_or_else(|e| panic!("{} {}", e.stage, e.stderr));
+    let errs = lint_object(Arm::Asm, "vint", &so);
+    assert!(errs.iter().any(|e| e.contains(".rodata") && e.contains("limit 4096")), "{errs:#?}");
+}
+
+#[test]
 fn indirect_is_rejected() {
     assert_rejected("indirect.s", "indirect");
 }
@@ -114,6 +143,8 @@ fn rust_source_rules() {
         "extern crate core;",
         "extern \"C\" { fn puts(); }",
         "asm ! (\"nop\");",
+        "#[link_section = \".mytable\"] static T: [u8; 4] = [0; 4];",
+        "#[unsafe(link_section = \".mytable\")] static T: [u8; 4] = [0; 4];",
     ] {
         assert!(!src_errors(Arm::Rust, bad).is_empty(), "accepted: {bad}");
     }
