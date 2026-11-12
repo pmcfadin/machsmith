@@ -1,0 +1,11 @@
+[workspace]
+members = ["kernels", "harness"]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = 1          # line tables only, so llvm-objdump -S and perf can map code to source
+strip = "none"
