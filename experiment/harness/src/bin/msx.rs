@@ -1,6 +1,8 @@
 use msx_harness::check::{child_main, phase_params, try_check, Phase};
 use msx_harness::build::{a_path, build_a, disassemble, sha256_hex, Rung};
 use msx_harness::loader::Lib;
+use msx_harness::measure::{run_protocol, session_main, Contestant, Protocol, Split};
+use msx_harness::stats::{threshold, verdict};
 use msx_harness::spec::{kernel, kernels_with_traces, load_segment, manifest_segments, KernelSpec};
 use std::path::PathBuf;
 
@@ -78,14 +80,67 @@ fn check_cmd(args: &[String]) -> Result<(), String> {
     Ok(())
 }
 
+/// `msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],...
+///  [--null-band B]`. `:chain` after a path calls `msx_<k>_chain` directly (A.inline).
+fn measure_cmd(args: &[String]) -> Result<(), String> {
+    let kname = arg_after(args, "--kernel").ok_or("--kernel required")?;
+    let k = kernel(&kname).ok_or(format!("unknown kernel {kname}"))?;
+    let protocol = match arg_after(args, "--protocol").ok_or("--protocol required")?.as_str() {
+        "search" => Protocol::Search,
+        "final" => Protocol::Final,
+        o => return Err(format!("bad --protocol {o} (search|final)")),
+    };
+    let split = match arg_after(args, "--split").ok_or("--split required")?.as_str() {
+        "search" => Split::Search,
+        "holdout" => Split::Holdout,
+        o => return Err(format!("bad --split {o} (search|holdout)")),
+    };
+    let mut cs = Vec::new();
+    for item in arg_after(args, "--contestants").ok_or("--contestants required")?.split(',') {
+        let (name, rest) = item.split_once('=').ok_or(format!("bad contestant {item} (name=path[:chain])"))?;
+        let (path, is_chain) = match rest.strip_suffix(":chain") {
+            Some(p) => (p, true),
+            None => (rest, false),
+        };
+        let symbol = if is_chain { k.chain_symbol() } else { k.symbol() };
+        cs.push(Contestant { name: name.into(), so: PathBuf::from(path), symbol: symbol.into(), is_chain });
+    }
+    let band: f64 = match arg_after(args, "--null-band") {
+        Some(b) => b.parse().map_err(|e| format!("--null-band: {e}"))?,
+        None => 0.0,
+    };
+    let t = threshold(band);
+    match run_protocol(&kname, &cs, protocol, split) {
+        Ok(res) => {
+            let verdicts: Vec<_> = res
+                .pairs
+                .iter()
+                .map(|p| serde_json::json!({ "cand": p.cand, "base": p.base, "interval": p.interval, "verdict": p.interval.map(|iv| verdict(iv, t)).unwrap_or("INCONCLUSIVE") }))
+                .collect();
+            let mut v = serde_json::to_value(&res).map_err(|e| e.to_string())?;
+            v["threshold"] = t.into();
+            v["verdicts"] = verdicts.into();
+            println!("{v}");
+            Ok(())
+        }
+        Err(e) if e.starts_with("NOISE_GATE_FAILED") => {
+            println!("{}", serde_json::json!({ "verdict": "NOISE_GATE_FAILED", "detail": e }));
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let r = match args.get(1).map(String::as_str) {
         Some("rungs") if args.get(2).map(String::as_str) == Some("build") => rungs_build(),
         Some("__train") => train(&args),
+        Some("measure") => measure_cmd(&args),
+        Some("__session") => session_main(&args),
         Some("check") => check_cmd(&args),
         Some("__check-child") => child_main(&args),
-        _ => Err("usage: msx rungs build | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx __train --so PATH --kernels all|k,..".into()),
+        _ => Err("usage: msx rungs build | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],.. | msx __train --so PATH --kernels all|k,..".into()),
     };
     if let Err(e) = r {
         eprintln!("msx: {e}");
