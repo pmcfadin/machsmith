@@ -980,3 +980,331 @@ pub fn selftest(_args: &[String]) -> Result<Value, String> {
     rec["id"] = id.into();
     Ok(rec)
 }
+
+// ---------------------------------------------------------------------------------------------
+// report
+// ---------------------------------------------------------------------------------------------
+
+const CEILING_BUCKETS: [&str; 9] = ["own_decoding", "allocator", "memcpy", "decompression", "checksum", "sync", "other_cqlite", "bench_harness", "other"];
+const CEILING_BENCHES: [&str; 3] = ["read", "partition_lookup", "decode"];
+const COUNTER_ORDER: [&str; 8] = ["A.r1", "A.r2", "A.r3", "A.r3copy", "A.inline", "B.asm", "B.rust", "B.rust.r2"];
+
+fn fnum(v: &Value, dec: usize) -> String {
+    v.as_f64().map_or("–".to_string(), |x| format!("{x:.dec$}"))
+}
+
+/// `0.901–0.923` from an `{lo, hi}` object.
+fn fspan(i: &Value, dec: usize) -> String {
+    match (i["lo"].as_f64(), i["hi"].as_f64()) {
+        (Some(lo), Some(hi)) => format!("{lo:.dec$}–{hi:.dec$}"),
+        _ => "–".to_string(),
+    }
+}
+
+fn read_json(p: &Path) -> Option<Value> {
+    serde_json::from_str(&std::fs::read_to_string(p).ok()?).ok()
+}
+
+fn ceiling_section(results: &Path, out: &mut String) {
+    let mut rows = Vec::new();
+    let mut commit = None;
+    for b in CEILING_BENCHES {
+        let rel = format!("profile/{b}.json");
+        if let Some(j) = read_json(&results.join(&rel)) {
+            commit = commit.or_else(|| j["cqlite_commit"].as_str().map(str::to_string));
+            let cells: Vec<String> = CEILING_BUCKETS.iter().map(|k| j["buckets"][k].as_f64().map_or("–".into(), |x| format!("{:.1}", x * 100.0))).collect();
+            rows.push(format!("| {b} | {} | {} | `{rel}` |", j["samples"].as_u64().map_or("–".into(), |n| n.to_string()), cells.join(" | ")));
+        }
+    }
+    out.push_str("## 1. Ceiling (share of user-space cycle samples, percent)\n\n");
+    if rows.is_empty() {
+        out.push_str("no profile data (experiment/results/profile/*.json is missing)\n\n");
+        return;
+    }
+    out.push_str(&format!("| bench | samples | {} | source |\n|---|---|{}---|\n", CEILING_BUCKETS.join(" | "), "---|".repeat(CEILING_BUCKETS.len())));
+    for r in rows {
+        out.push_str(&r);
+        out.push('\n');
+    }
+    out.push_str(&format!("\nThe ceiling is the `own_decoding` column. CQLite commit {}. Rows end with their source file (they come from no ledger record).\n\n", commit.unwrap_or_else(|| "unknown".into())));
+}
+
+/// The row for `cand` vs `base`, from the final record's tool-issued verdicts.
+fn verdict_row(fin: &Value, id: &str, cand: &str, base: &str) -> String {
+    let found = fin["verdicts"].as_array().and_then(|a| a.iter().find(|p| p["cand"] == cand && p["base"] == base));
+    let arm_status = |arm: &str| fin["arms"][arm]["status"].as_str().unwrap_or("NO_ENTRY").to_string();
+    match found {
+        Some(p) => format!("| {cand} vs {base} | {} | {} | {} | {id} |", fnum(&p["interval"]["point"], 3), fspan(&p["interval"], 3), p["verdict"].as_str().unwrap_or("–")),
+        None => {
+            let why = match cand {
+                "B.asm" => arm_status("asm"),
+                "B.rust" => arm_status("rust"),
+                "B.rust.r2" if fin["arms"]["rust"]["status"] == "ENTERED" => "OMITTED".into(),
+                "B.rust.r2" => arm_status("rust"),
+                _ => "n/a".into(),
+            };
+            let why = if why == "ENTERED" { "n/a".to_string() } else { why };
+            let why = if base == "B.rust" && fin["arms"]["rust"]["status"] != "ENTERED" { arm_status("rust") } else { why };
+            format!("| {cand} vs {base} | – | – | {why} | {id} |")
+        }
+    }
+}
+
+fn kernel_section(name: &str, fin: &Value, ledger: &[Value], out: &mut String) {
+    let id = fin["id"].as_str().unwrap_or("unknown");
+    out.push_str(&format!("### {name} (final {id})\n\n"));
+    // consistency with the ledger: the file must be the latest final record
+    let latest = ledger.iter().rev().find(|r| r["kind"] == "final" && r["kernel"] == name && r["status"] == "OK").and_then(|r| r["id"].as_str());
+    match latest {
+        Some(l) if l == id => {}
+        Some(l) => out.push_str(&format!("WARNING: final/{name}.json is {id} but the latest OK final in the ledger is {l}.\n\n")),
+        None => out.push_str(&format!("WARNING: the ledger holds no OK final record for {name}; final/{name}.json says {id}.\n\n")),
+    }
+    out.push_str(&format!("Status: {}.", fin["status"].as_str().unwrap_or("unknown")));
+    if let Some(rv) = fin["rustc_version"].as_str() {
+        out.push_str(&format!(" Compiler: {rv}."));
+    }
+    out.push_str("\n\n| arm | status | attempt | cases checked | detail | ledger id |\n|---|---|---|---|---|---|\n");
+    for arm in ["asm", "rust"] {
+        let a = &fin["arms"][arm];
+        let detail = a["reason"].as_str().map(str::to_string).or_else(|| a["r2_omitted"].as_str().map(|r| format!("B.rust.r2 omitted: {r}"))).unwrap_or_default();
+        out.push_str(&format!(
+            "| {arm} | {} | {} | {} | {detail} | {id} |\n",
+            a["status"].as_str().unwrap_or("NO_ENTRY"),
+            a["attempt"].as_u64().map_or("–".to_string(), |n| format!("attempt-{n:02}")),
+            a["check"]["cases_run"].as_u64().map_or("–".to_string(), |n| n.to_string()),
+        ));
+    }
+    out.push('\n');
+    if fin["measure"].is_null() || fin["verdicts"].is_null() {
+        out.push_str("No verdicts were issued by this final record.\n\n");
+        return;
+    }
+
+    out.push_str("| comparison | ratio | 95% interval | verdict | ledger id |\n|---|---|---|---|---|\n");
+    let mut rows = Vec::new();
+    for cand in ["B.asm", "B.rust"] {
+        for base in ["A.r1", "A.r2", "A.r3"] {
+            rows.push((cand, base));
+        }
+    }
+    rows.extend([("B.rust.r2", "A.r2"), ("B.asm", "B.rust"), ("A.r2", "A.r1"), ("A.r3", "A.r2")]);
+    for (c, b) in rows {
+        out.push_str(&verdict_row(fin, id, c, b));
+        out.push('\n');
+    }
+    if let Some(nulls) = fin["nulls"].as_object() {
+        for (k, i) in nulls {
+            let label = k.replace('/', " vs ");
+            out.push_str(&format!("| {label} (null) | {} | {} | NULL | {id} |\n", fnum(&i["point"], 5), fspan(i, 5)));
+        }
+    }
+    let bt = &fin["boundary_tax"];
+    if bt["interval"].is_object() {
+        out.push_str(&format!(
+            "| {} vs {} (boundary tax) | {} | {} | BOUNDARY | {id} |\n",
+            bt["cand"].as_str().unwrap_or("A.r3"),
+            bt["base"].as_str().unwrap_or("A.inline"),
+            fnum(&bt["interval"]["point"], 3),
+            fspan(&bt["interval"], 3)
+        ));
+    }
+    let m = &fin["measure"];
+    out.push_str(&format!(
+        "\nNull band {} ({} of 1.0); T = {} (T = max(0.05, 2 x band)). Ratio is candidate / baseline cycles per op; below 1 the candidate is faster. No `A.reasm` arm exists, so the only null is A.r3copy vs A.r3 (identical bytes).\n",
+        fnum(&fin["band"], 5),
+        fin["band"].as_f64().map_or("–".into(), |b| format!("{:.3}%", b * 100.0)),
+        fnum(&fin["threshold"], 3)
+    ));
+    out.push_str(&format!(
+        "\nMeasured on the {} split, {} sessions x {} blocks, core {}, session reruns {}, inputs repeat: {}.{}\n\n",
+        m["split"].as_str().unwrap_or("?"),
+        m["sessions_used"],
+        m["blocks_used"],
+        m["core"],
+        m["reruns"],
+        if m["inputs_repeat"] == true { "yes (small-trace mode)" } else { "no" },
+        m["rejected_sessions"].as_array().map_or(String::new(), |a| format!(" Rejected sessions: {}.", a.len()))
+    ));
+
+    out.push_str("| contestant | cycles/op | instructions/op | branch misses/op | ns/op | ledger id |\n|---|---|---|---|---|---|\n");
+    let meds = m["medians"].as_object();
+    let mut names: Vec<String> = COUNTER_ORDER.iter().filter(|n| meds.is_some_and(|o| o.contains_key(**n))).map(|s| s.to_string()).collect();
+    if let Some(o) = meds {
+        names.extend(o.keys().filter(|k| !COUNTER_ORDER.contains(&k.as_str())).cloned());
+    }
+    for n in names {
+        let c = &m["medians"][&n];
+        out.push_str(&format!(
+            "| {n} | {} | {} | {} | {} | {id} |\n",
+            fnum(&c["cycles_per_op"], 2),
+            fnum(&c["instructions_per_op"], 2),
+            fnum(&c["branch_misses_per_op"], 4),
+            fnum(&c["ns_per_op"], 3)
+        ));
+    }
+    out.push('\n');
+}
+
+fn attempts_section(kernels: &[String], ledger: &[Value], out: &mut String) {
+    out.push_str("## 3. Attempts history\n\nSearch-phase numbers are provisional and are not results.\n\n");
+    for k in kernels {
+        for arm in ["asm", "rust"] {
+            let recs: Vec<&Value> = ledger.iter().filter(|r| (r["kind"] == "attempt" || r["kind"] == "refused") && r["kernel"] == k.as_str() && r["arm"] == arm).collect();
+            out.push_str(&format!("### {k} / {arm}\n\n"));
+            if recs.is_empty() {
+                out.push_str("no submissions in the ledger\n\n");
+                continue;
+            }
+            out.push_str("| submission | counted | verdict | provisional (search phase) ratio vs A.r3, or failure kind | ledger id |\n|---|---|---|---|---|\n");
+            for r in recs {
+                let verdict_s = r["verdict"].as_str().unwrap_or("–");
+                let pair = r["measure"]["pairs"].as_array().and_then(|a| a.iter().find(|p| p["cand"] == "cand" && p["base"] == "A.r3"));
+                let last = match pair {
+                    Some(p) => format!("{} ({})", fnum(&p["interval"]["point"], 3), fspan(&p["interval"], 3)),
+                    None => verdict_s.to_string(),
+                };
+                out.push_str(&format!(
+                    "| {} | {} | {verdict_s} | {last} | {} |\n",
+                    r["submission"].as_u64().map_or("–".to_string(), |n| n.to_string()),
+                    r["counted_attempt"].as_u64().map_or("free".to_string(), |n| n.to_string()),
+                    r["id"].as_str().unwrap_or("–"),
+                ));
+            }
+            out.push('\n');
+        }
+    }
+}
+
+fn incidents_section(results: &Path, ledger: &[Value], out: &mut String) {
+    out.push_str("## 4. Incidents\n\nFrom the ledger (noise-gate failures and refusals):\n\n");
+    let mut any = false;
+    for r in ledger {
+        let noisy = r["noise_failure"] == true || r["kind"] == "refused" || r["pass"] == false && r["kind"] == "null";
+        if noisy {
+            any = true;
+            let detail = r["noise_detail"].as_str().or_else(|| r["reason"].as_str()).unwrap_or("");
+            out.push_str(&format!(
+                "- {} ({}, {}, {}): {detail}\n",
+                r["id"].as_str().unwrap_or("?"),
+                r["kind"].as_str().unwrap_or("?"),
+                r["kernel"].as_str().unwrap_or("-"),
+                r["ts"].as_str().unwrap_or("?")
+            ));
+        }
+    }
+    if !any {
+        out.push_str("none\n");
+    }
+    out.push_str("\nFrom `experiment/results/incidents.md`:\n\n");
+    match std::fs::read_to_string(results.join("incidents.md")) {
+        Ok(t) => {
+            out.push_str(t.trim_end());
+            out.push_str("\n\n");
+        }
+        Err(_) => out.push_str("no incidents file\n\n"),
+    }
+}
+
+fn provenance_section(results: &Path, ledger: &[Value], out: &mut String) {
+    out.push_str("## 5. Provenance\n\n");
+    let ids: Vec<&str> = ledger.iter().filter_map(|r| r["id"].as_str()).collect();
+    let (Some(first), Some(last)) = (ids.first(), ids.last()) else {
+        out.push_str("The ledger is empty.\n");
+        return;
+    };
+    out.push_str(&format!("- Ledger id range: {first} to {last} ({} records).\n", ids.len()));
+    let ts: Vec<&str> = ledger.iter().filter_map(|r| r["ts"].as_str()).collect();
+    out.push_str(&format!("- Dates: {} to {}.\n", ts.first().unwrap_or(&"?"), ts.last().unwrap_or(&"?")));
+    // tool hashes, with the ids that cite each
+    let mut tools: Vec<(String, Vec<&str>)> = Vec::new();
+    for r in ledger {
+        if let (Some(h), Some(id)) = (r["tool_sha256"].as_str(), r["id"].as_str()) {
+            match tools.iter_mut().find(|(t, _)| t == h) {
+                Some((_, v)) => v.push(id),
+                None => tools.push((h.to_string(), vec![id])),
+            }
+        }
+    }
+    for (h, v) in &tools {
+        out.push_str(&format!("- Tool sha256 {h}: {} records ({} to {}).\n", v.len(), v[0], v[v.len() - 1]));
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Ok(h) = sha256_hex(&exe) {
+            out.push_str(&format!("- This report was produced by a separate build of the tool, sha256 {h} (it only reads files).\n"));
+        }
+    }
+    // A hashes: each distinct set, with the ids that recorded it
+    let mut sets: Vec<(String, Vec<&str>)> = Vec::new();
+    for r in ledger {
+        if r["a_sha256"].is_object() {
+            let s = r["a_sha256"].to_string();
+            let id = r["id"].as_str().unwrap_or("?");
+            match sets.iter_mut().find(|(t, _)| *t == s) {
+                Some((_, v)) => v.push(id),
+                None => sets.push((s, vec![id])),
+            }
+        }
+    }
+    for (s, v) in &sets {
+        let j: Value = serde_json::from_str(s).unwrap_or(Value::Null);
+        let parts: Vec<String> = j.as_object().map(|o| o.iter().map(|(k, h)| format!("A.{k} {}", h.as_str().unwrap_or("?"))).collect()).unwrap_or_default();
+        out.push_str(&format!("- A hashes ({} records, {} to {}): {}.\n", v.len(), v[0], v[v.len() - 1], parts.join(", ")));
+    }
+    let commit = CEILING_BENCHES.iter().find_map(|b| read_json(&results.join(format!("profile/{b}.json"))).and_then(|j| j["cqlite_commit"].as_str().map(str::to_string)));
+    out.push_str(&format!("- CQLite commit: {}.\n", commit.unwrap_or_else(|| "unknown (no profile data)".into())));
+    let host = &ledger[ledger.len() - 1]["host"];
+    out.push_str(&format!(
+        "- Host: {}, Linux {}, governor {}.\n",
+        host["cpu_model"].as_str().unwrap_or("?"),
+        host["kernel_release"].as_str().unwrap_or("?"),
+        host["governor"].as_str().unwrap_or("?")
+    ));
+    let dirty: Vec<&str> = ledger.iter().filter(|r| r["git_dirty"] == true).filter_map(|r| r["id"].as_str()).collect();
+    out.push_str(&format!("- Records written with `git_dirty` true: {}.\n", if dirty.is_empty() { "none".to_string() } else { dirty.join(", ") }));
+}
+
+/// The Markdown report. Reads the ledger (`MSX_LEDGER` or the default path) and the `final/`,
+/// `profile/` and `incidents.md` files beside it. Takes no lock and writes nothing.
+pub fn report() -> Result<String, String> {
+    let ledger_file = ledger::ledger_path();
+    let results = ledger_file.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from("."));
+    let recs = ledger::read_all();
+    let mut out = String::from("# msx report\n\n");
+    ceiling_section(&results, &mut out);
+
+    let mut finals: Vec<(String, Value)> = Vec::new();
+    if let Ok(rd) = std::fs::read_dir(results.join("final")) {
+        for e in rd.flatten() {
+            let p = e.path();
+            if p.extension().is_some_and(|x| x == "json") {
+                if let (Some(stem), Some(j)) = (p.file_stem().and_then(|s| s.to_str()), read_json(&p)) {
+                    finals.push((stem.to_string(), j));
+                }
+            }
+        }
+    }
+    finals.sort_by(|a, b| a.0.cmp(&b.0));
+    out.push_str("## 2. Verdicts per kernel\n\n");
+    if finals.is_empty() {
+        out.push_str("no final results (experiment/results/final/*.json is missing)\n\n");
+    }
+    for (name, j) in &finals {
+        kernel_section(name, j, &recs, &mut out);
+    }
+    let mut kernels: Vec<String> = finals.iter().map(|(n, _)| n.clone()).collect();
+    for r in &recs {
+        if r["kind"] == "attempt" {
+            if let Some(k) = r["kernel"].as_str() {
+                if !kernels.iter().any(|x| x == k) {
+                    kernels.push(k.to_string());
+                }
+            }
+        }
+    }
+    kernels.sort();
+    attempts_section(&kernels, &recs, &mut out);
+    incidents_section(&results, &recs, &mut out);
+    provenance_section(&results, &recs, &mut out);
+    Ok(out)
+}
