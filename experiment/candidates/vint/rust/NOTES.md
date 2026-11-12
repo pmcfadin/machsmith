@@ -1,0 +1,3 @@
+# Notes
+
+attempt-01: Fast path for len==0 and first byte < 0x80 with no prologue (no callee-saved pushes, no stack frame); everything else goes to a cold non-inlined function that uses overlapping big-endian u16/u32 loads (no copy_from_slice, no memcpy call, no byte-count dispatch ladder). Expected to help because 81% of inputs are 1 byte and A.r3 pays pushes/pops and a leading_ones computation on every call. Result: PASS, ratio vs A.r3 0.856 (cycles 9.41 vs 10.99, instructions 28.3 vs 42.2). Stopped after one attempt since the remaining time is likely dominated by the dependent chain in the harness.
