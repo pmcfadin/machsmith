@@ -48,7 +48,12 @@ fn verbatim_blocks_match_cqlite() {
     for f in ["vint.rs", "index_framing.rs", "bti_sparse_find.rs"] {
         let src = std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join(f)).unwrap();
         for (file, body) in blocks(&src) {
-            let theirs = std::fs::read_to_string(root.join(&file)).unwrap();
+            // The clone carries the trace patch (Task 4), so compare against the pinned commit, not the worktree.
+            let out = std::process::Command::new("git")
+                .arg("-C").arg(&root).arg("show").arg(format!("2e5b7a4cf6abe6f51b7677ecb7199e2cab087c0e:{file}"))
+                .output().unwrap();
+            assert!(out.status.success(), "git show {file} failed");
+            let theirs = String::from_utf8(out.stdout).unwrap();
             let (n, t) = (normalize(&body), normalize(&theirs));
             assert!(!n.is_empty());
             assert!(t.contains(&n), "block from {f} not found in {file}:\n{n}");
