@@ -204,6 +204,32 @@ fn arg_after(args: &[String], flag: &str) -> Result<String, String> {
 // Child: msx __session
 // ---------------------------------------------------------------------------------------------
 
+/// Loads `so` from a private copy (new inode, unique path) so that dlopen can never hand back a
+/// handle that is already mapped (for example the A.r1 reference). The copy is unlinked once loaded.
+pub fn load_private_copy(so: &std::path::Path, tag: &str) -> Result<Lib, String> {
+    let dir = crate::build::work().join("tmp").join(format!("sess-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    let copy = dir.join(format!("{tag}.so"));
+    std::fs::copy(so, &copy).map_err(|e| format!("copy {}: {e}", so.display()))?;
+    let r = Lib::open(&copy);
+    let _ = std::fs::remove_file(&copy);
+    let _ = std::fs::remove_dir(&dir);
+    r
+}
+
+/// A session is only usable if every requested comparison (ordered pair of contestants) has a
+/// ratio, i.e. at least 10 valid blocks. Returns the first missing pair.
+pub fn missing_ratio(samples: &[Sample], names: &[&str]) -> Option<(String, String)> {
+    for c in names {
+        for b in names {
+            if c != b && session_ratio(samples, c, b).is_none() {
+                return Some((c.to_string(), b.to_string()));
+            }
+        }
+    }
+    None
+}
+
 type ChainFn = unsafe extern "C" fn(*const u8, usize, *mut u64) -> u64;
 
 enum Runner {
@@ -318,7 +344,7 @@ pub fn session_main(args: &[String]) -> Result<(), String> {
         }
         gap_pages.push(pages);
         let c = &contestants[i];
-        let lib = Lib::open(&c.so).map_err(|e| format!("{}: {e}", c.name))?;
+        let lib = load_private_copy(&c.so, &format!("s{session}-{i}")).map_err(|e| format!("{}: {e}", c.name))?;
         let f = lib.sym(&c.symbol).ok_or(format!("{}: {} not exported by {}", c.name, c.symbol, c.so.display()))?;
         runners[i] = Some(if c.is_chain { Runner::Chain(unsafe { core::mem::transmute::<RawFn, ChainFn>(f) }) } else { Runner::Kernel(f) });
         libs[i] = Some(lib);
@@ -701,6 +727,9 @@ pub fn run_protocol(kname: &str, contestants: &[Contestant], protocol: Protocol,
         } else if !session_is_valid(&samples) {
             meta.valid = false;
             meta.invalid_reason = Some(format!("{bad} of {total} blocks discarded (> {:.0}%)", MAX_DISCARD_FRACTION * 100.0));
+        } else if let Some((c, b)) = missing_ratio(&samples, &names) {
+            meta.valid = false;
+            meta.invalid_reason = Some(format!("fewer than 10 valid blocks for {c}/{b}: no session ratio"));
         }
         if meta.valid {
             eprintln!("msx measure: session {si} ok ({} of {} blocks valid)", meta.valid_blocks, meta.total_blocks);

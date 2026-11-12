@@ -81,3 +81,19 @@ fn session_validity_threshold() {
     assert!(!session_is_valid(&with_discarded_blocks(100, 31)));
     assert!(session_is_valid(&with_discarded_blocks(100, 30)));
 }
+
+#[test]
+fn session_without_ratio_is_flagged() {
+    use msx_harness::measure::missing_ratio;
+    // 12 blocks, both contestants clean: ratios exist
+    let ok = clean(12);
+    assert_eq!(missing_ratio(&ok, &["a", "b"]), None);
+    // 3 blocks discarded leaves 9 valid blocks: no ratio, the session must be treated as invalid
+    let mut v = clean(12);
+    for b in 0..3usize {
+        v[2 * b].discard = Some(Discard::Preempted);
+    }
+    apply_hygiene(&mut v);
+    assert!(session_is_valid(&v), "still under the discard fraction");
+    assert!(missing_ratio(&v, &["a", "b"]).is_some());
+}

@@ -4,7 +4,8 @@
 
 use msx_harness::build::{a_path, Rung};
 use msx_harness::counters::Counters;
-use msx_harness::measure::{run_protocol, Contestant, Protocol, Split};
+use msx_harness::loader::Lib;
+use msx_harness::measure::{load_private_copy, run_protocol, Contestant, Protocol, Split};
 use std::sync::Mutex;
 
 static SERIAL: Mutex<()> = Mutex::new(());
@@ -59,4 +60,15 @@ fn r1_against_its_copy() {
         assert!((0.8..=1.25).contains(&p.point), "{p:?}");
     }
     let _ = std::fs::remove_file(&copy);
+}
+
+#[test]
+fn contestant_with_reference_path_gets_its_own_mapping() {
+    let _g = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    let reference = Lib::open(&a_path(Rung::R1)).unwrap();
+    let again = Lib::open(&a_path(Rung::R1)).unwrap();
+    let private = load_private_copy(&a_path(Rung::R1), "test").unwrap();
+    let r = reference.sym("msx_vint").unwrap() as usize;
+    assert_eq!(again.sym("msx_vint").unwrap() as usize, r, "plain dlopen of the same path is deduplicated");
+    assert_ne!(private.sym("msx_vint").unwrap() as usize, r, "private copy must map at its own address");
 }
