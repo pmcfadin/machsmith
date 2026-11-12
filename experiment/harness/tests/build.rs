@@ -22,10 +22,6 @@ fn dyn_symbols(so: &Path) -> String {
     let o = Command::new(llvm("llvm-nm")).args(["-D", "--defined-only"]).arg(so).output().unwrap();
     String::from_utf8_lossy(&o.stdout).into_owned()
 }
-fn needed(so: &Path) -> String {
-    let o = Command::new(llvm("llvm-readobj")).arg("--needed-libs").arg(so).output().unwrap();
-    String::from_utf8_lossy(&o.stdout).into_owned()
-}
 fn control() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../selftest/vint/control_copy.rs")
 }
@@ -94,7 +90,7 @@ fn rust_candidate_builds_both_recipes() {
         let so = build_rust_candidate("vint", &control(), recipe, &out).unwrap_or_else(|e| panic!("{} {}", e.stage, e.stderr));
         assert_eq!(so, out.join(name));
         assert_eq!(entry_alignment(&so, "msx_vint").unwrap(), 0);
-        assert!(!needed(&so).contains("Library"), "NEEDED entries: {}", needed(&so));
+        assert_eq!(needed_libs(&so).unwrap(), Vec::<String>::new());
     }
 }
 
@@ -115,4 +111,11 @@ fn rust_candidate_panic_crashes() {
         unsafe { f([0u8].as_ptr(), 1, &mut o) };
     });
     assert_eq!(sig, Some(libc::SIGSEGV));
+}
+
+#[test]
+fn needed_libs_is_not_vacuous() {
+    let so = build_a(Rung::R1).unwrap();
+    let libs = needed_libs(&so).unwrap();
+    assert!(libs.iter().any(|l| l.starts_with("libc.so")), "{libs:?}");
 }

@@ -200,6 +200,32 @@ pub fn entry_alignment(so: &Path, symbol: &str) -> Result<u64, String> {
     Err(format!("{symbol} is not exported by {}", so.display()))
 }
 
+/// DT_NEEDED entries of `so`, from `llvm-readobj --needed-libs`.
+pub fn needed_libs(so: &Path) -> Result<Vec<String>, String> {
+    let out = Command::new(llvm("llvm-readobj"))
+        .arg("--needed-libs")
+        .arg(so)
+        .output()
+        .map_err(|e| format!("llvm-readobj: {e}"))?;
+    if !out.status.success() {
+        return Err(format!("llvm-readobj failed: {}", text(&out.stderr)));
+    }
+    let t = text(&out.stdout);
+    let start = t.find("NeededLibraries [").ok_or("no NeededLibraries block in llvm-readobj output")?;
+    let body = &t[start + "NeededLibraries [".len()..];
+    let end = body.find(']').ok_or("unterminated NeededLibraries block")?;
+    Ok(body[..end].lines().map(str::trim).filter(|l| !l.is_empty()).map(String::from).collect())
+}
+
+fn check_no_needed(so: &Path) -> Result<(), BuildError> {
+    let libs = needed_libs(so).map_err(|e| err("needed", e))?;
+    if libs.is_empty() {
+        Ok(())
+    } else {
+        Err(err("needed", format!("{} has NEEDED entries: {}", so.display(), libs.join(", "))))
+    }
+}
+
 /// Disassembly of one symbol with addresses and annotations removed, for comparing builds.
 pub fn disassemble(so: &Path, symbol: &str) -> Result<String, String> {
     let out = Command::new(llvm("llvm-objdump"))
@@ -374,7 +400,8 @@ pub fn build_a(rung: Rung) -> Result<PathBuf, BuildError> {
 
 fn check_candidate_export(so: &Path, kernel_name: &str) -> Result<(), BuildError> {
     let sym = format!("msx_{kernel_name}");
-    entry_alignment(so, &sym).map(|_| ()).map_err(|e| err("export", e))
+    entry_alignment(so, &sym).map_err(|e| err("export", e))?;
+    check_no_needed(so)
 }
 
 pub fn build_asm_candidate(kernel_name: &str, src: &Path, out_dir: &Path) -> Result<PathBuf, BuildError> {
