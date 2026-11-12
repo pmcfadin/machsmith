@@ -142,9 +142,10 @@ fn main() {
         Some("check") => check_cmd(&args),
         Some("attempt") => commands::attempt(&args).map(|v| println!("{v}")),
         Some("null") => commands::null(&args).map(|v| println!("{v}")),
+        Some("selftest") => commands::selftest(&args).map(|v| println!("{}", serde_json::json!({ "pass": v["pass"], "results": v["results"], "id": v["id"] }))),
         Some("final") => commands::final_exam(&args).map(|v| println!("{v}")),
         Some("__check-child") => child_main(&args),
-        _ => Err("usage: msx rungs build | msx attempt --kernel K --arm asm|rust --file PATH | msx null --kernel K | msx final --kernel K [--rerun-reason TEXT] | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],.. | msx __train --so PATH --kernels all|k,..".into()),
+        _ => Err("usage: msx rungs build | msx attempt --kernel K --arm asm|rust --file PATH | msx null --kernel K | msx selftest | msx final --kernel K [--rerun-reason TEXT] | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],.. | msx __train --so PATH --kernels all|k,..".into()),
     };
     if let Err(e) = r {
         eprintln!("msx: {e}");

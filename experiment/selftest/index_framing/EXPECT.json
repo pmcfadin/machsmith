@@ -1,0 +1,6 @@
+{
+  "control_ok.s": "PASS/*",
+  "control_slow.s": "PASS/LOST",
+  "overread.s": "OOB_OR_CRASH",
+  "wrong.s": "INCORRECT"
+}

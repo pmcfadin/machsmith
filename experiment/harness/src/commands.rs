@@ -12,7 +12,7 @@ use crate::ledger::{self, budget, COUNTED_ATTEMPTS, MAX_SUBMISSIONS};
 use crate::lint::{lint_object, lint_source, Arm};
 use crate::measure::{
     run_protocol, size_override_active, Contestant, Protocol, RunResult, Split, FINAL_BLOCKS, FINAL_SESSIONS, NULL_BAND_MAX, SEARCH_BLOCKS,
-    SEARCH_SESSIONS,
+    SEARCH_SESSIONS, THRESHOLD_FLOOR,
 };
 use crate::spec::{kernel, kernels_with_traces, KernelSpec};
 use crate::stats::{null_band, threshold, verdict, Interval};
@@ -596,5 +596,218 @@ pub fn final_exam(args: &[String]) -> Result<Value, String> {
     if let Some(o) = rec.as_object_mut() {
         o.remove("measure");
     }
+    Ok(rec)
+}
+
+// ---------------------------------------------------------------------------------------------
+// selftest
+// ---------------------------------------------------------------------------------------------
+
+/// What a self-test file must produce. `check` is a check verdict or `LINT_FAILED`; `measured` is
+/// set only for controls (`PASS/LOST` -> `Some("LOST")`, `PASS/*` -> `Some("*")`, any verdict).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Expect {
+    pub check: String,
+    pub measured: Option<String>,
+}
+
+const CHECK_VERDICTS: [&str; 7] = ["LINT_FAILED", "BUILD_FAILED", "INCORRECT", "OOB_OR_CRASH", "ABI_VIOLATION", "TIMEOUT", "PASS"];
+const MEASURE_VERDICTS: [&str; 4] = ["WON", "LOST", "TIED", "INCONCLUSIVE"];
+
+/// Parses an `EXPECT.json`: an object mapping file name to `"<check>"` or `"PASS/<measured>"`.
+pub fn parse_expect(text: &str) -> Result<std::collections::BTreeMap<String, Expect>, String> {
+    let v: Value = serde_json::from_str(text).map_err(|e| format!("EXPECT.json: {e}"))?;
+    let obj = v.as_object().ok_or("EXPECT.json must be an object")?;
+    let mut out = std::collections::BTreeMap::new();
+    for (file, val) in obj {
+        let s = val.as_str().ok_or(format!("{file}: expectation must be a string"))?;
+        let (check, measured) = match s.split_once('/') {
+            Some((c, m)) => (c, Some(m)),
+            None => (s, None),
+        };
+        if !CHECK_VERDICTS.contains(&check) {
+            return Err(format!("{file}: unknown expectation {s}"));
+        }
+        if let Some(m) = measured {
+            if check != "PASS" || !(m == "*" || MEASURE_VERDICTS.contains(&m)) {
+                return Err(format!("{file}: bad measured expectation {s}"));
+            }
+        }
+        out.insert(file.clone(), Expect { check: check.into(), measured: measured.map(String::from) });
+    }
+    Ok(out)
+}
+
+/// The text of the outcome (`PASS/TIED` for a measured control) and whether it meets `e`.
+/// `measured` is the measured verdict or `NOISE_GATE_FAILED`; it is only looked at after a PASS.
+pub fn judge(e: &Expect, check: &str, measured: Option<&str>) -> (String, bool) {
+    let got = match (check, measured) {
+        ("PASS", Some(m)) => format!("PASS/{m}"),
+        _ => check.to_string(),
+    };
+    let ok = match (&e.measured, measured) {
+        _ if check != e.check => false,
+        (None, _) => true,
+        (Some(want), Some(m)) => MEASURE_VERDICTS.contains(&m) && (want == "*" || want == m),
+        (Some(_), None) => false,
+    };
+    (got, ok)
+}
+
+pub fn selftest_dir() -> PathBuf {
+    match std::env::var_os("MSX_SELFTEST_DIR") {
+        Some(d) => PathBuf::from(d),
+        None => root().join("experiment/selftest"),
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SelftestEntry {
+    /// Sub-directory of the self-test directory (`vint`, `index_framing`, `reasm`).
+    pub dir: String,
+    pub file: String,
+    /// The kernel the file is a candidate for (the file stem in `reasm/`).
+    pub kernel: String,
+    pub path: PathBuf,
+    pub expect: Expect,
+    pub reasm: bool,
+}
+
+/// Every candidate file (`.s`, `.rs`) in each sub-directory of `dir`, with its expectation. A file
+/// without an entry, or an entry without a file, is an error.
+pub fn selftest_entries(dir: &Path) -> Result<Vec<SelftestEntry>, String> {
+    let mut subs: Vec<_> = std::fs::read_dir(dir).map_err(|e| format!("{}: {e}", dir.display()))?.filter_map(|e| e.ok()).filter(|e| e.path().is_dir()).collect();
+    subs.sort_by_key(|e| e.file_name());
+    let mut out = Vec::new();
+    for sub in subs {
+        let dname = sub.file_name().to_string_lossy().into_owned();
+        let ep = sub.path().join("EXPECT.json");
+        let text = std::fs::read_to_string(&ep).map_err(|e| format!("{}: {e}", ep.display()))?;
+        let mut expect = parse_expect(&text).map_err(|e| format!("{}: {e}", ep.display()))?;
+        let mut files: Vec<String> = std::fs::read_dir(sub.path())
+            .map_err(|e| e.to_string())?
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .filter(|n| n.ends_with(".s") || n.ends_with(".rs"))
+            .collect();
+        files.sort();
+        let reasm = dname == "reasm";
+        for f in files {
+            let e = expect.remove(&f).ok_or(format!("{dname}/{f} has no entry in {}", ep.display()))?;
+            let kname = if reasm { f.trim_end_matches(".s").to_string() } else { dname.clone() };
+            if reasm && !f.ends_with(".s") {
+                return Err(format!("{dname}/{f}: A.reasm candidates are assembly"));
+            }
+            if kernel(&kname).is_none() {
+                return Err(format!("{dname}/{f}: unknown kernel {kname}"));
+            }
+            out.push(SelftestEntry { dir: dname.clone(), file: f.clone(), kernel: kname, path: sub.path().join(&f), expect: e, reasm });
+        }
+        if let Some(stale) = expect.keys().next() {
+            return Err(format!("{} names {stale}, which does not exist", ep.display()));
+        }
+    }
+    Ok(out)
+}
+
+/// Lint, build and check one file; for a measured control also the search-protocol measurement
+/// against A.r3 at `THRESHOLD_FLOOR`. Returns the result object.
+fn selftest_one(e: &SelftestEntry) -> Result<Value, String> {
+    let arm = if e.file.ends_with(".rs") { Arm::Rust } else { Arm::Asm };
+    let mut detail = serde_json::Map::new();
+    let finish = |check: &str, measured: Option<&str>, detail: serde_json::Map<String, Value>| {
+        let (got, ok) = judge(&e.expect, check, measured);
+        let mut v = json!({ "kernel": e.kernel, "file": format!("{}/{}", e.dir, e.file), "expected": expected_text(&e.expect), "got": got, "ok": ok });
+        for (k, x) in detail {
+            v[k] = x;
+        }
+        v
+    };
+    let errs = lint_source(arm, &e.path);
+    if !errs.is_empty() {
+        detail.insert("lint_errors".into(), json!(errs));
+        return Ok(finish("LINT_FAILED", None, detail));
+    }
+    let stem = e.file.rsplit_once('.').map_or(e.file.as_str(), |x| x.0);
+    let out_dir = work().join("build/selftest").join(&e.dir).join(stem);
+    let built = match arm {
+        Arm::Asm => build_asm_candidate(&e.kernel, &e.path, &out_dir),
+        Arm::Rust => build_rust_candidate(&e.kernel, &e.path, Rung::R3, &out_dir),
+    };
+    let so = match built {
+        Ok(so) => so,
+        Err(b) if b.stage == "setup" => return Err(b.to_string()),
+        Err(b) => {
+            detail.insert("build_stage".into(), b.stage.into());
+            detail.insert("build_stderr".into(), b.stderr.into());
+            return Ok(finish("BUILD_FAILED", None, detail));
+        }
+    };
+    let errs = lint_object(arm, &e.kernel, &so);
+    if !errs.is_empty() {
+        detail.insert("lint_errors".into(), json!(errs));
+        return Ok(finish("LINT_FAILED", None, detail));
+    }
+    let report = try_check(&e.kernel, &so, Phase::Search, None)?;
+    detail.insert("cases_run".into(), report.cases_run.into());
+    if report.verdict != "PASS" {
+        detail.insert("first_failure".into(), serde_json::to_value(&report.first_failure).map_err(|x| x.to_string())?);
+        return Ok(finish(&report.verdict, None, detail));
+    }
+    if e.reasm {
+        let dst = reasm_path(&e.kernel);
+        std::fs::create_dir_all(dst.parent().unwrap()).map_err(|x| x.to_string())?;
+        std::fs::copy(&so, &dst).map_err(|x| format!("{}: {x}", dst.display()))?;
+    }
+    if e.expect.measured.is_none() {
+        return Ok(finish("PASS", None, detail));
+    }
+    let (_, k) = traced_kernel(&[String::from("--kernel"), e.kernel.clone()])?;
+    let cs = vec![contestant("A.r3", a_path(Rung::R3), k), contestant("cand", so.clone(), k)];
+    detail.insert("threshold".into(), THRESHOLD_FLOOR.into());
+    match run_protocol(&e.kernel, &cs, Protocol::Search, Split::Search) {
+        Ok(res) => {
+            let i = iv(&res, "cand", "A.r3");
+            detail.insert("ratio_vs_A.r3".into(), serde_json::to_value(i).map_err(|x| x.to_string())?);
+            detail.insert("protocol_sizes".into(), sizes(Protocol::Search, Some(&res)));
+            let m = i.map(|i| verdict(i, THRESHOLD_FLOOR)).unwrap_or("INCONCLUSIVE");
+            Ok(finish("PASS", Some(m), detail))
+        }
+        Err(x) if is_noise(&x) => {
+            detail.insert("noise_detail".into(), x.into());
+            Ok(finish("PASS", Some("NOISE_GATE_FAILED"), detail))
+        }
+        Err(x) => Err(x),
+    }
+}
+
+fn expected_text(e: &Expect) -> String {
+    match &e.measured {
+        Some(m) => format!("{}/{m}", e.check),
+        None => e.check.clone(),
+    }
+}
+
+/// `msx selftest`: every sabotage and control file under `experiment/selftest/`. Consumes no agent
+/// budget; appends one `selftest` record to the ledger.
+pub fn selftest(_args: &[String]) -> Result<Value, String> {
+    refuse_size_override()?;
+    let entries = selftest_entries(&selftest_dir())?;
+    let _host = host_lock()?;
+    require_a(&[Rung::R1, Rung::R2, Rung::R3])?;
+    let mut results = Vec::new();
+    for e in &entries {
+        eprintln!("msx: selftest {}/{}", e.dir, e.file);
+        let r = selftest_one(e)?;
+        eprintln!("msx:   expected {} got {} ok {}", r["expected"], r["got"], r["ok"]);
+        results.push(r);
+    }
+    let pass = results.iter().all(|r| r["ok"] == true);
+    let mut rec = json!({
+        "kind": "selftest", "kernel": null, "arm": null, "pass": pass, "results": results,
+        "noise_failure": false, "protocol_sizes": sizes(Protocol::Search, None),
+    });
+    let id = ledger::append(rec.clone())?;
+    rec["id"] = id.into();
     Ok(rec)
 }
