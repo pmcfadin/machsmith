@@ -1,3 +1,4 @@
+use msx_harness::commands;
 use msx_harness::check::{child_main, phase_params, try_check, Phase};
 use msx_harness::build::{a_path, build_a, disassemble, sha256_hex, Rung};
 use msx_harness::loader::Lib;
@@ -139,8 +140,11 @@ fn main() {
         Some("measure") => measure_cmd(&args),
         Some("__session") => session_main(&args),
         Some("check") => check_cmd(&args),
+        Some("attempt") => commands::attempt(&args).map(|v| println!("{v}")),
+        Some("null") => commands::null(&args).map(|v| println!("{v}")),
+        Some("final") => commands::final_exam(&args).map(|v| println!("{v}")),
         Some("__check-child") => child_main(&args),
-        _ => Err("usage: msx rungs build | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],.. | msx __train --so PATH --kernels all|k,..".into()),
+        _ => Err("usage: msx rungs build | msx attempt --kernel K --arm asm|rust --file PATH | msx null --kernel K | msx final --kernel K [--rerun-reason TEXT] | msx check --kernel K --so PATH --phase search|final [--seed-from FILE] | msx measure --kernel K --protocol search|final --split search|holdout --contestants name=path[:chain],.. | msx __train --so PATH --kernels all|k,..".into()),
     };
     if let Err(e) = r {
         eprintln!("msx: {e}");

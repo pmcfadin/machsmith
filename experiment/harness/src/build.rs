@@ -37,7 +37,7 @@ const ALIGN_FLAG: &str = "-C llvm-args=-align-all-functions=6";
 
 // ---- locations ----
 
-fn root() -> PathBuf {
+pub(crate) fn root() -> PathBuf {
     match std::env::var_os("MSX_ROOT") {
         Some(r) => PathBuf::from(r),
         None => Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").components().collect(),
