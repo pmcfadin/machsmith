@@ -40,4 +40,5 @@ the lock appends exactly one ledger record with `status` `OK`, `NOISE_GATE_FAILE
 `NULL_MISMATCH` (null's case set differs; no verdict), `aborted` (SIGINT/SIGTERM,
 panic or tool error) or `refused`; outside test mode each binary needs its
 `<bin>.meta.json` build manifest and `CQLITE_DATASETS_ROOT` must be the pinned root; `r2 run` exits 0 only
-for `OK`. `R2_TEST_MODE=1` is for tests only (see `DECISIONS.md` R1, T5.1).
+for `OK`. The per-session noise gate rejects on load, cargo/rustc, SMT-sibling use, or
+> 2% of an arm's wall time spent on the pinned core by anything but the arm (DECISIONS R15). `R2_TEST_MODE=1` is for tests only (see `DECISIONS.md` R1, T5.1).

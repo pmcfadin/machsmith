@@ -2,7 +2,7 @@
 //! process with its own `CRITERION_HOME` and a seeded environment pad, under `perf stat`.
 
 use crate::criterion::{read_home, CaseStat};
-use crate::host::{Probe, Rejection, SessionMonitor};
+use crate::host::{foreign_fraction, Probe, Rejection, SessionMonitor};
 use rand_chacha::ChaCha8Rng;
 use rand_core::{RngCore, SeedableRng};
 use serde_json::{json, Value};
@@ -71,8 +71,12 @@ pub struct ProcStat {
     pub wall_s: f64,
     /// `ru_nivcsw` from wait4 (perf stat plus the bench it waited for)
     pub nivcsw: u64,
-    /// what the noise gate judged: `probe.ctx_switches(nivcsw)` (equal unless the probe is fake)
-    pub nivcsw_gated: u64,
+    /// `ru_utime + ru_stime` from wait4, seconds
+    pub own_cpu_s: f64,
+    /// busy seconds of the pinned core between spawn and reap (None when /proc/stat lacks it)
+    pub core_busy_s: Option<f64>,
+    /// share of the arm's wall time the pinned core spent on anything but the arm (DECISIONS R15)
+    pub foreign_frac: Option<f64>,
     pub pad_len: usize,
 }
 
@@ -122,7 +126,6 @@ pub enum SessionOutcome {
 
 struct ArmRun {
     stat: ProcStat,
-    pid: u32,
     failure: Option<String>,
     aborted: bool,
 }
@@ -188,6 +191,7 @@ fn run_arm(role: &str, arm: &Arm, inp: &SessionInput, pad_len: usize, deadline: 
         Some(d) => cmd.env("CQLITE_DATASETS_ROOT", d),
         None => cmd.env_remove("CQLITE_DATASETS_ROOT"),
     };
+    let busy0 = inp.probe.cpu_times().get(&inp.core).map(|t| t.0);
     let child = cmd.spawn().map_err(|e| format!("spawn taskset/perf for {role}: {e}"))?;
     let pid = child.id();
     let t0 = Instant::now();
@@ -208,6 +212,7 @@ fn run_arm(role: &str, arm: &Arm, inp: &SessionInput, pad_len: usize, deadline: 
         }
         std::thread::sleep(Duration::from_millis(10));
     };
+    let busy1 = inp.probe.cpu_times().get(&inp.core).map(|t| t.0);
     drop(child); // already reaped by wait4; dropping does not wait
     let wall_s = t0.elapsed().as_secs_f64();
     let (exit_code, signal) = if libc::WIFEXITED(status) {
@@ -218,7 +223,15 @@ fn run_arm(role: &str, arm: &Arm, inp: &SessionInput, pad_len: usize, deadline: 
         (None, None)
     };
     let nivcsw = ru.ru_nivcsw.max(0) as u64;
-    let stat = ProcStat { exit_code, signal, wall_s, nivcsw, nivcsw_gated: inp.probe.ctx_switches(nivcsw), pad_len };
+    let tv = |t: libc::timeval| t.tv_sec as f64 + t.tv_usec as f64 / 1e6;
+    let own_cpu_s = tv(ru.ru_utime) + tv(ru.ru_stime);
+    let clk_tck = unsafe { libc::sysconf(libc::_SC_CLK_TCK) }.max(0) as u64;
+    let core_busy_s = match (busy0, busy1) {
+        (Some(a), Some(b)) if b >= a && clk_tck > 0 => Some((b - a) as f64 / clk_tck as f64),
+        _ => None,
+    };
+    let foreign_frac = foreign_fraction(busy0, busy1, clk_tck, own_cpu_s, wall_s);
+    let stat = ProcStat { exit_code, signal, wall_s, nivcsw, own_cpu_s, core_busy_s, foreign_frac, pad_len };
     let failure = match (killed, exit_code, signal) {
         (Some("abort"), _, _) => None,
         (Some(_), _, _) => Some(format!("{role}: session timeout after {} s", inp.timeout.as_secs())),
@@ -227,7 +240,7 @@ fn run_arm(role: &str, arm: &Arm, inp: &SessionInput, pad_len: usize, deadline: 
         (None, _, Some(s)) => Some(format!("{role} killed by signal {s}: {}", tail(&errp))),
         (None, None, None) => Some(format!("{role}: unknown wait status {status}")),
     };
-    Ok(ArmRun { stat, pid, failure, aborted: killed == Some("abort") })
+    Ok(ArmRun { stat, failure, aborted: killed == Some("abort") })
 }
 
 fn ratio(b: &CaseStat, c: &CaseStat) -> CaseRatio {
@@ -264,7 +277,7 @@ pub fn run_session(inp: &SessionInput) -> Result<SessionOutcome, String> {
         if r.aborted {
             return Ok(SessionOutcome::Aborted);
         }
-        mon.add_process(r.pid, r.stat.nivcsw_gated, r.stat.wall_s);
+        mon.add_process(r.stat.foreign_frac);
         procs.insert(role.to_string(), r.stat);
         perf.insert(role.to_string(), parse_perf(&inp.dir.join(format!("{role}.perf"))));
         if r.failure.is_some() {

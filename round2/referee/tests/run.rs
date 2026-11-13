@@ -43,11 +43,12 @@ fn arm(dir: &Path, file: &str, name: &str, vars: &[(&str, &str)]) -> Arm {
 
 /// An always-quiet probe (like test mode's `QuietProbe`) that also steers `choose_core` to `core`
 /// (it and its SMT sibling idle, every other CPU busy), so the record's core can be checked.
-/// `extra_switches` is added to every measured involuntary-switch count (0 = report quiet).
+/// With `foreign` set, the chosen core also reports busy time (after the two `choose_core`
+/// snapshots) that no bench arm used, so the foreign-CPU rule fires.
 struct CoreProbe {
     core: usize,
     calls: AtomicU64,
-    extra_switches: Option<u64>,
+    foreign: bool,
 }
 
 impl Probe for CoreProbe {
@@ -58,13 +59,20 @@ impl Probe for CoreProbe {
         Vec::new()
     }
     fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)> {
-        let n = self.calls.fetch_add(1, Ordering::SeqCst) * 100;
+        let k = self.calls.fetch_add(1, Ordering::SeqCst);
+        let n = k * 100;
         (0..32)
-            .map(|c| (c, if c == self.core || c == self.core + SIBLING_OFFSET { (0, n) } else { (n, n) }))
+            .map(|c| {
+                let busy = if c == self.core && self.foreign && k >= 2 {
+                    n
+                } else if c == self.core || c == self.core + SIBLING_OFFSET {
+                    0
+                } else {
+                    n
+                };
+                (c, (busy, n))
+            })
             .collect()
-    }
-    fn ctx_switches(&self, measured: u64) -> u64 {
-        self.extra_switches.map_or(0, |x| measured + x)
     }
 }
 
@@ -73,7 +81,7 @@ fn env_in(dir: &Path, core: usize) -> RunEnv {
         ledger: dir.join("ledger.jsonl"),
         lock: dir.join("r2.lock"),
         scratch: dir.join("scratch"),
-        probe: Arc::new(CoreProbe { core, calls: AtomicU64::new(0), extra_switches: None }),
+        probe: Arc::new(CoreProbe { core, calls: AtomicU64::new(0), foreign: false }),
         quiet: false,
         test_mode: true,
         datasets_root: Some(DATASETS_ROOT.into()),
@@ -248,20 +256,21 @@ fn process_failure_rejects() {
 }
 
 #[test]
-fn ctx_switch_gate_rejects() {
-    let d = tmpdir("ctxsw");
+fn foreign_cpu_gate_rejects() {
+    let d = tmpdir("foreign");
     let b = arm(&d, "a.sh", "base", &[]);
     let c = arm(&d, "b.sh", "cand", &[("FAKE_FACTOR", "0.9")]);
     let mut env = env_in(&d, 11);
-    env.probe = Arc::new(CoreProbe { core: 11, calls: AtomicU64::new(0), extra_switches: Some(1_000) });
+    env.probe = Arc::new(CoreProbe { core: 11, calls: AtomicU64::new(0), foreign: true });
     let null = synthetic_null(&env, &b.sha256, None);
     let id = run(&spec(RunKind::Screen, &b, &c, 2, &[], Some(&null)), &env).unwrap();
     let r = record(&env, &id);
     assert_eq!(r["status"], "NOISE_GATE_FAILED", "{r}");
     for s in r["sessions"].as_array().unwrap() {
-        assert!(s["rejection"]["CtxSwitches"].as_f64().unwrap() > 50.0, "{s}");
+        assert!(s["rejection"]["ForeignCpu"].as_f64().unwrap() > 0.02, "{s}");
         let p = &s["procs"]["base"];
-        assert_eq!(p["nivcsw_gated"].as_u64().unwrap(), p["nivcsw"].as_u64().unwrap() + 1_000);
+        assert!(p["foreign_frac"].as_f64().unwrap() > 0.02, "{p}");
+        assert!(p["core_busy_s"].as_f64().is_some() && p["own_cpu_s"].as_f64().is_some(), "{p}");
     }
 }
 

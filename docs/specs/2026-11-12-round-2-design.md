@@ -156,6 +156,14 @@ If either fails, stop and report.
   `rustc`/`cargo` process appeared, the measuring core's SMT sibling exceeded 20% utilization (round
   1's `MAX_SIBLING_UTIL`), or either bench process logged more than 50 involuntary context switches
   per second of run time.
+  **Amended 2026-11-13 (owner-approved, DECISIONS R15):** the context-switch criterion is replaced by:
+  for each arm (one `taskset … perf stat … <bin>` process), `core_busy_s` = busy time of the pinned core
+  between spawn and reaping (`/proc/stat` jiffies delta over `sysconf(_SC_CLK_TCK)`), `own_cpu_s` =
+  `ru_utime + ru_stime` from `wait4`, `foreign_s = max(0, core_busy_s - own_cpu_s)`, `foreign_frac =
+  foreign_s / wall_s`; the session is rejected when either arm's `foreign_frac` exceeds 0.02
+  (`MAX_FOREIGN_CPU_FRAC`). Precedence: load, cargo/rustc, sibling, foreign CPU. When the core's
+  time is unavailable or wall time is 0 the rule does not apply. Reason: the benches' own pinned
+  multi-threaded runtime causes the switches (R2-000005..7).
 - **Run-level gate:** at most 3 rejected sessions are replaced per run (round 1's
   `MAX_SESSION_RERUNS`); a 4th rejection ends the run as `NOISE_GATE_FAILED` with no verdict.
 - **Retry cap, fixed now:** at most 3 confirmation tries per branch, each after a fresh quiet-host

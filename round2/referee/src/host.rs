@@ -7,7 +7,9 @@ use std::time::Duration;
 
 pub const MAX_SESSION_LOAD: f64 = 3.0;
 pub const MAX_SIBLING_UTIL: f64 = 0.20;
-pub const MAX_CTX_SWITCHES_PER_SEC: f64 = 50.0;
+/// Spec 6.4 (amended, DECISIONS R15): max share of an arm's wall time spent on the pinned core by
+/// anything other than that arm.
+pub const MAX_FOREIGN_CPU_FRAC: f64 = 0.02;
 pub const QUIET_HOLD: Duration = Duration::from_secs(10 * 60);
 pub const QUIET_MAX_LOAD: f64 = 2.0;
 pub const QUIET_SAMPLE_EVERY: Duration = Duration::from_secs(60);
@@ -29,12 +31,6 @@ pub trait Probe {
     fn cargo_rustc_pids(&self) -> Vec<u32>;
     /// cpu index -> (busy jiffies, total jiffies)
     fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)>;
-    /// The involuntary context switches the session gate judges, given the count `wait4`
-    /// measured for one bench process. The real probe passes it through; an always-quiet
-    /// (test-mode) probe reports a quiet host here too. Records keep the measured count.
-    fn ctx_switches(&self, measured: u64) -> u64 {
-        measured
-    }
 }
 
 /// The real /proc implementation.
@@ -82,7 +78,7 @@ impl Probe for ProcProbe {
 }
 
 /// A probe that always reports an idle host: no load, no cargo/rustc, no CPU times (so no
-/// sibling figure), no involuntary context switches. Test mode only (`R2_TEST_MODE=1`); its
+/// sibling or foreign-CPU figure). Test mode only (`R2_TEST_MODE=1`); its
 /// records carry `"test_mode": true`.
 pub struct QuietProbe;
 
@@ -95,9 +91,6 @@ impl Probe for QuietProbe {
     }
     fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)> {
         BTreeMap::new()
-    }
-    fn ctx_switches(&self, _measured: u64) -> u64 {
-        0
     }
 }
 
@@ -182,7 +175,7 @@ pub enum Rejection {
     Load(f64),
     CargoRustc(Vec<u32>),
     SiblingUtil(f64),
-    CtxSwitches(f64),
+    ForeignCpu(f64),
     ProcessFailed(String),
     MissingCase(String),
 }
@@ -194,9 +187,10 @@ pub struct MonitorSample {
 }
 
 /// The session rejection rules (spec 6.4), pure. `session_sibling_util` is the SMT sibling's
-/// utilisation over the whole session; `procs` = (involuntary switches, run seconds) per bench
-/// process. The first violated rule wins: load, cargo/rustc, sibling, switches.
-pub fn judge(samples: &[MonitorSample], session_sibling_util: Option<f64>, procs: &[(u64, f64)]) -> Option<Rejection> {
+/// utilisation over the whole session; `foreign_fracs` = each bench arm's foreign-CPU fraction
+/// (`None` = not measurable, rule does not apply). First violated rule wins: load, cargo/rustc,
+/// sibling, foreign CPU (the larger arm fraction is reported).
+pub fn judge(samples: &[MonitorSample], session_sibling_util: Option<f64>, foreign_fracs: &[Option<f64>]) -> Option<Rejection> {
     if let Some(s) = samples.iter().find(|s| s.load1 > MAX_SESSION_LOAD) {
         return Some(Rejection::Load(s.load1));
     }
@@ -206,15 +200,29 @@ pub fn judge(samples: &[MonitorSample], session_sibling_util: Option<f64>, procs
     if let Some(u) = session_sibling_util.filter(|u| *u > MAX_SIBLING_UTIL) {
         return Some(Rejection::SiblingUtil(u));
     }
-    for &(sw, secs) in procs {
-        if secs > 0.0 {
-            let rate = sw as f64 / secs;
-            if rate > MAX_CTX_SWITCHES_PER_SEC {
-                return Some(Rejection::CtxSwitches(rate));
-            }
-        }
+    let worst = foreign_fracs.iter().flatten().copied().fold(f64::NEG_INFINITY, f64::max);
+    if worst > MAX_FOREIGN_CPU_FRAC {
+        return Some(Rejection::ForeignCpu(worst));
     }
     None
+}
+
+/// Foreign CPU of one arm: busy time of the pinned core over the arm's run (jiffies delta over
+/// `clk_tck`) minus the arm's own CPU time, floored at 0, over its wall time. `None` when a
+/// snapshot lacks the core, the busy counter went backwards, `clk_tck` is 0 or `wall_s <= 0`.
+pub fn foreign_fraction(
+    busy_before: Option<u64>,
+    busy_after: Option<u64>,
+    clk_tck: u64,
+    own_cpu_s: f64,
+    wall_s: f64,
+) -> Option<f64> {
+    let (b0, b1) = (busy_before?, busy_after?);
+    if wall_s <= 0.0 || clk_tck == 0 || b1 < b0 {
+        return None;
+    }
+    let busy_s = (b1 - b0) as f64 / clk_tck as f64;
+    Some((busy_s - own_cpu_s).max(0.0) / wall_s)
 }
 
 /// `nonvoluntary_ctxt_switches` from /proc/<pid>/status; None when unreadable or absent.
@@ -236,7 +244,7 @@ pub struct SessionMonitor {
     stop: Arc<AtomicBool>,
     samples: Arc<Mutex<Vec<MonitorSample>>>,
     thread: Option<std::thread::JoinHandle<()>>,
-    procs: Vec<(u64, f64)>,
+    foreign: Vec<Option<f64>>,
 }
 
 impl SessionMonitor {
@@ -255,11 +263,12 @@ impl SessionMonitor {
             }
             sa.lock().unwrap().push(take_sample(&*pr));
         });
-        SessionMonitor { probe, sibling: core + SIBLING_OFFSET, first, stop, samples, thread: Some(thread), procs: Vec::new() }
+        SessionMonitor { probe, sibling: core + SIBLING_OFFSET, first, stop, samples, thread: Some(thread), foreign: Vec::new() }
     }
 
-    pub fn add_process(&mut self, _pid: u32, nonvoluntary_switches: u64, run_secs: f64) {
-        self.procs.push((nonvoluntary_switches, run_secs));
+    /// Records one arm's foreign-CPU fraction (see `foreign_fraction`).
+    pub fn add_process(&mut self, foreign_frac: Option<f64>) {
+        self.foreign.push(foreign_frac);
     }
 
     fn halt(&mut self) {
@@ -277,7 +286,7 @@ impl SessionMonitor {
         let mut samples = self.samples.lock().unwrap().clone();
         samples.push(last);
         let sib = util(&self.first, &last_times, self.sibling);
-        judge(&samples, sib, &self.procs)
+        judge(&samples, sib, &self.foreign)
     }
 }
 
@@ -363,9 +372,23 @@ mod tests {
     }
 
     #[test]
-    fn ctx_switch_rate() {
-        assert_eq!(judge(&[], None, &[(600, 10.0)]), Some(Rejection::CtxSwitches(60.0)));
-        assert_eq!(judge(&[], None, &[(400, 10.0)]), None);
+    fn foreign_cpu_rule() {
+        assert_eq!(judge(&[], None, &[Some(0.01), Some(0.03)]), Some(Rejection::ForeignCpu(0.03)));
+        assert_eq!(judge(&[], None, &[Some(0.01), None]), None);
+        assert_eq!(judge(&[], None, &[Some(0.02)]), None);
+        assert_eq!(judge(&[sample(3.1, vec![])], None, &[Some(0.5)]), Some(Rejection::Load(3.1)));
+        assert_eq!(judge(&[sample(0.1, vec![4])], None, &[Some(0.5)]), Some(Rejection::CargoRustc(vec![4])));
+        assert_eq!(judge(&[], Some(0.25), &[Some(0.5)]), Some(Rejection::SiblingUtil(0.25)));
+    }
+
+    #[test]
+    fn foreign_fraction_cases() {
+        assert_eq!(foreign_fraction(Some(1000), Some(4000), 100, 29.0, 30.0), Some(1.0 / 30.0));
+        assert_eq!(foreign_fraction(Some(1000), Some(1100), 100, 5.0, 30.0), Some(0.0));
+        assert_eq!(foreign_fraction(None, Some(4000), 100, 29.0, 30.0), None);
+        assert_eq!(foreign_fraction(Some(1000), None, 100, 29.0, 30.0), None);
+        assert_eq!(foreign_fraction(Some(1000), Some(4000), 100, 29.0, 0.0), None);
+        assert_eq!(foreign_fraction(Some(4000), Some(1000), 100, 1.0, 30.0), None);
     }
 
     #[test]
