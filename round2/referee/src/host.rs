@@ -29,6 +29,12 @@ pub trait Probe {
     fn cargo_rustc_pids(&self) -> Vec<u32>;
     /// cpu index -> (busy jiffies, total jiffies)
     fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)>;
+    /// The involuntary context switches the session gate judges, given the count `wait4`
+    /// measured for one bench process. The real probe passes it through; an always-quiet
+    /// (test-mode) probe reports a quiet host here too. Records keep the measured count.
+    fn ctx_switches(&self, measured: u64) -> u64 {
+        measured
+    }
 }
 
 /// The real /proc implementation.
@@ -72,6 +78,26 @@ impl Probe for ProcProbe {
             m.insert(n, (total - f[3] - f[4], total));
         }
         m
+    }
+}
+
+/// A probe that always reports an idle host: no load, no cargo/rustc, no CPU times (so no
+/// sibling figure), no involuntary context switches. Test mode only (`R2_TEST_MODE=1`); its
+/// records carry `"test_mode": true`.
+pub struct QuietProbe;
+
+impl Probe for QuietProbe {
+    fn loadavg(&self) -> (f64, f64, f64) {
+        (0.0, 0.0, 0.0)
+    }
+    fn cargo_rustc_pids(&self) -> Vec<u32> {
+        Vec::new()
+    }
+    fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)> {
+        BTreeMap::new()
+    }
+    fn ctx_switches(&self, _measured: u64) -> u64 {
+        0
     }
 }
 

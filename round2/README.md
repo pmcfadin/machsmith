@@ -22,3 +22,20 @@ cd round2 && msx_cargo r2-tool build -p r2_referee
 `env.sh` unsets `CARGO_TARGET_DIR`; `msx_cargo <name>` builds into
 `work/target/<name>`. Never build into the shared cargo target dir, and never
 build or test while `work/r2.lock` is held (`r2_require_unlocked`).
+
+## `r2`, the referee
+
+```
+r2 quiet-wait [--hold-min 10] [--max-load 2.0] [--timeout-h 12]
+r2 run --kind <null|calibration|screen|confirm|crosscheck|proposal> --workload <read|decode|partition_lookup>
+       --base <bin> --cand <bin> [--sessions N] [--targets <file.json>] [--rule <id>] [--null <ledger-id>]
+r2 report <ledger-id>
+r2 nullband --null <ledger-id> --workload W [--targets <file.json>]
+```
+
+The ledger is `--ledger` or `$R2_LEDGER`; the run lock is `$R2_LOCK`; per-session
+Criterion homes, perf output and `progress.json` go to `$R2_SCRATCH` (default a new
+temp dir). A targets file is a JSON array of Criterion `full_id`s. Every run after
+the lock appends exactly one ledger record with `status` `OK`, `NOISE_GATE_FAILED`,
+`aborted` (SIGINT/SIGTERM, panic or tool error) or `refused`; `r2 run` exits 0 only
+for `OK`. `R2_TEST_MODE=1` is for tests only (see `DECISIONS.md` R1, T5.1).

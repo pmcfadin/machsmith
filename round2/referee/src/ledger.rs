@@ -28,7 +28,8 @@ fn lock_path(path: &Path) -> PathBuf {
     PathBuf::from(s)
 }
 
-fn iso_utc(secs: u64) -> String {
+/// `YYYY-MM-DDTHH:MM:SSZ` for a Unix time.
+pub fn iso_utc(secs: u64) -> String {
     let days = (secs / 86_400) as i64;
     let rem = secs % 86_400;
     let z = days + 719_468;
@@ -42,6 +43,30 @@ fn iso_utc(secs: u64) -> String {
     let m = if mp < 10 { mp + 3 } else { mp - 9 };
     let y = if m <= 2 { y + 1 } else { y };
     format!("{y:04}-{m:02}-{d:02}T{:02}:{:02}:{:02}Z", rem / 3600, rem % 3600 / 60, rem % 60)
+}
+
+/// Inverse of `iso_utc` for its exact format; None for anything else.
+pub fn parse_iso_utc(s: &str) -> Option<u64> {
+    let b = s.as_bytes();
+    if b.len() != 20 || b[4] != b'-' || b[7] != b'-' || b[10] != b'T' || b[13] != b':' || b[16] != b':' || b[19] != b'Z' {
+        return None;
+    }
+    let n = |r: std::ops::Range<usize>| s.get(r)?.parse::<i64>().ok();
+    let (y, m, d) = (n(0..4)?, n(5..7)?, n(8..10)?);
+    let (hh, mm, ss) = (n(11..13)?, n(14..16)?, n(17..19)?);
+    if !(1..=12).contains(&m) || !(1..=31).contains(&d) || hh > 23 || mm > 59 || ss > 59 {
+        return None;
+    }
+    // days from civil (Howard Hinnant)
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let mp = if m > 2 { m - 3 } else { m + 9 };
+    let doy = (153 * mp + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    let days = era * 146_097 + doe - 719_468;
+    let secs = days * 86_400 + hh * 3600 + mm * 60 + ss;
+    u64::try_from(secs).ok().filter(|&x| iso_utc(x) == s)
 }
 
 fn git(args: &[&str]) -> Result<String, String> {
@@ -150,6 +175,15 @@ mod tests {
         assert_eq!(iso_utc(0), "1970-01-01T00:00:00Z");
         assert_eq!(iso_utc(1_794_528_000), "2026-11-13T00:00:00Z");
         assert_eq!(iso_utc(951_782_400 + 86_399), "2000-02-29T23:59:59Z");
+    }
+
+    #[test]
+    fn parse_iso_utc_round_trips() {
+        for t in [0, 951_782_400 + 86_399, 1_794_528_000, 1_794_528_000 + 12_345] {
+            assert_eq!(parse_iso_utc(&iso_utc(t)), Some(t));
+        }
+        assert_eq!(parse_iso_utc("2026-02-30T00:00:00Z"), None);
+        assert_eq!(parse_iso_utc("2026-11-13 00:00:00"), None);
     }
 
     #[test]
