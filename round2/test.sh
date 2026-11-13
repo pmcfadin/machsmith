@@ -31,6 +31,20 @@ decide() {
 }
 # launch_runid <launch-output-file>: the run-id from the "--run-id <id>" in gate-detached's poll line.
 launch_runid() { sed -n 's/.*gate-liveness\.sh .* --run-id \([^[:space:]]*\).*/\1/p' "$1" 2>/dev/null | head -n 1; }
+# step_json <test-log> <exit-code> <log-path>: {exit, passed, failed, failing_tests, build_failed, log}.
+# Sums every `test result:` line; failing names from `---- <name> stdout ----` headers and the
+# `failures:` lists (4-space-indented names). build_failed = exit != 0 with 0 tests counted and no names.
+step_json() {
+    local log=$1 rc=$2 p=0 f=0 n names
+    for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) passed;.*/\1/p' "$log" 2>/dev/null); do p=$((p + n)); done
+    for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) failed;.*/\1/p' "$log" 2>/dev/null); do f=$((f + n)); done
+    names=$( { sed -n 's/^---- \(.*\) stdout ----$/\1/p' "$log" 2>/dev/null
+               awk '/^failures:$/{on=1;next} on&&/^    [^ ]/{sub(/^    /,"");print;next} on&&!/^$/{on=0}' "$log" 2>/dev/null; } \
+             | sort -u | jq -R . | jq -s .)
+    jq -n --argjson rc "$rc" --argjson p "$p" --argjson f "$f" --argjson names "$names" --arg log "$3" \
+        '{exit:$rc, passed:$p, failed:$f, failing_tests:$names, log:$log,
+          build_failed:($rc != 0 and $p == 0 and $f == 0 and ($names|length) == 0)}'
+}
 [ "${TESTSH_SOURCE_ONLY:-}" = 1 ] && return 0 2>/dev/null
 
 [ $# -eq 1 ] || { echo "usage: test.sh <rev>" >&2; exit 2; }
@@ -109,24 +123,26 @@ case "$result" in PASS|FAIL|LAUNCH_FAILED|NO_RUN_ID|LIVENESS_LOST|NO_RESULT) ;; 
 
 if [ "$decision" = fallback ]; then
     mode=fallback
-    echo "test.sh: gate cannot certify this clone, behind origin/main (result=$result); running fallback cargo test + clippy" >&2
-    tlog=$gatedir/$sha12.fallback-test.log
+    echo "test.sh: gate cannot certify this clone (result=$result; cause: ${cs:-no component-set line}); running fallback cargo test + clippy" >&2
+    wlog=$gatedir/$sha12.fallback-workspace.log
+    klog=$gatedir/$sha12.fallback-core.log
     clog=$gatedir/$sha12.fallback-clippy.log
-    nice -n 10 cargo test --workspace --no-fail-fast >"$tlog" 2>&1
-    test_rc=$?
+    nice -n 10 cargo test --workspace --no-fail-fast --exclude cqlite-py --exclude cqlite-node >"$wlog" 2>&1
+    w_rc=$?
+    nice -n 10 cargo test --no-fail-fast -p cqlite-core --features cli-helpers >"$klog" 2>&1
+    k_rc=$?
     RUSTFLAGS="-D warnings" nice -n 10 cargo clippy --workspace --all-targets --all-features >"$clog" 2>&1
     clippy_rc=$?
-    passed=0; for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) passed;.*/\1/p' "$tlog"); do passed=$((passed + n)); done
-    failed=0; for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) failed;.*/\1/p' "$tlog"); do failed=$((failed + n)); done
-    names=$(sed -n 's/^test \(.*\) \.\.\. FAILED$/\1/p' "$tlog" | jq -R . | jq -s .)
-    [ "$test_rc" -eq 0 ] && [ "$clippy_rc" -eq 0 ] && status=0 || status=1
-    jq -n --arg rev "$sha" --arg mode fallback --arg gate_result "$result" --arg why "${cs:-} ${ti:-}" \
-        --argjson passed "${passed:-0}" --argjson failed "${failed:-0}" --argjson names "$names" \
-        --argjson test_rc "$test_rc" --argjson clippy_rc "$clippy_rc" --argjson status "$status" \
-        --arg tlog "$tlog" --arg clog "$clog" \
-        '{rev:$rev, mode:$mode, gate_result:$gate_result, gate_why:$why, tests_passed:$passed, tests_failed:$failed,
-          failing_tests:$names, cargo_test_exit:$test_rc, clippy_exit:$clippy_rc, exit_status:$status,
-          logs:[$tlog,$clog]}' >"$body"
+    wj=$(step_json "$wlog" "$w_rc" "$wlog"); kj=$(step_json "$klog" "$k_rc" "$klog")
+    [ "$w_rc" -eq 0 ] && [ "$k_rc" -eq 0 ] && [ "$clippy_rc" -eq 0 ] && status=0 || status=1
+    jq -n --arg rev "$sha" --arg gate_result "$result" --arg why "${cs:-} ${ti:-}" \
+        --argjson w "$wj" --argjson k "$kj" --argjson clippy_rc "$clippy_rc" --argjson status "$status" --arg clog "$clog" \
+        '{rev:$rev, mode:"fallback", gate_result:$gate_result, gate_why:$why,
+          steps:{workspace:$w, core_cli_helpers:$k, clippy:{exit:$clippy_rc, log:$clog}},
+          tests_passed:($w.passed+$k.passed), tests_failed:($w.failed+$k.failed),
+          failing_tests:(($w.failing_tests+$k.failing_tests)|unique),
+          cargo_test_exit:(if $w.exit!=0 then $w.exit else $k.exit end), clippy_exit:$clippy_rc,
+          exit_status:$status}' >"$body"
 else
     [ "$decision" = pass ] && status=0 || status=1
     jq -n --arg rev "$sha" --arg mode gate --arg result "$result" --argjson status "$status" \
