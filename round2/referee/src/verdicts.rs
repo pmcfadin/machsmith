@@ -146,6 +146,15 @@ pub fn report(r: &Value) -> String {
     if r["provisional"] == true {
         o += "- **provisional** (screening run; never a reported result)\n";
     }
+    if r["protocol_deviation"] == true {
+        o += &format!(
+            "- **protocol deviation**: {} sessions requested, protocol is {}\n",
+            r["sessions_requested"], r["protocol_sessions"]
+        );
+    }
+    if r["null_cases_match"] == false {
+        o += "- **null case set differs** from this run's cases; no verdict\n";
+    }
     if let Some(reason) = r["reason"].as_str() {
         o += &format!("- reason: {reason}\n");
     }
@@ -166,6 +175,9 @@ pub fn report(r: &Value) -> String {
                 o += &format!("- {k} verdict: **{}** {}\n", v[k]["verdict"].as_str().unwrap_or("-"), iv_text(&v[k]["interval"]));
             }
         }
+    }
+    if r["workload_interval"].is_object() {
+        o += &format!("- workload interval (no verdict): {}\n", iv_text(&r["workload_interval"]));
     }
     if let Some(res) = r["results"].as_object() {
         o += "\n| case | ratio | lo | hi | REGRESSION | perf_gate_10pct |\n|---|---|---|---|---|---|\n";

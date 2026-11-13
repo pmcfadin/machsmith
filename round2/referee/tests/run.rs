@@ -4,7 +4,7 @@
 
 use r2_referee::host::{Probe, SIBLING_OFFSET};
 use r2_referee::ledger;
-use r2_referee::run::{null_band, run, RunEnv, RunKind, RunSpec};
+use r2_referee::run::{manifest_path, null_band, run, RunEnv, RunKind, RunSpec, DATASETS_ROOT};
 use r2_referee::session::{sha256_file, Arm};
 use serde_json::{json, Value};
 use std::os::unix::fs::PermissionsExt;
@@ -76,7 +76,22 @@ fn env_in(dir: &Path, core: usize) -> RunEnv {
         probe: Arc::new(CoreProbe { core, calls: AtomicU64::new(0), extra_switches: None }),
         quiet: false,
         test_mode: true,
+        datasets_root: Some(DATASETS_ROOT.into()),
     }
+}
+
+/// Writes `<bin>.meta.json` as round2/build.sh would; `sha` overrides the true sha256.
+fn write_manifest(a: &Arm, sha: Option<&str>) {
+    let m = json!({
+        "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d", "branch": null, "bench": "read",
+        "features": "", "sha256": sha.unwrap_or(&a.sha256), "built_at": "2026-11-13T00:00:00Z",
+    });
+    std::fs::write(manifest_path(&a.bin), m.to_string()).unwrap();
+}
+
+/// A non-test-mode environment (still a temp ledger, no quiet wait).
+fn real_env_in(dir: &Path, core: usize) -> RunEnv {
+    RunEnv { test_mode: false, ..env_in(dir, core) }
 }
 
 fn spec(kind: RunKind, base: &Arm, cand: &Arm, sessions: u32, targets: &[&str], null_ref: Option<&str>) -> RunSpec {
@@ -143,6 +158,8 @@ fn null_on_identical_is_tied() {
     assert_eq!(r["status"], "OK", "{r}");
     assert_eq!(r["test_mode"], true);
     assert_eq!(r["core"], 2);
+    assert!(r["base"]["rev"].is_null() && r["cand"]["rev"].is_null());
+    assert_eq!(r["datasets_root"], DATASETS_ROOT);
     assert_eq!(r["sessions_completed"], 6);
     assert_eq!(valid_sessions(&r), 6);
     let w = &r["intervals"]["workload"];
@@ -303,6 +320,8 @@ fn regression_flagged() {
     assert_eq!(r["results"]["g/b"]["perf_gate_10pct"], true);
     assert_eq!(r["results"]["g/a"]["REGRESSION"], false);
     assert_eq!(r["results"]["g/a"]["perf_gate_10pct"], false);
+    assert!(r.get("verdict").is_none() && r.get("verdicts").is_none(), "a cross-check issues no verdict: {r}");
+    assert!(r["workload_interval"]["lo"].is_number());
     let out = Command::new(env!("CARGO_BIN_EXE_r2"))
         .args(["report", &id])
         .env("R2_LEDGER", &env.ledger)
@@ -311,6 +330,7 @@ fn regression_flagged() {
     assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
     let md = String::from_utf8_lossy(&out.stdout);
     assert!(md.contains("crosscheck") && md.contains("g/b") && md.contains("REGRESSION"), "{md}");
+    assert!(md.contains("protocol deviation"), "{md}");
 }
 
 #[test]
@@ -420,4 +440,106 @@ fn cli_nullband_prints_t() {
     let v: Value = serde_json::from_slice(&out.stdout).unwrap();
     assert!(v["b_targets"].is_number() && v["b_workload"].is_number());
     assert_eq!(v["T"], 0.05);
+}
+
+#[test]
+fn manifest_mismatch_refused_outside_test_mode() {
+    let d = tmpdir("manifest");
+    let b = arm(&d, "a.sh", "base", &[]);
+    let c = arm(&d, "b.sh", "cand", &[("FAKE_FACTOR", "0.9")]);
+    let env = real_env_in(&d, 8);
+    // missing manifests
+    let id = run(&spec(RunKind::Screen, &b, &c, 2, &[], Some("R2-000099")), &env).unwrap();
+    let r = record(&env, &id);
+    assert_eq!(r["status"], "refused");
+    assert!(r["reason"].as_str().unwrap().contains("manifest"), "{r}");
+    assert!(r.get("test_mode").is_none());
+    // cand manifest names another binary
+    write_manifest(&b, None);
+    write_manifest(&c, Some("00ff"));
+    let id = run(&spec(RunKind::Screen, &b, &c, 2, &[], Some("R2-000099")), &env).unwrap();
+    let r = record(&env, &id);
+    assert_eq!(r["status"], "refused");
+    let reason = r["reason"].as_str().unwrap();
+    assert!(reason.contains("manifest") && reason.contains("00ff"), "{reason}");
+    assert!(!env.scratch.join("s0").exists());
+}
+
+#[test]
+fn manifest_recorded() {
+    let d = tmpdir("manifestok");
+    let (b, c) = (arm(&d, "a.sh", "base", &[]), arm(&d, "b.sh", "cand", &[]));
+    write_manifest(&b, None);
+    write_manifest(&c, None);
+    let env = env_in(&d, 12);
+    let id = run(&spec(RunKind::Null, &b, &c, 1, &[], None), &env).unwrap();
+    let r = record(&env, &id);
+    assert_eq!(r["status"], "OK", "{r}");
+    assert_eq!(r["base"]["rev"]["cqlite_commit"], "7f9abe3663254724439dbe71aff77bb93faa1c2d");
+    assert_eq!(r["cand"]["rev"]["sha256"], c.sha256.as_str());
+}
+
+#[test]
+fn datasets_root_required_outside_test_mode() {
+    let d = tmpdir("datasets");
+    let b = arm(&d, "a.sh", "base", &[]);
+    let c = arm(&d, "b.sh", "cand", &[("FAKE_FACTOR", "0.9")]);
+    write_manifest(&b, None);
+    write_manifest(&c, None);
+    for root in [None, Some("/tmp/elsewhere")] {
+        let env = RunEnv { datasets_root: root.map(String::from), ..real_env_in(&d, 8) };
+        let id = run(&spec(RunKind::Screen, &b, &c, 2, &[], Some("R2-000099")), &env).unwrap();
+        let r = record(&env, &id);
+        assert_eq!(r["status"], "refused");
+        assert!(r["reason"].as_str().unwrap().contains("CQLITE_DATASETS_ROOT"), "{r}");
+    }
+}
+
+#[test]
+fn null_case_set_mismatch_issues_no_verdict() {
+    let d = tmpdir("nullmis");
+    let b = arm(&d, "a.sh", "base", &[("FAKE_CASES", "g/a,g/b,g/c")]);
+    let c = arm(&d, "b.sh", "cand", &[("FAKE_CASES", "g/a,g/b,g/c"), ("FAKE_FACTOR", "0.8")]);
+    let env = env_in(&d, 13);
+    let null = synthetic_null(&env, &b.sha256, None); // cases g/a, g/b
+    let id = run(&spec(RunKind::Confirm, &b, &c, 2, &[], Some(&null)), &env).unwrap();
+    let r = record(&env, &id);
+    assert_eq!(r["status"], "NULL_MISMATCH", "{r}");
+    assert!(r["reason"].as_str().unwrap().contains("null case set differs"));
+    assert_eq!(r["null_cases_match"], false);
+    for k in ["verdict", "verdicts", "results", "T"] {
+        assert!(r.get(k).is_none(), "{k} present: {r}");
+    }
+    assert_eq!(valid_sessions(&r), 2);
+    let out = Command::new(env!("CARGO_BIN_EXE_r2")).args(["report", &id]).env("R2_LEDGER", &env.ledger).output().unwrap();
+    assert!(String::from_utf8_lossy(&out.stdout).contains("null case set differs"));
+}
+
+#[test]
+fn zero_median_rejects_session() {
+    let d = tmpdir("zero");
+    let b = arm(&d, "a.sh", "base", &[]);
+    let c = arm(&d, "b.sh", "cand", &[("FAKE_ZERO_CASE", "g/b")]);
+    let env = env_in(&d, 14);
+    let null = synthetic_null(&env, &b.sha256, None);
+    let id = run(&spec(RunKind::Calibration, &b, &c, 2, &[], Some(&null)), &env).unwrap();
+    let r = record(&env, &id);
+    assert_eq!(r["status"], "NOISE_GATE_FAILED", "{r}");
+    let s = r["sessions"].as_array().unwrap();
+    assert_eq!(s.len(), 4);
+    for x in s {
+        assert_eq!(x["rejection"], json!({"ProcessFailed": "non-finite median for g/b"}), "{x}");
+    }
+}
+
+#[test]
+fn library_refuses_test_mode_on_real_ledger() {
+    let before = std::fs::read(REAL_LEDGER).ok();
+    let d = tmpdir("libreal");
+    let (b, c) = (arm(&d, "a.sh", "base", &[]), arm(&d, "b.sh", "cand", &[]));
+    let env = RunEnv { ledger: PathBuf::from(REAL_LEDGER), ..env_in(&d, 8) };
+    let e = run(&spec(RunKind::Null, &b, &c, 1, &[], None), &env).unwrap_err();
+    assert!(e.contains("test mode"), "{e}");
+    assert_eq!(std::fs::read(REAL_LEDGER).ok(), before);
+    assert!(!d.join("r2.lock").exists() && !env.scratch.exists());
 }

@@ -6,7 +6,27 @@ use std::io::Write;
 use std::os::fd::AsRawFd;
 use std::path::{Path, PathBuf};
 
-const MACHSMITH_DIR: &str = "/home/dev/projects/machsmith";
+pub const MACHSMITH_DIR: &str = "/home/dev/projects/machsmith";
+
+/// The real round 2 ledger, relative to `MACHSMITH_DIR`.
+pub const REAL_LEDGER_REL: &str = "round2/results/ledger.jsonl";
+
+/// Canonical form of a path whose file may not exist yet (its parent canonicalized).
+fn canonical(p: &Path) -> PathBuf {
+    if let Ok(c) = std::fs::canonicalize(p) {
+        return c;
+    }
+    let parent = p.parent().map(|d| if d.as_os_str().is_empty() { Path::new(".") } else { d });
+    match (parent.and_then(|d| std::fs::canonicalize(d).ok()), p.file_name()) {
+        (Some(d), Some(f)) => d.join(f),
+        _ => p.to_path_buf(),
+    }
+}
+
+/// True when `p` resolves to the real round 2 ledger (test mode must never write there).
+pub fn is_real_ledger(p: &Path) -> bool {
+    canonical(p) == canonical(&Path::new(MACHSMITH_DIR).join(REAL_LEDGER_REL))
+}
 
 /// All records in order. A missing ledger is empty; blank lines are skipped; a bad line is an error.
 pub fn read_all(path: &Path) -> Result<Vec<Value>, String> {
@@ -168,6 +188,12 @@ mod tests {
         assert_eq!(recs[1]["y"], 2);
         assert!(recs[0]["at"].as_str().unwrap().ends_with('Z'));
         assert!(recs[0]["machsmith"].is_object());
+    }
+
+    #[test]
+    fn real_ledger_detected() {
+        assert!(is_real_ledger(Path::new("/home/dev/projects/machsmith/round2/results/../results/ledger.jsonl")));
+        assert!(!is_real_ledger(&tmp("real")));
     }
 
     #[test]

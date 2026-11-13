@@ -16,7 +16,6 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
 
-const REAL_LEDGER: &str = "/home/dev/projects/machsmith/round2/results/ledger.jsonl";
 const WORKLOADS: [&str; 3] = ["read", "decode", "partition_lookup"];
 const USAGE: &str = "usage:
   r2 quiet-wait [--hold-min 10] [--max-load 2.0] [--timeout-h 12]
@@ -81,17 +80,6 @@ fn ledger_path(flags: &BTreeMap<String, String>) -> Result<PathBuf, String> {
         .ok_or_else(|| "no ledger: pass --ledger or set R2_LEDGER".into())
 }
 
-/// Canonical form of a path whose file may not exist yet (parent canonicalized).
-fn canonical(p: &Path) -> PathBuf {
-    if let Ok(c) = std::fs::canonicalize(p) {
-        return c;
-    }
-    match (p.parent().and_then(|d| std::fs::canonicalize(if d.as_os_str().is_empty() { Path::new(".") } else { d }).ok()), p.file_name()) {
-        (Some(d), Some(f)) => d.join(f),
-        _ => p.to_path_buf(),
-    }
-}
-
 fn read_targets(flags: &BTreeMap<String, String>) -> Result<Vec<String>, String> {
     let Some(f) = flags.get("targets") else { return Ok(Vec::new()) };
     let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
@@ -111,8 +99,8 @@ fn cmd_run(flags: &BTreeMap<String, String>) -> Result<i32, String> {
     allow(flags, &["kind", "workload", "base", "cand", "sessions", "targets", "rule", "null", "ledger"])?;
     let test_mode = std::env::var("R2_TEST_MODE").as_deref() == Ok("1");
     let ledger_p = ledger_path(flags)?;
-    if test_mode && canonical(&ledger_p) == canonical(Path::new(REAL_LEDGER)) {
-        return Err(format!("test mode (R2_TEST_MODE=1) is refused on the real ledger {REAL_LEDGER}"));
+    if test_mode && ledger::is_real_ledger(&ledger_p) {
+        return Err(format!("test mode (R2_TEST_MODE=1) is refused on the real ledger {}", ledger_p.display()));
     }
     let kind = RunKind::parse(need(flags, "kind")?).ok_or("bad --kind")?;
     let workload = need(flags, "workload")?;
@@ -135,7 +123,10 @@ fn cmd_run(flags: &BTreeMap<String, String>) -> Result<i32, String> {
         null_ref: flags.get("null").cloned(),
     };
     let probe: Arc<dyn Probe + Send + Sync> = if test_mode { Arc::new(QuietProbe) } else { Arc::new(ProcProbe) };
-    let env = RunEnv { ledger: ledger_p.clone(), lock: PathBuf::from(lock), scratch, probe, quiet: !test_mode, test_mode };
+    let env = RunEnv { ledger: ledger_p.clone(), lock: PathBuf::from(lock), scratch, probe, quiet: !test_mode,
+        test_mode,
+        datasets_root: std::env::var("CQLITE_DATASETS_ROOT").ok(),
+    };
     install_signal_handlers();
     let id = run(&spec, &env)?;
     let status = find(&ledger_p, &id)?["status"].as_str().unwrap_or("?").to_string();

@@ -107,6 +107,8 @@ pub struct SessionInput<'a> {
     pub dir: PathBuf,
     /// case ids both arms must report (targets, then the first valid session's cases)
     pub expected: &'a BTreeSet<String>,
+    /// `CQLITE_DATASETS_ROOT` for the bench; None removes it from the bench's environment
+    pub datasets_root: Option<String>,
     pub probe: Arc<dyn Probe + Send + Sync>,
     pub abort: &'a AtomicBool,
     pub timeout: Duration,
@@ -182,6 +184,10 @@ fn run_arm(role: &str, arm: &Arm, inp: &SessionInput, pad_len: usize, deadline: 
         .stdout(out)
         .stderr(err)
         .process_group(0); // so an abort or timeout can kill perf and the bench together
+    match &inp.datasets_root {
+        Some(d) => cmd.env("CQLITE_DATASETS_ROOT", d),
+        None => cmd.env_remove("CQLITE_DATASETS_ROOT"),
+    };
     let child = cmd.spawn().map_err(|e| format!("spawn taskset/perf for {role}: {e}"))?;
     let pid = child.id();
     let t0 = Instant::now();
@@ -275,6 +281,11 @@ pub fn run_session(inp: &SessionInput) -> Result<SessionOutcome, String> {
             (Err(e), _) => Some(Rejection::ProcessFailed(format!("base: {e}"))),
             (_, Err(e)) => Some(Rejection::ProcessFailed(format!("cand: {e}"))),
             (Ok(b), Ok(c)) => {
+                let bad = b.iter().chain(c.iter()).find(|(_, st)| !(st.median_ns.is_finite() && st.median_ns > 0.0));
+                if let Some((id, _)) = bad {
+                    return Ok(SessionOutcome::Done(record(inp, &roles, BTreeMap::new(), perf, procs,
+                        Some(Rejection::ProcessFailed(format!("non-finite median for {id}"))))));
+                }
                 let mut ids: BTreeSet<String> = b.keys().chain(c.keys()).cloned().collect();
                 if ids.is_empty() {
                     Some(Rejection::ProcessFailed("no Criterion cases in either arm".into()))
@@ -291,7 +302,18 @@ pub fn run_session(inp: &SessionInput) -> Result<SessionOutcome, String> {
             }
         }
     };
-    Ok(SessionOutcome::Done(SessionRecord {
+    Ok(SessionOutcome::Done(record(inp, &roles, cases, perf, procs, rejection)))
+}
+
+fn record(
+    inp: &SessionInput,
+    roles: &[(&str, &Arm); 2],
+    cases: BTreeMap<String, CaseRatio>,
+    perf: BTreeMap<String, Value>,
+    procs: BTreeMap<String, ProcStat>,
+    rejection: Option<Rejection>,
+) -> SessionRecord {
+    SessionRecord {
         attempt: inp.attempt,
         index: inp.index,
         replacements: inp.replacements,
@@ -302,7 +324,7 @@ pub fn run_session(inp: &SessionInput) -> Result<SessionOutcome, String> {
         perf,
         procs,
         rejection,
-    }))
+    }
 }
 
 #[cfg(test)]

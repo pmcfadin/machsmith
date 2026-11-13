@@ -4,6 +4,7 @@
 # FAKE_FACTOR_CASES  comma list; when set, FAKE_FACTOR applies only to these cases
 # FAKE_CASES         comma list of Criterion full_ids "group/function" (default g/a,g/b)
 # FAKE_EXIT          exit code (default 0)
+# FAKE_ZERO_CASE     a case id whose sample times are all 0 (a zero median)
 # FAKE_SLEEP         seconds to sleep before writing (default 0.2)
 # Writes <CRITERION_HOME>/<group>/<function>/new/{benchmark,sample}.json in Criterion 0.5.1 format,
 # 50 samples, time per iteration = 1000 ns x factor x (1 + jitter), jitter uniform in +-0.5%.
@@ -32,6 +33,7 @@ for my $c (@cases) {
     close $b;
     my @iters = map { $_ * 10 } 1 .. 50;
     my @times = map { sprintf "%.4f", $_ * 1000 * $k * (1 + (rand() - 0.5) * 0.01) } @iters;
+    @times = map { "0.0" } @iters if ($ENV{FAKE_ZERO_CASE} // "") eq $c;
     open my $s, ">", "$dir/sample.json" or die "$dir: $!\n";
     print $s q({"sampling_mode":"Linear","iters":[), join(",", @iters), q(],"times":[), join(",", @times), "]}\n";
     close $s;

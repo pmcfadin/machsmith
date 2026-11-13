@@ -28,6 +28,8 @@ pub const MAX_CONFIRM_TRIES: u32 = 3;
 pub const NULL_BAND_MAX: f64 = 0.05;
 pub const NULL_MAX_AGE_DAYS: u64 = 7;
 const LOCK_GRACE: Duration = Duration::from_secs(5);
+/// The only datasets root a non-test run accepts (plan global constraints).
+pub const DATASETS_ROOT: &str = "/home/dev/projects/cqlite/test-data/datasets";
 pub const QUIET_TIMEOUT: Duration = Duration::from_secs(12 * 3600);
 
 /// Raised by the CLI's SIGINT/SIGTERM handlers; the run kills the running arm and records `aborted`.
@@ -93,8 +95,10 @@ pub struct RunEnv {
     pub probe: Arc<dyn Probe + Send + Sync>,
     /// false skips `quiet_wait` (tests and test mode only)
     pub quiet: bool,
-    /// adds `"test_mode": true` to the record
+    /// adds `"test_mode": true` to the record; allows missing build manifests and any datasets root
     pub test_mode: bool,
+    /// `CQLITE_DATASETS_ROOT` given to every bench process (the CLI passes its own environment's)
+    pub datasets_root: Option<String>,
 }
 
 fn take_lock(path: &std::path::Path) -> Result<File, String> {
@@ -146,17 +150,53 @@ fn null_problem(spec: &RunSpec, env: &RunEnv, null: &Value) -> Option<String> {
     None
 }
 
-/// Checks made before any session. Ok(Err(reason)) means refuse; Ok(Ok(null record)) proceeds.
-fn preflight(spec: &RunSpec, env: &RunEnv) -> Result<Result<Option<Value>, String>, String> {
+/// `<bin>.meta.json`, written by round2/build.sh (ruling R6).
+pub fn manifest_path(bin: &std::path::Path) -> PathBuf {
+    let mut s = bin.as_os_str().to_owned();
+    s.push(".meta.json");
+    PathBuf::from(s)
+}
+
+/// The arm's build manifest (null if absent in test mode), or the reason to refuse.
+fn manifest(arm: &Arm, test_mode: bool) -> Result<Value, String> {
+    let p = manifest_path(&arm.bin);
+    let text = match std::fs::read_to_string(&p) {
+        Ok(t) => t,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound && test_mode => return Ok(Value::Null),
+        Err(e) => return Err(format!("build manifest {}: {e}", p.display())),
+    };
+    let m: Value = serde_json::from_str(&text).map_err(|e| format!("build manifest {}: {e}", p.display()))?;
+    if m["sha256"].as_str() != Some(arm.sha256.as_str()) {
+        return Err(format!("build manifest {} has sha256 {}, but the binary's is {}", p.display(), m["sha256"], arm.sha256));
+    }
+    let commit_ok = m["cqlite_commit"].as_str().is_some_and(|c| c.len() == 40 && c.bytes().all(|b| b.is_ascii_hexdigit()));
+    if !commit_ok && !test_mode {
+        return Err(format!("build manifest {} has no 40-hex cqlite_commit", p.display()));
+    }
+    Ok(m)
+}
+
+/// Checks made before any session; records the build manifests in `rec` as `base.rev` and
+/// `cand.rev`. Ok(Err(reason)) means refuse; Ok(Ok(null record)) proceeds.
+fn preflight(spec: &RunSpec, env: &RunEnv, rec: &mut Map<String, Value>) -> Result<Result<Option<Value>, String>, String> {
     if spec.sessions == 0 {
         return Ok(Err("sessions must be at least 1".into()));
     }
-    for a in [&spec.base, &spec.cand] {
+    for (role, a) in [("base", &spec.base), ("cand", &spec.cand)] {
         match sha256_file(&a.bin) {
             Ok(s) if s == a.sha256 => {}
             Ok(s) => return Ok(Err(format!("{} sha256 is {s}, not the given {}", a.bin.display(), a.sha256))),
             Err(e) => return Ok(Err(e)),
         }
+        match manifest(a, env.test_mode) {
+            Ok(m) => {
+                rec[role]["rev"] = m;
+            }
+            Err(e) => return Ok(Err(e)),
+        }
+    }
+    if !env.test_mode && env.datasets_root.as_deref() != Some(DATASETS_ROOT) {
+        return Ok(Err(format!("CQLITE_DATASETS_ROOT is {:?}; a run needs {DATASETS_ROOT}", env.datasets_root)));
     }
     if spec.kind == RunKind::Null {
         if spec.base.sha256 != spec.cand.sha256 {
@@ -208,7 +248,7 @@ fn header(spec: &RunSpec, env: &RunEnv) -> Map<String, Value> {
     m.insert("protocol_deviation".into(), json!(spec.sessions != spec.kind.protocol_sessions()));
     m.insert("criterion_args".into(), json!(CRITERION_ARGS));
     m.insert("perf_events".into(), json!(PERF_EVENTS));
-    m.insert("datasets_root".into(), json!(std::env::var("CQLITE_DATASETS_ROOT").ok()));
+    m.insert("datasets_root".into(), json!(env.datasets_root));
     m.insert("session_timeout_s".into(), json!(SESSION_TIMEOUT.as_secs()));
     m.insert("max_session_replacements".into(), json!(MAX_SESSION_REPLACEMENTS));
     m.insert("quiet_wait_skipped".into(), json!(!env.quiet));
@@ -240,6 +280,7 @@ fn write_progress(env: &RunEnv, spec: &RunSpec, st: &State) {
 
 enum End {
     Complete,
+    NullMismatch(String),
     NoiseGate(String),
     Aborted,
 }
@@ -289,6 +330,7 @@ fn measure(spec: &RunSpec, env: &RunEnv, null: Option<&Value>, st: &mut State) -
             cand: &spec.cand,
             dir: env.scratch.join(format!("s{attempt}")),
             expected: &expected,
+            datasets_root: env.datasets_root.clone(),
             probe: env.probe.clone(),
             abort: &ABORT,
             timeout: SESSION_TIMEOUT,
@@ -326,11 +368,27 @@ fn measure(spec: &RunSpec, env: &RunEnv, null: Option<&Value>, st: &mut State) -
             f
         }
         Some(n) => {
-            let (bt, bw) = null_band(n, &spec.workload, &spec.targets)?;
-            let mut f = verdict_fields(&maps, &cases, &spec.targets, bt, bw)?;
+            // b must come from the same case set the verdict is on; otherwise issue no verdict
             let null_cases: BTreeSet<&str> = n["cases"].as_array().into_iter().flatten().filter_map(|v| v.as_str()).collect();
             let ours: BTreeSet<&str> = cases.iter().map(|s| s.as_str()).collect();
-            f.insert("null_cases_match".into(), json!(null_cases == ours));
+            st.rec.insert("null_cases_match".into(), json!(null_cases == ours));
+            if null_cases != ours {
+                st.rec.insert("null_cases".into(), json!(null_cases));
+                return Ok(End::NullMismatch(format!(
+                    "null case set differs: only in null {:?}, only in this run {:?}",
+                    null_cases.difference(&ours).collect::<Vec<_>>(),
+                    ours.difference(&null_cases).collect::<Vec<_>>()
+                )));
+            }
+            let (bt, bw) = null_band(n, &spec.workload, &spec.targets)?;
+            let mut f = verdict_fields(&maps, &cases, &spec.targets, bt, bw)?;
+            if spec.kind == RunKind::Crosscheck {
+                // spec 6.2: a cross-check can flag REGRESSION but never issues a verdict
+                let w = f["verdicts"]["workload"]["interval"].clone();
+                f.remove("verdict");
+                f.remove("verdicts");
+                f.insert("workload_interval".into(), w);
+            }
             f
         }
     };
@@ -345,9 +403,12 @@ fn panic_text(p: &(dyn std::any::Any + Send)) -> String {
 /// Runs `spec` and appends exactly one ledger record; returns its id. `Err` only when the lock
 /// cannot be taken, the ledger cannot be read or written, or (with no record) before the lock.
 pub fn run(spec: &RunSpec, env: &RunEnv) -> Result<String, String> {
+    if env.test_mode && ledger::is_real_ledger(&env.ledger) {
+        return Err(format!("test mode is refused on the real ledger {}", env.ledger.display()));
+    }
     let _lock = take_lock(&env.lock)?;
     let mut st = State { rec: header(spec, env), sessions: Vec::new(), completed: 0, rejected: 0 };
-    let null = match preflight(spec, env)? {
+    let null = match preflight(spec, env, &mut st.rec)? {
         Err(reason) => {
             st.rec.insert("status".into(), json!("refused"));
             st.rec.insert("reason".into(), json!(reason));
@@ -362,13 +423,14 @@ pub fn run(spec: &RunSpec, env: &RunEnv) -> Result<String, String> {
     let (status, reason) = match outcome {
         Ok(Ok(End::Complete)) => ("OK", None),
         Ok(Ok(End::NoiseGate(r))) => ("NOISE_GATE_FAILED", Some(r)),
+        Ok(Ok(End::NullMismatch(r))) => ("NULL_MISMATCH", Some(r)),
         Ok(Ok(End::Aborted)) => ("aborted", Some("signal".to_string())),
         Ok(Err(e)) => ("aborted", Some(format!("error: {e}"))),
         Err(p) => ("aborted", Some(format!("panic: {}", panic_text(&*p)))),
     };
     if status != "OK" {
         // no partial statistics on a run that did not finish
-        for k in ["verdict", "verdicts", "results", "intervals", "T", "b_targets", "b_workload"] {
+        for k in ["verdict", "verdicts", "results", "regressions", "intervals", "workload_interval", "T", "T_workload", "b_targets", "b_workload", "null_band_over_max"] {
             st.rec.remove(k);
         }
     }
