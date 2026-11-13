@@ -10,7 +10,8 @@ set -uo pipefail
 
 # decide <RESULT token> <component-set: line> <tree-integrity: line>  ->  pass | fallback | fail
 # fallback ONLY for a full-gate FAIL whose component-set line is FAIL-CLOSED because the clone is
-# BEHIND origin/main (agent-gate.sh ~6802) or the ancestry probe is indeterminate (~6810). Every other
+# BEHIND origin/main (agent-gate.sh ~6802), the ancestry probe is indeterminate (~6810), or the baseline is
+# unmeasured because origin is not the canonical upstream (remote-not-canonical). Every other
 # outcome (tree-integrity FAIL, other FAIL-CLOSED causes, ERROR/REFUSED, unknown tokens) is a recorded failure.
 decide() {
     local result=$1 cs=$2 ti=$3
@@ -22,6 +23,7 @@ decide() {
                 "component-set: FAIL-CLOSED"*"this tree is BEHIND origin/main"*|\
                 "component-set: FAIL-CLOSED"*"ancestry probe could not tell BEHIND from a deliberate removal"*)
                     echo fallback ;;
+                "component-set: FAIL-CLOSED"*"remote-not-canonical"*) echo fallback ;;   # clone's origin is local, not the canonical upstream
                 *) echo fail ;;
             esac ;;
         *) echo fail ;;
