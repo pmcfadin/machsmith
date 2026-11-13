@@ -29,6 +29,8 @@ decide() {
         *) echo fail ;;
     esac
 }
+# launch_runid <launch-output-file>: the run-id from the "--run-id <id>" in gate-detached's poll line.
+launch_runid() { sed -n 's/.*gate-liveness\.sh .* --run-id \([^[:space:]]*\).*/\1/p' "$1" 2>/dev/null | head -n 1; }
 [ "${TESTSH_SOURCE_ONLY:-}" = 1 ] && return 0 2>/dev/null
 
 [ $# -eq 1 ] || { echo "usage: test.sh <rev>" >&2; exit 2; }
@@ -70,7 +72,13 @@ if [ "$gate_rc" -ne 0 ]; then
     echo "test.sh: gate launch refused (exit $gate_rc)" >&2
     result="LAUNCH_FAILED"
 else
-    runid=$(sed -n 's/^run-id:[[:space:]]*//p' "$summary" | head -n 1)
+    runid=$(launch_runid "$gatedir/$sha12.launch")
+    # gate-detached may return before the summary exists: poll for a run-id line, 2 s steps, 300 s max.
+    waited=0
+    while [ -z "$runid" ] && [ "$waited" -lt 300 ]; do
+        runid=$(sed -n 's/^run-id:[[:space:]]*//p' "$summary" 2>/dev/null | head -n 1)
+        [ -n "$runid" ] || { sleep 2; waited=$((waited + 2)); }
+    done
     [ -n "$runid" ] || { echo "test.sh: no run-id in $summary" >&2; result="NO_RUN_ID"; }
     bad=0
     while [ -n "$runid" ]; do

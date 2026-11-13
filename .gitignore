@@ -2,3 +2,4 @@ work/
 **/target/
 __pycache__/
 experiment/results/ledger.lock
+round2/results/*.lock
