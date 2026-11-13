@@ -1,0 +1,23 @@
+{
+  "read": {
+    "path": "work/r2-bins/7f9abe366325/read",
+    "sha256": "773f4a2e008777c473cb19a99cf0c6bf6ecd25b68f7ae82e99896b1e42396018",
+    "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+    "features": "cli-helpers,bench-internals",
+    "built_at": "2026-11-13T03:40:23Z"
+  },
+  "decode": {
+    "path": "work/r2-bins/7f9abe366325/decode",
+    "sha256": "c617b96ad11897fc1dda725f17c5cd585214b4b9c458524a309a3cd0f1288d07",
+    "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+    "features": "cli-helpers,bench-internals",
+    "built_at": "2026-11-13T03:43:11Z"
+  },
+  "partition_lookup": {
+    "path": "work/r2-bins/7f9abe366325/partition_lookup",
+    "sha256": "49e87a24603f36adb7bb1464ced722dafeb9aefb429b4e4fd2a87f892aeecbd0",
+    "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+    "features": "cli-helpers,bench-internals",
+    "built_at": "2026-11-13T03:43:12Z"
+  }
+}
