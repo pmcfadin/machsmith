@@ -168,10 +168,14 @@ fn cmd_report(flags: &BTreeMap<String, String>, pos: &[String]) -> Result<i32, S
 
 fn cmd_ledger_append(flags: &BTreeMap<String, String>) -> Result<i32, String> {
     allow(flags, &["kind", "body-file", "ledger"])?;
+    let kind = need(flags, "kind")?;
+    if kind != "tests" {
+        return Err(format!("ledger-append: only --kind tests is accepted (got {kind}); run records are written by `r2 run`"));
+    }
     let f = need(flags, "body-file")?;
     let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
     let body: Value = serde_json::from_str(&text).map_err(|e| format!("{f}: not JSON: {e}"))?;
-    println!("{}", ledger::append(&ledger_path(flags)?, need(flags, "kind")?, body)?);
+    println!("{}", ledger::append(&ledger_path(flags)?, kind, body)?);
     Ok(0)
 }
 

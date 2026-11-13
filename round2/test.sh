@@ -8,13 +8,34 @@
 set -uo pipefail
 . /home/dev/projects/machsmith/round2/env.sh
 
+# decide <RESULT token> <component-set: line> <tree-integrity: line>  ->  pass | fallback | fail
+# fallback ONLY for a full-gate FAIL whose component-set line is FAIL-CLOSED because the clone is
+# BEHIND origin/main (agent-gate.sh ~6802) or the ancestry probe is indeterminate (~6810). Every other
+# outcome (tree-integrity FAIL, other FAIL-CLOSED causes, ERROR/REFUSED, unknown tokens) is a recorded failure.
+decide() {
+    local result=$1 cs=$2 ti=$3
+    case "$ti" in "tree-integrity: FAIL"*) echo fail; return ;; esac
+    case "$result" in
+        PASS) echo pass ;;
+        FAIL)
+            case "$cs" in
+                "component-set: FAIL-CLOSED"*"this tree is BEHIND origin/main"*|\
+                "component-set: FAIL-CLOSED"*"ancestry probe could not tell BEHIND from a deliberate removal"*)
+                    echo fallback ;;
+                *) echo fail ;;
+            esac ;;
+        *) echo fail ;;
+    esac
+}
+[ "${TESTSH_SOURCE_ONLY:-}" = 1 ] && return 0 2>/dev/null
+
 [ $# -eq 1 ] || { echo "usage: test.sh <rev>" >&2; exit 2; }
 r2_require_unlocked || exit 1
 command -v jq >/dev/null || { echo "test.sh: jq is required" >&2; exit 1; }
 
 sha=$(git -C "$R2_CLONE" rev-parse --verify "$1^{commit}") || { echo "test.sh: cannot resolve $1 in $R2_CLONE" >&2; exit 1; }
 sha12=${sha:0:12}
-wt=$R2_WT/$sha12
+wt=$R2_WT/$sha12-test   # test.sh has its own worktree so build.sh can never dirty the gate's tree
 if [ ! -e "$wt" ]; then
     mkdir -p "$R2_WT"
     git -C "$R2_CLONE" worktree add --detach "$wt" "$sha" >&2 || exit 1
@@ -30,17 +51,17 @@ rm -f "$summary" "$summary.heartbeat" "$log"
 body=$(mktemp "$gatedir/$sha12.body.XXXXXX.json")
 trap 'rm -f "$body"' EXIT
 
+# Always bring the r2 binary up to date now, and prove ledger-append exists before a multi-hour gate.
+(cd "$R2_ROOT" && nice -n 10 bash -c '. /home/dev/projects/machsmith/round2/env.sh; msx_cargo r2-tool build -p r2_referee --bin r2') >&2 || { echo "test.sh: cannot build r2" >&2; exit 1; }
 r2bin=$MSX_WORK/target/r2-tool/debug/r2
-if [ ! -x "$r2bin" ]; then
-    (cd "$R2_ROOT" && msx_cargo r2-tool build -p r2_referee --bin r2) >&2 || exit 1
-fi
+probe=$("$r2bin" ledger-append --kind probe --body-file /dev/null 2>&1 >/dev/null)
+case "$probe" in *"only --kind tests"*) ;; *) echo "test.sh: $r2bin lacks a working ledger-append: $probe" >&2; exit 1 ;; esac
 
 mode=gate status=0 gate_rc=0
 cd "$wt" || exit 1
 echo "test.sh: launching the gate detached in $wt (summary $summary)" >&2
 nice -n 10 bash scripts/flow/gate-detached.sh --summary "$summary" --log "$log" >"$gatedir/$sha12.launch" 2>&1
 gate_rc=$?
-cannot_certify=0
 result=""
 if [ "$gate_rc" -ne 0 ]; then
     cat "$gatedir/$sha12.launch" >&2
@@ -67,27 +88,26 @@ else
     fi
 fi
 
+cs="" ti=""
 if [ -f "$summary" ]; then
-    # Reasons caused by being a clone: behind origin/main (component-set), tree integrity,
-    # an outright refusal/error. A genuine FAIL with PASS integrity is a test failure, not this.
     cs=$(command grep -E '^component-set:' "$summary" | head -n 1)
     ti=$(command grep -E '^tree-integrity:' "$summary" | head -n 1)
-    case "$cs" in *FAIL-CLOSED*|*origin/main*REFUSED*) [ "$result" = PASS ] || cannot_certify=1 ;; esac
-    case "$ti" in "tree-integrity: FAIL"*) cannot_certify=1 ;; esac
 fi
-case "$result" in ERROR|REFUSED) cannot_certify=1 ;; esac
+decision=$(decide "$result" "$cs" "$ti")
+case "$decision" in pass|fallback|fail) ;; *) decision=fail ;; esac
+case "$result" in PASS|FAIL|LAUNCH_FAILED|NO_RUN_ID|LIVENESS_LOST|NO_RESULT) ;; *) echo "test.sh: unknown terminal result '$result'; recording a failure (no fallback)" >&2 ;; esac
 
-if [ "$cannot_certify" = 1 ]; then
+if [ "$decision" = fallback ]; then
     mode=fallback
-    echo "test.sh: gate cannot certify this clone (result=$result); running fallback cargo test + clippy" >&2
+    echo "test.sh: gate cannot certify this clone, behind origin/main (result=$result); running fallback cargo test + clippy" >&2
     tlog=$gatedir/$sha12.fallback-test.log
     clog=$gatedir/$sha12.fallback-clippy.log
     nice -n 10 cargo test --workspace --no-fail-fast >"$tlog" 2>&1
     test_rc=$?
     RUSTFLAGS="-D warnings" nice -n 10 cargo clippy --workspace --all-targets --all-features >"$clog" 2>&1
     clippy_rc=$?
-    passed=$(sed -n 's/^test result: .* \([0-9][0-9]*\) passed;.*/\1/p' "$tlog" | paste -sd+ - | bc 2>/dev/null)
-    failed=$(sed -n 's/^test result: .* \([0-9][0-9]*\) failed;.*/\1/p' "$tlog" | paste -sd+ - | bc 2>/dev/null)
+    passed=0; for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) passed;.*/\1/p' "$tlog"); do passed=$((passed + n)); done
+    failed=0; for n in $(sed -n 's/^test result: .* \([0-9][0-9]*\) failed;.*/\1/p' "$tlog"); do failed=$((failed + n)); done
     names=$(sed -n 's/^test \(.*\) \.\.\. FAILED$/\1/p' "$tlog" | jq -R . | jq -s .)
     [ "$test_rc" -eq 0 ] && [ "$clippy_rc" -eq 0 ] && status=0 || status=1
     jq -n --arg rev "$sha" --arg mode fallback --arg gate_result "$result" --arg why "${cs:-} ${ti:-}" \
@@ -98,10 +118,10 @@ if [ "$cannot_certify" = 1 ]; then
           failing_tests:$names, cargo_test_exit:$test_rc, clippy_exit:$clippy_rc, exit_status:$status,
           logs:[$tlog,$clog]}' >"$body"
 else
-    [ "$result" = PASS ] && status=0 || status=1
+    [ "$decision" = pass ] && status=0 || status=1
     jq -n --arg rev "$sha" --arg mode gate --arg result "$result" --argjson status "$status" \
-        --rawfile summary "$summary" --argjson gate_rc "$gate_rc" --arg log "$log" \
-        '{rev:$rev, mode:$mode, result:$result, summary:$summary, gate_launch_exit:$gate_rc,
+        --rawfile summary "$summary" --argjson gate_rc "$gate_rc" --arg log "$log" --arg why "${cs:-} ${ti:-}" \
+        '{rev:$rev, mode:$mode, result:$result, gate_why:$why, summary:$summary, gate_launch_exit:$gate_rc,
           exit_status:$status, log:$log}' >"$body" 2>/dev/null \
     || jq -n --arg rev "$sha" --arg result "$result" --argjson status "$status" \
         '{rev:$rev, mode:"gate", result:$result, summary:null, exit_status:$status}' >"$body"

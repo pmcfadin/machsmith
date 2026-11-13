@@ -560,6 +560,10 @@ fn ledger_append_subcommand() {
     assert_eq!(String::from_utf8_lossy(&run("tests").stdout).trim(), "R2-000002");
     let r = ledger::read_all(&led).unwrap();
     assert_eq!((r[0]["kind"].as_str(), r[0]["rev"].as_str()), (Some("tests"), Some("abc")));
+    let before = std::fs::read(&led).unwrap();
+    let o = run("null");
+    assert!(!o.status.success() && String::from_utf8_lossy(&o.stderr).contains("only --kind tests"));
+    assert_eq!(std::fs::read(&led).unwrap(), before, "refused kind must write nothing");
     std::fs::write(&body, "[1]").unwrap();
     assert!(!run("tests").status.success());
 }
