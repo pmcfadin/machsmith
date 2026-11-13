@@ -543,3 +543,23 @@ fn library_refuses_test_mode_on_real_ledger() {
     assert_eq!(std::fs::read(REAL_LEDGER).ok(), before);
     assert!(!d.join("r2.lock").exists() && !env.scratch.exists());
 }
+
+#[test]
+fn ledger_append_subcommand() {
+    let d = tmpdir("lappend");
+    let (led, body) = (d.join("l.jsonl"), d.join("b.json"));
+    std::fs::write(&body, r#"{"rev":"abc","mode":"gate"}"#).unwrap();
+    let run = |k: &str| {
+        Command::new(env!("CARGO_BIN_EXE_r2"))
+            .args(["ledger-append", "--kind", k, "--body-file"]).arg(&body)
+            .env("R2_LEDGER", &led).output().unwrap()
+    };
+    let o = run("tests");
+    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
+    assert_eq!(String::from_utf8_lossy(&o.stdout).trim(), "R2-000001");
+    assert_eq!(String::from_utf8_lossy(&run("tests").stdout).trim(), "R2-000002");
+    let r = ledger::read_all(&led).unwrap();
+    assert_eq!((r[0]["kind"].as_str(), r[0]["rev"].as_str()), (Some("tests"), Some("abc")));
+    std::fs::write(&body, "[1]").unwrap();
+    assert!(!run("tests").status.success());
+}

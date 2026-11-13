@@ -22,7 +22,8 @@ const USAGE: &str = "usage:
   r2 run --kind <null|calibration|screen|confirm|crosscheck|proposal> --workload <read|decode|partition_lookup>
          --base <bin> --cand <bin> [--sessions N] [--targets <file.json>] [--rule <id>] [--null <ledger-id>] [--ledger <path>]
   r2 report <ledger-id> [--ledger <path>]
-  r2 nullband --null <ledger-id> --workload W [--targets <file.json>] [--ledger <path>]";
+  r2 nullband --null <ledger-id> --workload W [--targets <file.json>] [--ledger <path>]
+  r2 ledger-append --kind <k> --body-file <json-object-file> [--ledger <path>]";
 
 extern "C" fn on_signal(_: libc::c_int) {
     ABORT.store(true, Ordering::SeqCst);
@@ -165,14 +166,24 @@ fn cmd_report(flags: &BTreeMap<String, String>, pos: &[String]) -> Result<i32, S
     Ok(0)
 }
 
+fn cmd_ledger_append(flags: &BTreeMap<String, String>) -> Result<i32, String> {
+    allow(flags, &["kind", "body-file", "ledger"])?;
+    let f = need(flags, "body-file")?;
+    let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
+    let body: Value = serde_json::from_str(&text).map_err(|e| format!("{f}: not JSON: {e}"))?;
+    println!("{}", ledger::append(&ledger_path(flags)?, need(flags, "kind")?, body)?);
+    Ok(0)
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let r = match args.split_first() {
         Some((cmd, rest)) => parse(rest).and_then(|(flags, pos)| match cmd.as_str() {
-            "run" | "quiet-wait" | "nullband" if !pos.is_empty() => Err(format!("unexpected argument {}", pos[0])),
+            "run" | "quiet-wait" | "nullband" | "ledger-append" if !pos.is_empty() => Err(format!("unexpected argument {}", pos[0])),
             "run" => cmd_run(&flags),
             "quiet-wait" => cmd_quiet_wait(&flags),
             "nullband" => cmd_nullband(&flags),
+            "ledger-append" => cmd_ledger_append(&flags),
             "report" => cmd_report(&flags, &pos),
             _ => Err(USAGE.into()),
         }),
