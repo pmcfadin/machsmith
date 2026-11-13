@@ -407,8 +407,6 @@ fn panic_text(p: &(dyn std::any::Any + Send)) -> String {
     p.downcast_ref::<&str>().map(|s| s.to_string()).or_else(|| p.downcast_ref::<String>().cloned()).unwrap_or_else(|| "panic".into())
 }
 
-/// Runs `spec` and appends exactly one ledger record; returns its id. `Err` only when the lock
-/// cannot be taken, the ledger cannot be read or written, or (with no record) before the lock.
 /// Every CPU in `0..online` except `core` and its SMT sibling.
 pub fn affinity_cpus(online: usize, core: usize) -> Vec<usize> {
     (0..online).filter(|&c| c != core && c != core + crate::host::SIBLING_OFFSET).collect()
@@ -436,6 +434,8 @@ fn keep_off_core(core: usize) -> Result<(), String> {
     Ok(())
 }
 
+/// Runs `spec` and appends exactly one ledger record; returns its id. `Err` only when the lock
+/// cannot be taken, the ledger cannot be read or written, or (with no record) before the lock.
 pub fn run(spec: &RunSpec, env: &RunEnv) -> Result<String, String> {
     if env.test_mode && ledger::is_real_ledger(&env.ledger) {
         return Err(format!("test mode is refused on the real ledger {}", env.ledger.display()));
