@@ -1,0 +1,5 @@
+{
+  "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+  "cloned_at": "2026-11-13T01:12:23Z",
+  "cqlite_toolchain": "[toolchain]\nchannel = \"1.97.1\"\ncomponents = [\"clippy\", \"rustfmt\"]\ntargets = [\"wasm32-unknown-unknown\"]\n\n# Pin to specific stable version for reproducible builds\n# Update quarterly or when needed for new features\nprofile = \"default\""
+}
