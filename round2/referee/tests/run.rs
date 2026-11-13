@@ -567,3 +567,11 @@ fn ledger_append_subcommand() {
     std::fs::write(&body, "[1]").unwrap();
     assert!(!run("tests").status.success());
 }
+
+#[test]
+fn choose_core_prints_a_measurement_core() {
+    let out = Command::new(env!("CARGO_BIN_EXE_r2")).arg("choose-core").output().unwrap();
+    assert!(out.status.success());
+    let core: usize = String::from_utf8(out.stdout).unwrap().trim().parse().unwrap();
+    assert!((2..=15).contains(&core), "core {core}");
+}

@@ -32,7 +32,9 @@ else
     [ -x "$r2bin" ] || { echo "profile.sh: $r2bin missing; build r2_referee first" >&2; exit 1; }
     snap=$("$r2bin" quiet-wait)
 fi
-core=$(jq -r '.core // 5' <<<"$snap")
+core=$(jq -r '.core // empty' <<<"$snap")
+[ -n "$core" ] || { [ -x "$r2bin" ] && core=$("$r2bin" choose-core); }
+[ -n "$core" ] || { echo "profile.sh: cannot choose a core (r2 binary missing)" >&2; exit 1; }
 
 if [ "$callgraph" = 1 ]; then
     tagdir="$tag-cg"; freq=999; cgargs=(--call-graph dwarf,16384)

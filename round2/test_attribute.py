@@ -103,6 +103,38 @@ class InclusiveTest(unittest.TestCase):
         self.assertAlmostEqual(inc["Value::into_owned"], 20.0)
         self.assertEqual(inc["allocator"], 0.0)
 
+    def test_harness_sample_counts_in_denominator_only(self):
+        chains = [
+            [frame("malloc", LIBC), frame("pprof::collector::Collector::add"), frame("cqlite_core::a::b")],
+            [frame("malloc", LIBC), frame("cqlite_core::a::b")],
+        ]
+        n, hits, st = attribute.inclusive_counts(chains)
+        self.assertEqual(n, 2)
+        self.assertEqual(hits["allocator"], 1)
+        self.assertEqual(hits["cqlite:cqlite_core::a::b"], 1)
+        self.assertAlmostEqual(attribute.chain_stats_report(n, st)["inclusive_harness_samples"], 50.0)
+
+    def test_cqlite_backtrace_function_is_not_harness(self):
+        chains = [[frame("malloc", LIBC), frame("cqlite_core::error::backtrace_capture")]]
+        self.assertEqual(attribute.inclusive_shares(chains)["allocator"], 100.0)
+
+    def test_chain_reaches_root_and_depth(self):
+        chains = [
+            [frame("a"), frame("criterion::routine::f"), frame("main")],
+            [frame("a"), frame("b")],
+            [frame("a"), frame("b"), frame("c"), frame("_start")],
+            [frame("x")],
+        ]
+        n, _, st = attribute.inclusive_counts(chains)
+        rep = attribute.chain_stats_report(n, st)
+        self.assertAlmostEqual(rep["chain_reaches_root"], 50.0)
+        self.assertAlmostEqual(rep["median_chain_depth"], 2.5)
+        self.assertEqual(rep["inclusive_harness_samples"], 0.0)
+
+    def test_explicit_depths_override_chain_length(self):
+        n, _, st = attribute.inclusive_counts([[frame("a"), frame("a")]], depths=[1])
+        self.assertEqual(attribute.chain_stats_report(n, st)["median_chain_depth"], 1)
+
     def test_top_cqlite_limited_to_30(self):
         chains = [[frame("cqlite_core::f%d" % i)] for i in range(50)]
         inc = attribute.inclusive_shares(chains)

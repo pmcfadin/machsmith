@@ -21,6 +21,7 @@ const USAGE: &str = "usage:
   r2 quiet-wait [--hold-min 10] [--max-load 2.0] [--timeout-h 12]
   r2 run --kind <null|calibration|screen|confirm|crosscheck|proposal> --workload <read|decode|partition_lookup>
          --base <bin> --cand <bin> [--sessions N] [--targets <file.json>] [--rule <id>] [--null <ledger-id>] [--ledger <path>]
+  r2 choose-core
   r2 report <ledger-id> [--ledger <path>]
   r2 nullband --null <ledger-id> --workload W [--targets <file.json>] [--ledger <path>]
   r2 ledger-append --kind <k> --body-file <json-object-file> [--ledger <path>]";
@@ -151,6 +152,11 @@ fn cmd_quiet_wait(flags: &BTreeMap<String, String>) -> Result<i32, String> {
     Ok(0)
 }
 
+fn cmd_choose_core() -> Result<i32, String> {
+    println!("{}", r2_referee::host::choose_core(&ProcProbe));
+    Ok(0)
+}
+
 fn cmd_nullband(flags: &BTreeMap<String, String>) -> Result<i32, String> {
     allow(flags, &["null", "workload", "targets", "ledger"])?;
     let rec = find(&ledger_path(flags)?, need(flags, "null")?)?;
@@ -183,10 +189,11 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let r = match args.split_first() {
         Some((cmd, rest)) => parse(rest).and_then(|(flags, pos)| match cmd.as_str() {
-            "run" | "quiet-wait" | "nullband" | "ledger-append" if !pos.is_empty() => Err(format!("unexpected argument {}", pos[0])),
+            "run" | "quiet-wait" | "nullband" | "ledger-append" | "choose-core" if !pos.is_empty() => Err(format!("unexpected argument {}", pos[0])),
             "run" => cmd_run(&flags),
             "quiet-wait" => cmd_quiet_wait(&flags),
             "nullband" => cmd_nullband(&flags),
+            "choose-core" => cmd_choose_core(),
             "ledger-append" => cmd_ledger_append(&flags),
             "report" => cmd_report(&flags, &pos),
             _ => Err(USAGE.into()),

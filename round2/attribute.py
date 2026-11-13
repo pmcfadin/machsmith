@@ -30,7 +30,7 @@ BUCKETS = ["own_decoding", "allocator", "memcpy", "decompression", "checksum",
 
 OWN_SSTABLE = ("reader::parsing", "index_reader", "bti", "summary_reader",
                "row_cell_state_machine")
-HARNESS_RE = re.compile(r"rustc_demangle|pprof|backtrace|gimli|addr2line")
+HARNESS_RE = re.compile(r"^<*(rustc_demangle|pprof|backtrace|gimli|addr2line|findshlibs)::|^_Unwind_\w+$")
 ALLOC_RE = re.compile(
     r"^(__rust_(alloc|dealloc|realloc|alloc_zeroed)|__rdl_|_?_?libc_(malloc|free|calloc|realloc)"
     r"|malloc|free|calloc|realloc|posix_memalign|aligned_alloc|memalign|cfree"
@@ -321,16 +321,31 @@ def is_cqlite(name):
     return name.startswith("cqlite_core::") or name.startswith("<cqlite_core::")
 
 
-def inclusive_counts(chains):
+ROOT_NAMES = {"main", "_start", "__libc_start_main", "__libc_start_call_main"}
+
+
+def reaches_root(chain):
+    return any(name in ROOT_NAMES or "criterion::" in name for name, _ in chain)
+
+
+def inclusive_counts(chains, depths=None):
     """chains: iterable of samples, each a list of (name, dso) over all frames (inlined ones included).
-    Returns (n_samples, Counter). A named frame, or a CQLite function, counts at most once per sample.
-    Samples that run inside the in-process profiler (pprof, backtrace, gimli, rustc_demangle) are
-    harness work: they stay in the denominator but credit no frame."""
+    depths: optional physical-frame count per sample (default: len(chain)).
+    Returns (n_samples, Counter, stats). A named frame, or a CQLite function, counts at most once per
+    sample. Samples that run inside the in-process profiler (pprof, backtrace, gimli, rustc_demangle,
+    the libgcc unwinder) are harness work: they stay in the denominator but credit no frame.
+    stats: {"harness": samples skipped, "root": chains reaching criterion/main/_start, "depths": [...]}."""
     n = 0
     hits = collections.Counter()
-    for chain in chains:
+    stats = {"harness": 0, "root": 0, "depths": []}
+    depths = list(depths) if depths is not None else None
+    for i, chain in enumerate(chains):
         n += 1
+        stats["depths"].append(depths[i] if depths is not None else len(chain))
+        if reaches_root(chain):
+            stats["root"] += 1
         if any(HARNESS_RE.search(name) for name, _ in chain):
+            stats["harness"] += 1
             continue
         seen = set()
         for name, dso in chain:
@@ -340,7 +355,25 @@ def inclusive_counts(chains):
             if is_cqlite(name):
                 seen.add("cqlite:" + name)
         hits.update(seen)
-    return n, hits
+    return n, hits, stats
+
+
+def chain_stats_report(n, stats):
+    """Truncation and reconciliation measures (percent of samples; median depth in frames)."""
+    d = sorted(stats["depths"])
+    med = (d[(len(d) - 1) // 2] + d[len(d) // 2]) / 2 if d else 0.0
+    return {"chain_reaches_root": 100.0 * stats["root"] / n if n else 0.0,
+            "median_chain_depth": med,
+            "inclusive_harness_samples": 100.0 * stats["harness"] / n if n else 0.0}
+
+
+def merge_stats(parts):
+    out = {"harness": 0, "root": 0, "depths": []}
+    for st in parts:
+        out["harness"] += st["harness"]
+        out["root"] += st["root"]
+        out["depths"].extend(st["depths"])
+    return out
 
 
 def inclusive_report(n, hits):
@@ -353,7 +386,8 @@ def inclusive_report(n, hits):
 
 
 def inclusive_shares(chains):
-    return inclusive_report(*inclusive_counts(chains))
+    n, hits, _ = inclusive_counts(chains)
+    return inclusive_report(n, hits)
 
 
 # ---- combining cases -------------------------------------------------------------------------
@@ -400,7 +434,7 @@ def frame_addr(ctx, frame, leaf):
 
 
 def process_script(ctx, script, callgraph):
-    """-> (n, bucket Counter, func_stats {(fn,bucket): {...}}, chains or None)."""
+    """-> (n, bucket Counter, func_stats {(fn,bucket): {...}}, chains or None, physical depths)."""
     samples = list(parse_blocks(script, callgraph))
     flat = [f for s in samples for f in s]
     mmap = os.path.splitext(script)[0] + ".mmap"
@@ -457,7 +491,7 @@ def process_script(ctx, script, callgraph):
         mangled = [x for c in chains for x, _ in c if x.startswith(("_R", "_ZN"))]
         ctx.demangle_more(mangled)
         chains = [[(ctx.demangled.get(x, x), d) for x, d in c] for c in chains]
-    return len(samples), total, stats, chains
+    return len(samples), total, stats, chains, [len(x) for x in samples]
 
 
 def read_cases(dirpath, slugs):
@@ -499,8 +533,10 @@ def main(argv):
     incl_n = 0
     per_case_top = {}
     incl_case = {}
+    meta = {}
+    all_stats = []
     for slug in slugs:
-        n, total, stats, chains = process_script(ctx, os.path.join(dirpath, slug + ".script"), callgraph)
+        n, total, stats, chains, depths = process_script(ctx, os.path.join(dirpath, slug + ".script"), callgraph)
         case = ids[slug]
         per[case] = (n, total)
         for k, st in stats.items():
@@ -509,9 +545,14 @@ def main(argv):
             g["phys"].update(st["phys"])
         per_case_top[case] = [entry(fn, b, st, n) for (fn, b), st in
                               sorted(stats.items(), key=lambda kv: -kv[1]["count"])[:10]] if n else []
+        meta[case] = {"samples": n, "no_samples": n == 0}
+        if n == 0:
+            print("attribute: WARNING: case %s (%s) has no samples" % (case, slug), file=sys.stderr)
         if callgraph:
-            cn, hits = inclusive_counts(chains)
+            cn, hits, cst = inclusive_counts(chains, depths)
             incl_case[case] = inclusive_report(cn, hits)
+            meta[case].update(chain_stats_report(cn, cst))
+            all_stats.append(cst)
             incl_n += cn
             incl_all.update(hits)
         print("attribute: %s: %d samples" % (slug, n), file=sys.stderr)
@@ -528,10 +569,12 @@ def main(argv):
         # additive: the report lists the top 15 own_decoding functions
         "own_decoding_top": [entry(fn, b, st, n) for (fn, b), st in ranked if b == "own_decoding"][:15] if n else [],
         "per_case_top_self": per_case_top,
+        "per_case_meta": meta,
     })
     if callgraph:
         result["inclusive"] = inclusive_report(incl_n, incl_all)
         result["inclusive_per_case"] = incl_case
+        result.update(chain_stats_report(incl_n, merge_stats(all_stats)))
     text = json.dumps(result, indent=2) + "\n"
     with open(out_path, "w") as fh:
         fh.write(text)
