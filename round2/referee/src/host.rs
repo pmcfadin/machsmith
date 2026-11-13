@@ -165,19 +165,19 @@ pub enum Rejection {
 pub struct MonitorSample {
     pub load1: f64,
     pub cargo_rustc_pids: Vec<u32>,
-    pub sibling_util: Option<f64>,
 }
 
-/// The session rejection rules (spec 6.4), pure. `procs` = (involuntary switches, run seconds)
-/// per bench process. The first violated rule wins: load, cargo/rustc, sibling, switches.
-pub fn judge(samples: &[MonitorSample], procs: &[(u64, f64)]) -> Option<Rejection> {
+/// The session rejection rules (spec 6.4), pure. `session_sibling_util` is the SMT sibling's
+/// utilisation over the whole session; `procs` = (involuntary switches, run seconds) per bench
+/// process. The first violated rule wins: load, cargo/rustc, sibling, switches.
+pub fn judge(samples: &[MonitorSample], session_sibling_util: Option<f64>, procs: &[(u64, f64)]) -> Option<Rejection> {
     if let Some(s) = samples.iter().find(|s| s.load1 > MAX_SESSION_LOAD) {
         return Some(Rejection::Load(s.load1));
     }
     if let Some(s) = samples.iter().find(|s| !s.cargo_rustc_pids.is_empty()) {
         return Some(Rejection::CargoRustc(s.cargo_rustc_pids.clone()));
     }
-    if let Some(u) = samples.iter().filter_map(|s| s.sibling_util).find(|u| *u > MAX_SIBLING_UTIL) {
+    if let Some(u) = session_sibling_util.filter(|u| *u > MAX_SIBLING_UTIL) {
         return Some(Rejection::SiblingUtil(u));
     }
     for &(sw, secs) in procs {
@@ -197,8 +197,16 @@ pub fn nonvoluntary_ctxt_switches(pid: u32) -> Option<u64> {
     t.lines().find_map(|l| l.strip_prefix("nonvoluntary_ctxt_switches:")).and_then(|v| v.trim().parse().ok())
 }
 
-/// A 1 s sampling thread around one session.
+fn take_sample(p: &dyn Probe) -> MonitorSample {
+    MonitorSample { load1: p.loadavg().0, cargo_rustc_pids: p.cargo_rustc_pids() }
+}
+
+/// A 1 s load/cargo sampling thread around one session, plus one session-wide utilisation
+/// figure for the SMT sibling (core + 16) from the first and last `cpu_times()` snapshots.
 pub struct SessionMonitor {
+    probe: Arc<dyn Probe + Send + Sync>,
+    sibling: usize,
+    first: BTreeMap<usize, (u64, u64)>,
     stop: Arc<AtomicBool>,
     samples: Arc<Mutex<Vec<MonitorSample>>>,
     thread: Option<std::thread::JoinHandle<()>>,
@@ -209,42 +217,47 @@ impl SessionMonitor {
     pub fn start(probe: Arc<dyn Probe + Send + Sync>, core: usize) -> SessionMonitor {
         let stop = Arc::new(AtomicBool::new(false));
         let samples = Arc::new(Mutex::new(Vec::new()));
-        let (st, sa) = (stop.clone(), samples.clone());
-        let thread = std::thread::spawn(move || {
-            let sib = core + SIBLING_OFFSET;
-            let mut prev = probe.cpu_times();
-            loop {
-                // sleep 1 s in short slices so finish() returns promptly
-                for _ in 0..20 {
-                    if st.load(Ordering::Relaxed) {
-                        return;
-                    }
-                    std::thread::sleep(Duration::from_millis(50));
+        let first = probe.cpu_times();
+        let (st, sa, pr) = (stop.clone(), samples.clone(), probe.clone());
+        let thread = std::thread::spawn(move || loop {
+            // sleep 1 s in short slices so stopping returns promptly
+            for _ in 0..20 {
+                if st.load(Ordering::Relaxed) {
+                    return;
                 }
-                let cur = probe.cpu_times();
-                let s = MonitorSample {
-                    load1: probe.loadavg().0,
-                    cargo_rustc_pids: probe.cargo_rustc_pids(),
-                    sibling_util: util(&prev, &cur, sib),
-                };
-                prev = cur;
-                sa.lock().unwrap().push(s);
+                std::thread::sleep(Duration::from_millis(50));
             }
+            sa.lock().unwrap().push(take_sample(&*pr));
         });
-        SessionMonitor { stop, samples, thread: Some(thread), procs: Vec::new() }
+        SessionMonitor { probe, sibling: core + SIBLING_OFFSET, first, stop, samples, thread: Some(thread), procs: Vec::new() }
     }
 
     pub fn add_process(&mut self, _pid: u32, nonvoluntary_switches: u64, run_secs: f64) {
         self.procs.push((nonvoluntary_switches, run_secs));
     }
 
-    pub fn finish(mut self) -> Option<Rejection> {
+    fn halt(&mut self) {
         self.stop.store(true, Ordering::Relaxed);
         if let Some(t) = self.thread.take() {
             let _ = t.join();
         }
-        let samples = self.samples.lock().unwrap().clone();
-        judge(&samples, &self.procs)
+    }
+
+    pub fn finish(mut self) -> Option<Rejection> {
+        self.halt();
+        // a last sample so sessions shorter than 1 s still get a load/cargo check
+        let last = take_sample(&*self.probe);
+        let last_times = self.probe.cpu_times();
+        let mut samples = self.samples.lock().unwrap().clone();
+        samples.push(last);
+        let sib = util(&self.first, &last_times, self.sibling);
+        judge(&samples, sib, &self.procs)
+    }
+}
+
+impl Drop for SessionMonitor {
+    fn drop(&mut self) {
+        self.halt();
     }
 }
 
@@ -301,32 +314,87 @@ mod tests {
         assert!(r.unwrap_err().contains("timeout"));
     }
 
-    fn sample(load1: f64, pids: Vec<u32>, sib: Option<f64>) -> MonitorSample {
-        MonitorSample { load1, cargo_rustc_pids: pids, sibling_util: sib }
+    fn sample(load1: f64, pids: Vec<u32>) -> MonitorSample {
+        MonitorSample { load1, cargo_rustc_pids: pids }
     }
 
     #[test]
     fn monitor_rejects_load() {
-        assert_eq!(judge(&[sample(3.1, vec![], None)], &[]), Some(Rejection::Load(3.1)));
-        assert_eq!(judge(&[sample(2.9, vec![], None)], &[]), None);
+        assert_eq!(judge(&[sample(3.1, vec![])], None, &[]), Some(Rejection::Load(3.1)));
+        assert_eq!(judge(&[sample(2.9, vec![])], None, &[]), None);
     }
 
     #[test]
     fn monitor_rejects_cargo() {
-        let s = [sample(0.1, vec![], None), sample(0.1, vec![7], None)];
-        assert_eq!(judge(&s, &[]), Some(Rejection::CargoRustc(vec![7])));
+        let s = [sample(0.1, vec![]), sample(0.1, vec![7])];
+        assert_eq!(judge(&s, None, &[]), Some(Rejection::CargoRustc(vec![7])));
     }
 
     #[test]
     fn monitor_rejects_sibling() {
-        assert_eq!(judge(&[sample(0.1, vec![], Some(0.25))], &[]), Some(Rejection::SiblingUtil(0.25)));
-        assert_eq!(judge(&[sample(0.1, vec![], Some(0.19))], &[]), None);
+        assert_eq!(judge(&[], Some(0.25), &[]), Some(Rejection::SiblingUtil(0.25)));
+        assert_eq!(judge(&[], Some(0.19), &[]), None);
     }
 
     #[test]
     fn ctx_switch_rate() {
-        assert_eq!(judge(&[], &[(600, 10.0)]), Some(Rejection::CtxSwitches(60.0)));
-        assert_eq!(judge(&[], &[(400, 10.0)]), None);
+        assert_eq!(judge(&[], None, &[(600, 10.0)]), Some(Rejection::CtxSwitches(60.0)));
+        assert_eq!(judge(&[], None, &[(400, 10.0)]), None);
+    }
+
+    #[test]
+    fn util_from_two_maps() {
+        let a = BTreeMap::from([(21, (100, 1000)), (5, (0, 1000))]);
+        let b = BTreeMap::from([(21, (300, 2000)), (5, (0, 1000))]);
+        assert_eq!(util(&a, &b, 21), Some(0.2));
+        assert_eq!(util(&a, &b, 5), None); // no elapsed jiffies
+        assert_eq!(util(&a, &b, 99), None);
+    }
+
+    struct ScriptedProbe {
+        times: Mutex<Vec<BTreeMap<usize, (u64, u64)>>>,
+        pids: Vec<u32>,
+    }
+    impl Probe for ScriptedProbe {
+        fn loadavg(&self) -> (f64, f64, f64) {
+            (0.1, 0.0, 0.0)
+        }
+        fn cargo_rustc_pids(&self) -> Vec<u32> {
+            self.pids.clone()
+        }
+        fn cpu_times(&self) -> BTreeMap<usize, (u64, u64)> {
+            self.times.lock().unwrap().remove(0)
+        }
+    }
+
+    fn scripted(sib_busy: u64, pids: Vec<u32>) -> Arc<ScriptedProbe> {
+        // first call (start) then last call (finish); core 5 -> sibling cpu 21
+        Arc::new(ScriptedProbe {
+            times: Mutex::new(vec![
+                BTreeMap::from([(5, (0, 0)), (21, (0, 0))]),
+                BTreeMap::from([(5, (900, 1000)), (21, (sib_busy, 1000))]),
+            ]),
+            pids,
+        })
+    }
+
+    #[test]
+    fn monitor_session_wide_sibling() {
+        assert_eq!(SessionMonitor::start(scripted(250, vec![]), 5).finish(), Some(Rejection::SiblingUtil(0.25)));
+        assert_eq!(SessionMonitor::start(scripted(150, vec![]), 5).finish(), None);
+    }
+
+    #[test]
+    fn monitor_short_session_gets_final_sample() {
+        assert_eq!(SessionMonitor::start(scripted(0, vec![9]), 5).finish(), Some(Rejection::CargoRustc(vec![9])));
+    }
+
+    #[test]
+    fn monitor_drop_stops_thread() {
+        let m = SessionMonitor::start(scripted(0, vec![]), 5);
+        let t = std::time::Instant::now();
+        drop(m); // must join promptly
+        assert!(t.elapsed() < Duration::from_secs(1));
     }
 
     #[test]
@@ -335,12 +403,5 @@ mod tests {
         assert!(p.loadavg().0.is_finite());
         assert!(!p.cpu_times().is_empty());
         assert!(nonvoluntary_ctxt_switches(std::process::id()).is_some());
-    }
-
-    #[test]
-    fn real_monitor_finishes() {
-        let mut m = SessionMonitor::start(Arc::new(ProcProbe), 5);
-        m.add_process(1, 0, 1.0);
-        let _ = m.finish();
     }
 }
