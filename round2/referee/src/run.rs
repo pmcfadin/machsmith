@@ -310,6 +310,13 @@ fn measure(spec: &RunSpec, env: &RunEnv, null: Option<&Value>, st: &mut State) -
     let core = choose_core(probe);
     st.rec.insert("host_start".into(), json!(snapshot(probe, Some(core))));
     st.rec.insert("core".into(), json!(core));
+    if !env.test_mode {
+        // keep r2 and its monitor thread off the measuring core and its SMT sibling; children
+        // pin themselves with `taskset -c <core>`
+        if let Err(e) = keep_off_core(core) {
+            st.rec.insert("r2_affinity_error".into(), json!(e));
+        }
+    }
     let nonce = fresh_nonce();
     st.rec.insert("nonce".into(), json!(format!("{nonce:#018x}")));
 
@@ -402,6 +409,33 @@ fn panic_text(p: &(dyn std::any::Any + Send)) -> String {
 
 /// Runs `spec` and appends exactly one ledger record; returns its id. `Err` only when the lock
 /// cannot be taken, the ledger cannot be read or written, or (with no record) before the lock.
+/// Every CPU in `0..online` except `core` and its SMT sibling.
+pub fn affinity_cpus(online: usize, core: usize) -> Vec<usize> {
+    (0..online).filter(|&c| c != core && c != core + crate::host::SIBLING_OFFSET).collect()
+}
+
+fn keep_off_core(core: usize) -> Result<(), String> {
+    let online = unsafe { libc::sysconf(libc::_SC_NPROCESSORS_ONLN) };
+    if online <= 0 {
+        return Err("sysconf(_SC_NPROCESSORS_ONLN) failed".into());
+    }
+    let cpus = affinity_cpus(online as usize, core);
+    if cpus.is_empty() {
+        return Err("no CPU left outside the measuring core".into());
+    }
+    let mut set: libc::cpu_set_t = unsafe { std::mem::zeroed() };
+    for c in cpus {
+        if c < libc::CPU_SETSIZE as usize {
+            unsafe { libc::CPU_SET(c, &mut set) };
+        }
+    }
+    let r = unsafe { libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &set) };
+    if r != 0 {
+        return Err(format!("sched_setaffinity: {}", std::io::Error::last_os_error()));
+    }
+    Ok(())
+}
+
 pub fn run(spec: &RunSpec, env: &RunEnv) -> Result<String, String> {
     if env.test_mode && ledger::is_real_ledger(&env.ledger) {
         return Err(format!("test mode is refused on the real ledger {}", env.ledger.display()));
@@ -455,6 +489,14 @@ mod tests {
         assert_eq!(RunKind::Screen.protocol_sessions(), 5);
         assert_eq!(RunKind::Crosscheck.protocol_sessions(), 10);
         assert_eq!(RunKind::Confirm.protocol_sessions(), 20);
+    }
+
+    #[test]
+    fn affinity_excludes_core_and_sibling_only() {
+        let v = affinity_cpus(32, 5);
+        assert_eq!(v.len(), 30);
+        assert!(!v.contains(&5) && !v.contains(&21));
+        assert!((0..32).filter(|c| *c != 5 && *c != 21).all(|c| v.contains(&c)));
     }
 
     #[test]
