@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-pub const MAX_SESSION_LOAD: f64 = 3.0;
+pub const MAX_SESSION_LOAD: f64 = 4.0; // spec 6.4 amended 2026-11-13 (owner-approved, DECISIONS R18)
 pub const MAX_SIBLING_UTIL: f64 = 0.20;
 /// Spec 6.4 (amended, DECISIONS R15): max share of an arm's wall time spent on the pinned core by
 /// anything other than that arm.
@@ -355,7 +355,7 @@ mod tests {
 
     #[test]
     fn monitor_rejects_load() {
-        assert_eq!(judge(&[sample(3.1, vec![])], None, &[]), Some(Rejection::Load(3.1)));
+        assert_eq!(judge(&[sample(4.1, vec![])], None, &[]), Some(Rejection::Load(4.1)));
         assert_eq!(judge(&[sample(2.9, vec![])], None, &[]), None);
     }
 
@@ -376,7 +376,7 @@ mod tests {
         assert_eq!(judge(&[], None, &[Some(0.01), Some(0.03)]), Some(Rejection::ForeignCpu(0.03)));
         assert_eq!(judge(&[], None, &[Some(0.01), None]), None);
         assert_eq!(judge(&[], None, &[Some(0.02)]), None);
-        assert_eq!(judge(&[sample(3.1, vec![])], None, &[Some(0.5)]), Some(Rejection::Load(3.1)));
+        assert_eq!(judge(&[sample(4.1, vec![])], None, &[Some(0.5)]), Some(Rejection::Load(4.1)));
         assert_eq!(judge(&[sample(0.1, vec![4])], None, &[Some(0.5)]), Some(Rejection::CargoRustc(vec![4])));
         assert_eq!(judge(&[], Some(0.25), &[Some(0.5)]), Some(Rejection::SiblingUtil(0.25)));
     }
@@ -389,6 +389,13 @@ mod tests {
         assert_eq!(foreign_fraction(Some(1000), None, 100, 29.0, 30.0), None);
         assert_eq!(foreign_fraction(Some(1000), Some(4000), 100, 29.0, 0.0), None);
         assert_eq!(foreign_fraction(Some(4000), Some(1000), 100, 1.0, 30.0), None);
+    }
+
+    #[test]
+    fn session_load_limit_is_four() {
+        assert_eq!(judge(&[sample(3.9, vec![])], None, &[]), None);
+        assert_eq!(judge(&[sample(4.0, vec![])], None, &[]), None);
+        assert_eq!(judge(&[sample(4.01, vec![])], None, &[]), Some(Rejection::Load(4.01)));
     }
 
     #[test]

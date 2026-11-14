@@ -164,6 +164,10 @@ If either fails, stop and report.
   (`MAX_FOREIGN_CPU_FRAC`). Precedence: load, cargo/rustc, sibling, foreign CPU. When the core's
   time is unavailable or wall time is 0 the rule does not apply. Reason: the benches' own pinned
   multi-threaded runtime causes the switches (R2-000005..7).
+  **Amended 2026-11-13 (owner-approved, DECISIONS R18):** the per-session load limit is 4.0, not 3.0.
+  Reason: the bench itself keeps 1.0-1.4 threads runnable (measured), so 3.0 left 0.6-1.0 for all other
+  activity; in R2-000008..10 every rejection was on load (3.03-5.1) while foreign CPU on the measuring
+  core stayed at or below 0.35%. The quiet precondition (load below 2.0) is unchanged.
 - **Run-level gate:** at most 3 rejected sessions are replaced per run (round 1's
   `MAX_SESSION_RERUNS`); a 4th rejection ends the run as `NOISE_GATE_FAILED` with no verdict.
 - **Retry cap, fixed now:** at most 3 confirmation tries per branch, each after a fresh quiet-host
