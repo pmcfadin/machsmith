@@ -569,7 +569,13 @@ fn ledger_append_subcommand() {
     assert_eq!(String::from_utf8_lossy(&run("tests").stdout).trim(), "R2-000002");
     let r = ledger::read_all(&led).unwrap();
     assert_eq!((r[0]["kind"].as_str(), r[0]["rev"].as_str()), (Some("tests"), Some("abc")));
+    // Profile records are hand-written by the controller too (Task 9 Step 7, DECISIONS R19).
+    let o = run("profile");
+    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
+    assert_eq!(String::from_utf8_lossy(&o.stdout).trim(), "R2-000003");
+    assert_eq!(ledger::read_all(&led).unwrap()[2]["kind"].as_str(), Some("profile"));
     let before = std::fs::read(&led).unwrap();
+    // Measurement kinds stay with `r2 run`; test.sh's probe matches this message prefix.
     let o = run("null");
     assert!(!o.status.success() && String::from_utf8_lossy(&o.stderr).contains("only --kind tests"));
     assert_eq!(std::fs::read(&led).unwrap(), before, "refused kind must write nothing");

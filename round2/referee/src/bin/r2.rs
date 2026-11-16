@@ -175,8 +175,11 @@ fn cmd_report(flags: &BTreeMap<String, String>, pos: &[String]) -> Result<i32, S
 fn cmd_ledger_append(flags: &BTreeMap<String, String>) -> Result<i32, String> {
     allow(flags, &["kind", "body-file", "ledger"])?;
     let kind = need(flags, "kind")?;
-    if kind != "tests" {
-        return Err(format!("ledger-append: only --kind tests is accepted (got {kind}); run records are written by `r2 run`"));
+    // DECISIONS R8, R19: only non-measurement kinds are hand-appended; test.sh probes this message.
+    if kind != "tests" && kind != "profile" {
+        return Err(format!(
+            "ledger-append: only --kind tests or --kind profile is accepted (got {kind}); run records are written by `r2 run`"
+        ));
     }
     let f = need(flags, "body-file")?;
     let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
