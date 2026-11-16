@@ -1,0 +1,1097 @@
+{
+  "samples": 554577,
+  "per_case": {
+    "cache_operations/borrow_trait_lookup": {
+      "own_decoding": 2.357541536863967,
+      "allocator": 0.05516614745586708,
+      "memcpy": 0.014602803738317757,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.001622533748701973,
+      "other_cqlite": 0.0,
+      "bench_harness": 0.37480529595015577,
+      "other": 97.19626168224299
+    },
+    "index_lookup_cold/position_0": {
+      "own_decoding": 2.1817620737540504,
+      "allocator": 0.05863292701743558,
+      "memcpy": 0.01954430900581186,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0,
+      "other_cqlite": 0.0010286478424111505,
+      "bench_harness": 0.3332819009412128,
+      "other": 97.40575014143907
+    },
+    "index_lookup_warm/hot_keys": {
+      "own_decoding": 1.556014517455034,
+      "allocator": 0.02807242686130216,
+      "memcpy": 0.005012933368089671,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0010025866736179342,
+      "other_cqlite": 0.0,
+      "bench_harness": 0.22157165486956348,
+      "other": 98.1883258807724
+    },
+    "lookup_distribution/random_access": {
+      "own_decoding": 1.4880068942404365,
+      "allocator": 0.028726001819313448,
+      "memcpy": 0.010532867333748265,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0,
+      "other_cqlite": 0.0,
+      "bench_harness": 0.4232297601378848,
+      "other": 98.04950447646861
+    },
+    "lookup_distribution/sequential_access": {
+      "own_decoding": 1.5765790789400589,
+      "allocator": 0.03999777790122771,
+      "memcpy": 0.008888395089161713,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0,
+      "other_cqlite": 0.0,
+      "bench_harness": 0.2822065440808844,
+      "other": 98.09232820398867
+    },
+    "lookup_throughput/1000_lookups": {
+      "own_decoding": 1.7548351518493717,
+      "allocator": 0.032496947256469844,
+      "memcpy": 0.004923779887343916,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0009847559774687831,
+      "other_cqlite": 0.0,
+      "bench_harness": 0.30232008508291647,
+      "other": 97.90443927994643
+    }
+  },
+  "workload": {
+    "own_decoding": 1.7817183186464638,
+    "allocator": 0.039309239294092614,
+    "memcpy": 0.010278103852125133,
+    "decompression": 0.0,
+    "checksum": 0.0,
+    "sync": 0.0005409528343223754,
+    "other_cqlite": 0.0001803176114407918,
+    "bench_harness": 0.3207850307531686,
+    "other": 97.84718803700838
+  },
+  "workload_dir": "/home/dev/projects/machsmith/work/r2-profile/A/partition_lookup",
+  "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+  "callgraph": false,
+  "case_samples": {
+    "cache_operations/borrow_trait_lookup": 61632,
+    "index_lookup_cold/position_0": 97215,
+    "index_lookup_warm/hot_keys": 99742,
+    "lookup_distribution/random_access": 104435,
+    "lookup_distribution/sequential_access": 90005,
+    "lookup_throughput/1000_lookups": 101548
+  },
+  "top_self": [
+    {
+      "function": "core::intrinsics::rotate_left::<u64>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+      "bucket": "other",
+      "share": 10.03359317101142,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 9.63310775600142,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "perf_signal_handler"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 9.431152031187734,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+        "perf_signal_handler"
+      ]
+    },
+    {
+      "function": "__bcmp_ifunc_target",
+      "source_file": "",
+      "bucket": "other",
+      "share": 9.005422150576024,
+      "physical_symbols": [
+        "__bcmp_ifunc_target"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 8.842054394610667,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<hashbrown::control::bitmask::BitMask>::lowest_set_bit",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/control/bitmask.rs",
+      "bucket": "other",
+      "share": 7.977611765363512,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<u64>::wrapping_add",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 7.667826108908231,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 7.304666439466477,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+      ]
+    },
+    {
+      "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+      "bucket": "other",
+      "share": 5.865371264946076,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<hashbrown::raw::RawTableInner>::find_inner",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+      "bucket": "other",
+      "share": 5.1754760835736064,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<[u8] as core::cmp::PartialEq>::eq",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+      "bucket": "other",
+      "share": 3.7569174343688974,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "core::hash::sip::u8to64_le",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 2.3536857821366555,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+        "_RINvYNtNtNtCs2AWtUsOyxgP_3std4hash6random11RandomStateNtNtCs4NRVxsYgnAr_4core4hash11BuildHasher8hash_oneRNtNtCscd8XJgM4J6E_5pprof6frames6FramesEB1J_"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::index_reader::IndexReader>::lookup_partition",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/index.rs",
+      "bucket": "own_decoding",
+      "share": 1.7817183186464638,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "core::core_arch::x86::sse2::_mm_movemask_epi8",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/../../stdarch/crates/core_arch/src/x86/sse2.rs",
+      "bucket": "other",
+      "share": 1.249781364896128,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::build_hasher",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/std/src/hash/random.rs",
+      "bucket": "other",
+      "share": 0.8013314652428788,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds>>::reset",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.6870100995894168,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::SipHasher13 as core::hash::Hasher>::write",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.6662735742737257,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "perf_signal_handler"
+      ]
+    },
+    {
+      "function": "<usize>::to_ne_bytes",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 0.6458976841809163,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+        "perf_signal_handler"
+      ]
+    },
+    {
+      "function": "<usize as core::slice::index::SliceIndex<[cqlite_core::storage::sstable::index_reader::PartitionIndexEntry]>>::get",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/index.rs",
+      "bucket": "other",
+      "share": 0.6368818036088767,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "core::ptr::read_volatile::<&[u8]>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.6231776651393764,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup23bench_index_lookup_warm00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup22bench_cache_operations00EB31_"
+      ]
+    },
+    {
+      "function": "core::ptr::copy_nonoverlapping::<u8>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.549968714894415,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+        "_RNvMs4_NtNtCsjdQVitYQfOy_5gimli4read5dwarfINtB5_4UnitINtNtB7_12endian_slice11EndianSliceNtNtB9_9endianity12LittleEndianEjE3newCsbmQrzDkredu_9backtrace",
+        "_RINvMNtNtCs4NRVxsYgnAr_4core4cell4onceINtB3_8OnceCellINtNtB7_6result6ResultNtNtCsg1zDtaKmHFi_9addr2line4line5LinesNtNtCsjdQVitYQfOy_5gimli4read5ErrorEE8try_initNCINvB2_11get_or_initNCINvMB1d_NtB1d_9LazyLines6borrowINtNtB1Q_12endian_slice11EndianSliceNtNtB1S_9endianity12LittleEndianEE0E0zECsbmQrzDkredu_9backtrace"
+      ]
+    },
+    {
+      "function": "<u64 as core::cmp::PartialOrd>::lt",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/cmp.rs",
+      "bucket": "other",
+      "share": 0.43997497191553203,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup22bench_cache_operations00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup23bench_index_lookup_warm00EB31_",
+        "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable5drift4sortNtNtCsg1zDtaKmHFi_9addr2line4unit9UnitRangeNCINvMNtCscdodAO9FK5_5alloc5sliceSBW_11sort_by_keyyNCNvMs_BY_INtBY_8ResUnitsINtNtNtCsjdQVitYQfOy_5gimli4read12endian_slice11EndianSliceNtNtB2Y_9endianity12LittleEndianEE5parses2_0E0ECsbmQrzDkredu_9backtrace"
+      ]
+    },
+    {
+      "function": "<hashbrown::control::tag::Tag>::full",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/control/tag.rs",
+      "bucket": "other",
+      "share": 0.4069768490218671,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<tokio::sync::once_cell::OnceCell<cqlite_core::storage::sstable::index_reader::lazy::MaterializedIndex>>::get",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.53.1/src/sync/once_cell.rs",
+      "bucket": "other",
+      "share": 0.39669874516974196,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "partition_lookup::bench_lookup_by_key_distribution::{closure#0}::{closure#0}",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/benches/partition_lookup.rs",
+      "bucket": "other",
+      "share": 0.38876477026634715,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<[u8]> as core::ops::deref::Deref>::deref",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.356848553041327,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "partition_lookup::bench_index_lookup_warm::{closure#0}::{closure#0}",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/benches/partition_lookup.rs",
+      "bucket": "other",
+      "share": 0.27191895805271404,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup23bench_index_lookup_warm00EB31_"
+      ]
+    },
+    {
+      "function": "<hashbrown::map::HashMap<alloc::sync::Arc<[u8]>, usize, std::hash::random::RandomState>>::get::<[u8]>",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/map.rs",
+      "bucket": "other",
+      "share": 0.24757608050820715,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "core::ptr::read_volatile::<core::option::Option<&cqlite_core::storage::sstable::index_reader::PartitionIndexEntry>>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.238199564713286,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup22bench_cache_operations00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup23bench_index_lookup_warm00EB31_"
+      ]
+    },
+    {
+      "function": "partition_lookup::bench_lookup_by_key_distribution::{closure#1}::{closure#0}",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/benches/partition_lookup.rs",
+      "bucket": "other",
+      "share": 0.19726746691622624,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_"
+      ]
+    },
+    {
+      "function": "hashbrown::map::make_hash::<[u8], std::hash::random::RandomState>",
+      "source_file": "/rust/deps/hashbrown-0.17.1/src/map.rs",
+      "bucket": "other",
+      "share": 0.18915317440139062,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "fastrand::mul_high_u64",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/fastrand-2.5.0/src/lib.rs",
+      "bucket": "other",
+      "share": 0.17995697621791024,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_"
+      ]
+    },
+    {
+      "function": "[unknown]",
+      "source_file": "",
+      "bucket": "bench_harness",
+      "share": 0.17941602338358786,
+      "physical_symbols": [
+        "[unknown]"
+      ]
+    },
+    {
+      "function": "<alloc::raw_vec::RawVecInner>::non_null::<u8>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/raw_vec/mod.rs",
+      "bucket": "other",
+      "share": 0.17418681265180488,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_"
+      ]
+    },
+    {
+      "function": "core::sync::atomic::atomic_load::<u8>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+      "bucket": "other",
+      "share": 0.16354807357679818,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    },
+    {
+      "function": "<core::ops::range::Range<u64> as core::iter::range::RangeIteratorImpl>::spec_next",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/iter/range.rs",
+      "bucket": "other",
+      "share": 0.1610236270166271,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup22bench_cache_operations00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup23bench_index_lookup_warm00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_"
+      ]
+    },
+    {
+      "function": "<usize as core::slice::index::SliceIndex<[alloc::vec::Vec<u8>]>>::index",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/index.rs",
+      "bucket": "other",
+      "share": 0.14713917093568613,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distribution00EB31_"
+      ]
+    },
+    {
+      "function": "<u64>::unchecked_add",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 0.13145153874033724,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_"
+      ]
+    },
+    {
+      "function": "<fastrand::Rng>::gen_u64",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/fastrand-2.5.0/src/lib.rs",
+      "bucket": "other",
+      "share": 0.11864898832804101,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_",
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_"
+      ]
+    },
+    {
+      "function": "partition_lookup::bench_lookup_throughput::{closure#0}::{closure#0}",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/benches/partition_lookup.rs",
+      "bucket": "other",
+      "share": 0.1076496140301527,
+      "physical_symbols": [
+        "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsi5aXehndS8D_16partition_lookup23bench_lookup_throughput00EB10_"
+      ]
+    }
+  ],
+  "own_decoding_top": [
+    {
+      "function": "<cqlite_core::storage::sstable::index_reader::IndexReader>::lookup_partition",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/index.rs",
+      "bucket": "own_decoding",
+      "share": 1.7817183186464638,
+      "physical_symbols": [
+        "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+      ]
+    }
+  ],
+  "per_case_top_self": {
+    "cache_operations/borrow_trait_lookup": [
+      {
+        "function": "<hashbrown::control::bitmask::BitMask>::lowest_set_bit",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/control/bitmask.rs",
+        "bucket": "other",
+        "share": 20.119418483904465,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 10.536734164070612,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::find_inner",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 10.423156801661474,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 8.820093457943925,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 8.334955867082035,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 6.052050882658359,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 5.0395898234683285,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 4.9162772585669785,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 3.7529205607476634,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 3.728582554517134,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ],
+    "index_lookup_cold/position_0": [
+      {
+        "function": "<hashbrown::control::bitmask::BitMask>::lowest_set_bit",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/control/bitmask.rs",
+        "bucket": "other",
+        "share": 21.318726533971095,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 10.38934320835262,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::find_inner",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 9.831816077765778,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 9.148793910404773,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 7.839325207015379,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 7.594507020521524,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 6.304582626137941,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 4.986884740009258,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "core::core_arch::x86::sse2::_mm_movemask_epi8",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/../../stdarch/crates/core_arch/src/x86/sse2.rs",
+        "bucket": "other",
+        "share": 3.697988993468086,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 3.6938744020984418,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ],
+    "index_lookup_warm/hot_keys": [
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 21.00018046560125,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 19.342904694110807,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 9.960698602394176,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 8.748571313990094,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 7.087285195805177,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 6.379459004230916,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 4.21286920254256,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<[u8] as core::cmp::PartialEq>::eq",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+        "bucket": "other",
+        "share": 3.929137173908684,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "core::hash::sip::u8to64_le",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 3.6343766918650116,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 3.3907481301758535,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ],
+    "lookup_distribution/random_access": [
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 13.934025949154977,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "perf_signal_handler"
+        ]
+      },
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 12.261215109876957,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 12.145353569205726,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "_RINvMNtCslAmrs0orwAi_9criterion7bencherNtB3_7Bencher4iterINtNtCs4NRVxsYgnAr_4core6option6OptionRNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_reader19PartitionIndexEntryENCNCNvCsi5aXehndS8D_16partition_lookup32bench_lookup_by_key_distributions_00EB31_"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 9.141571312299517,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 8.363096662996123,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 7.891032699765404,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 6.476755876861206,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<[u8] as core::cmp::PartialEq>::eq",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+        "bucket": "other",
+        "share": 4.2380428017427105,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 3.025805524967683,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::find_inner",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 2.9109015176904296,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ],
+    "lookup_distribution/sequential_access": [
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 12.997055719126715,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 11.539358924504194,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "perf_signal_handler"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 10.14721404366424,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "perf_signal_handler"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 9.601688795066941,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 8.387311816010222,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 7.850674962502083,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 6.722959835564691,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core",
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 4.803066496305761,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::control::bitmask::BitMask>::lowest_set_bit",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/control/bitmask.rs",
+        "bucket": "other",
+        "share": 4.163102049886118,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<[u8] as core::cmp::PartialEq>::eq",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/cmp.rs",
+        "bucket": "other",
+        "share": 3.6297983445364146,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ],
+    "lookup_throughput/1000_lookups": [
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 16.96242171189979,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<u64>::wrapping_add",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+        "bucket": "other",
+        "share": 10.194193878756844,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "core::intrinsics::rotate_left::<u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/intrinsics/mod.rs",
+        "bucket": "other",
+        "share": 9.704770157954858,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::finish",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 8.573285539843226,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 8.211880096112184,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 6.982904636231142,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::c_rounds",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 6.6845235750581,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition",
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCsaZczlVjrUBm_11cqlite_core"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::find_inner",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 5.05770670027967,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::control::bitmask::BitMask>::lowest_set_bit",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/control/bitmask.rs",
+        "bucket": "other",
+        "share": 4.414661046992555,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      },
+      {
+        "function": "<hashbrown::raw::RawTableInner>::probe_seq",
+        "source_file": "/rust/deps/hashbrown-0.17.1/src/raw.rs",
+        "bucket": "other",
+        "share": 4.285658013944144,
+        "physical_symbols": [
+          "_RNvMs_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable12index_readerNtB4_11IndexReader16lookup_partition"
+        ]
+      }
+    ]
+  },
+  "per_case_meta": {
+    "cache_operations/borrow_trait_lookup": {
+      "samples": 61632,
+      "no_samples": false
+    },
+    "index_lookup_cold/position_0": {
+      "samples": 97215,
+      "no_samples": false
+    },
+    "index_lookup_warm/hot_keys": {
+      "samples": 99742,
+      "no_samples": false
+    },
+    "lookup_distribution/random_access": {
+      "samples": 104435,
+      "no_samples": false
+    },
+    "lookup_distribution/sequential_access": {
+      "samples": 90005,
+      "no_samples": false
+    },
+    "lookup_throughput/1000_lookups": {
+      "samples": 101548,
+      "no_samples": false
+    }
+  }
+}

@@ -1,0 +1,1928 @@
+{
+  "samples": 50787,
+  "per_case": {
+    "read/clustering_point_bti": {
+      "own_decoding": 0.06070908207867897,
+      "allocator": 56.945118989800875,
+      "memcpy": 37.6517727051967,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.012141816415735794,
+      "other_cqlite": 0.04856726566294318,
+      "bench_harness": 0.6070908207867897,
+      "other": 4.674599320058281
+    },
+    "read/clustering_range_bti": {
+      "own_decoding": 0.07333170373991689,
+      "allocator": 64.71522855047665,
+      "memcpy": 28.403813248594474,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.0,
+      "other_cqlite": 0.1344414568565143,
+      "bench_harness": 0.5255438768027377,
+      "other": 6.147641163529699
+    },
+    "read/clustering_slice": {
+      "own_decoding": 22.067039106145252,
+      "allocator": 1.3966480446927374,
+      "memcpy": 0.0,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.5586592178770949,
+      "other_cqlite": 2.793296089385475,
+      "bench_harness": 15.083798882681565,
+      "other": 58.100558659217874
+    },
+    "read/full_scan": {
+      "own_decoding": 1.362788696026395,
+      "allocator": 79.07043465786832,
+      "memcpy": 7.172572084349448,
+      "decompression": 0.14345144168698895,
+      "checksum": 0.0,
+      "sync": 0.014345144168698896,
+      "other_cqlite": 2.5677808061971024,
+      "bench_harness": 0.9324343709654282,
+      "other": 8.736192798737628
+    },
+    "read/get_partition_big": {
+      "own_decoding": 0.15787811809283234,
+      "allocator": 83.33859593726976,
+      "memcpy": 10.788338069676875,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.02105041574571098,
+      "other_cqlite": 0.08420166298284391,
+      "bench_harness": 0.473634354278497,
+      "other": 5.136301441953479
+    },
+    "read/get_partition_bti": {
+      "own_decoding": 1.6923076923076923,
+      "allocator": 17.076923076923077,
+      "memcpy": 3.8461538461538463,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.7692307692307693,
+      "other_cqlite": 5.076923076923077,
+      "bench_harness": 7.384615384615385,
+      "other": 64.15384615384616
+    },
+    "read/point_lookup_repeated": {
+      "own_decoding": 0.21614611477358694,
+      "allocator": 77.4451529233762,
+      "memcpy": 13.09845455527937,
+      "decompression": 0.0,
+      "checksum": 0.0,
+      "sync": 0.11888036312547282,
+      "other_cqlite": 0.3026045606830217,
+      "bench_harness": 0.6052091213660434,
+      "other": 8.213552361396303
+    },
+    "read/scan_partition_dense_stream": {
+      "own_decoding": 6.293706293706293,
+      "allocator": 2.797202797202797,
+      "memcpy": 0.0,
+      "decompression": 0.6993006993006993,
+      "checksum": 0.0,
+      "sync": 0.6993006993006993,
+      "other_cqlite": 0.6993006993006993,
+      "bench_harness": 40.55944055944056,
+      "other": 48.25174825174825
+    },
+    "read/type_heavy": {
+      "own_decoding": 0.05338315761377285,
+      "allocator": 92.59308688108902,
+      "memcpy": 4.9245962898705455,
+      "decompression": 0.013345789403443213,
+      "checksum": 0.0,
+      "sync": 0.0,
+      "other_cqlite": 0.013345789403443213,
+      "bench_harness": 0.7607099959962632,
+      "other": 1.6415320966235152
+    }
+  },
+  "workload": {
+    "own_decoding": 0.4804379073384921,
+    "allocator": 74.11148522259633,
+    "memcpy": 16.846830881918603,
+    "decompression": 0.0236280938035324,
+    "checksum": 0.0,
+    "sync": 0.045287179790103764,
+    "other_cqlite": 0.5414771496642842,
+    "bench_harness": 0.9372477208734519,
+    "other": 7.013605844015201
+  },
+  "workload_dir": "/home/dev/projects/machsmith/work/r2-profile/A-cg/read",
+  "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+  "callgraph": true,
+  "case_samples": {
+    "read/clustering_point_bti": 8236,
+    "read/clustering_range_bti": 8182,
+    "read/clustering_slice": 358,
+    "read/full_scan": 6971,
+    "read/get_partition_big": 9501,
+    "read/get_partition_bti": 650,
+    "read/point_lookup_repeated": 9253,
+    "read/scan_partition_dense_stream": 143,
+    "read/type_heavy": 7493
+  },
+  "top_self": [
+    {
+      "function": "malloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 24.277866383129542,
+      "physical_symbols": [
+        "malloc"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab250",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 21.653178963120485,
+      "physical_symbols": [
+        "libc_malloc_internal_ab250"
+      ]
+    },
+    {
+      "function": "__memcpy_ifunc_target",
+      "source_file": "",
+      "bucket": "memcpy",
+      "share": 16.63614704550377,
+      "physical_symbols": [
+        "__memcpy_ifunc_target"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab650",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 10.819697954200878,
+      "physical_symbols": [
+        "libc_malloc_internal_ab650"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_a9c90",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 9.880481225510465,
+      "physical_symbols": [
+        "libc_malloc_internal_a9c90"
+      ]
+    },
+    {
+      "function": "cfree",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 3.741114852225963,
+      "physical_symbols": [
+        "cfree"
+      ]
+    },
+    {
+      "function": "__bcmp_ifunc_target",
+      "source_file": "",
+      "bucket": "other",
+      "share": 2.11471439541615,
+      "physical_symbols": [
+        "__bcmp_ifunc_target"
+      ]
+    },
+    {
+      "function": "[unknown]",
+      "source_file": "",
+      "bucket": "other",
+      "share": 1.9237206371709297,
+      "physical_symbols": [
+        "[unknown]"
+      ]
+    },
+    {
+      "function": "realloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 1.596865339555398,
+      "physical_symbols": [
+        "realloc"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_a9bb0",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 1.305452182645165,
+      "physical_symbols": [
+        "libc_malloc_internal_a9bb0"
+      ]
+    },
+    {
+      "function": "[unknown]",
+      "source_file": "",
+      "bucket": "bench_harness",
+      "share": 0.48240691515545314,
+      "physical_symbols": [
+        "[unknown]"
+      ]
+    },
+    {
+      "function": "core::sync::atomic::atomic_add::<usize, usize>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+      "bucket": "other",
+      "share": 0.40561561029397286,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl",
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10block_emitNtB4_24V5CompressedLegacyParser11parse_block",
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtB8_5types13SSTableReader26bti_collect_partition_rows",
+        "_RNCINvMs0_NtCsgZM79OPrNyP_8arc_swap4debtNtB8_4Debt7pay_allINtNtCs4NRVxsYgnAr_4core6option6OptionINtNtCscdodAO9FK5_5alloc4sync3ArcNtNtNtCsaZczlVjrUBm_11cqlite_core5query11access_path10AccessPathEENCNvXs3_NtNtBa_8strategy6hybridINtB3f_14HybridStrategyNtB3f_13DefaultConfigEINtNtB3h_6sealed13InnerStrategyBU_E16wait_for_readers0E0B29_",
+        "_RNvNtCsj1eXcmRtlL3_5bytes5bytes12shared_clone"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ab070",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.3248862897985705,
+      "physical_symbols": [
+        "libc_malloc_internal_ab070"
+      ]
+    },
+    {
+      "function": "__libc_calloc",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.2658160552897395,
+      "physical_symbols": [
+        "__libc_calloc"
+      ]
+    },
+    {
+      "function": "_Unwind_Find_FDE",
+      "source_file": "",
+      "bucket": "bench_harness",
+      "share": 0.22052887549963573,
+      "physical_symbols": [
+        "_Unwind_Find_FDE"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<str> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.21068383641483057,
+      "physical_symbols": [
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsaZczlVjrUBm_11cqlite_core5query6result8QueryRowECs8UrdH1caGbs_4read",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsaZczlVjrUBm_11cqlite_core5types7ScanRowEBF_",
+        "_RNvNtNtNtCsaZczlVjrUBm_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached",
+        "_RNCINvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder19block_emit_windowedNtB7_24V5CompressedLegacyParser35parse_one_partition_with_timestampsNCNvMNtBb_20scan_stream_windowedNtNtBb_5types13SSTableReader17drain_scan_window0Es_0Bh_",
+        "_RNCNvMNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader11data_access10sequentialNtNtB8_5types13SSTableReader15sequential_scan0Cs8UrdH1caGbs_4read"
+      ]
+    },
+    {
+      "function": "__memset_ifunc_target",
+      "source_file": "",
+      "bucket": "memcpy",
+      "share": 0.20871482859786952,
+      "physical_symbols": [
+        "__memset_ifunc_target"
+      ]
+    },
+    {
+      "function": "cqlite_core::memory::estimate_value_size",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/memory/mod.rs",
+      "bucket": "other_cqlite",
+      "share": 0.18508673479433713,
+      "physical_symbols": [
+        "_RNvNtCsaZczlVjrUBm_11cqlite_core6memory19estimate_value_size"
+      ]
+    },
+    {
+      "function": "clock_gettime",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.17917971134345403,
+      "physical_symbols": [
+        "clock_gettime"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_aabe0",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.1713036800756099,
+      "physical_symbols": [
+        "libc_malloc_internal_aabe0"
+      ]
+    },
+    {
+      "function": "libc_func_98630",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.1358615393703113,
+      "physical_symbols": [
+        "libc_func_98630"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs",
+      "bucket": "own_decoding",
+      "share": 0.13389253155335026,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+      ]
+    },
+    {
+      "function": "<cqlite_core::types::Value>::into_owned",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/types.rs",
+      "bucket": "other_cqlite",
+      "share": 0.1240474924685451,
+      "physical_symbols": [
+        "_RNvMs3_NtCsaZczlVjrUBm_11cqlite_core5typesNtB5_5Value10into_owned"
+      ]
+    },
+    {
+      "function": "<core::result::Result<cqlite_core::types::Value, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+      "bucket": "other",
+      "share": 0.12207848465158407,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order",
+        "_RNvNtNtCsaZczlVjrUBm_11cqlite_core7storage19partition_key_codec28decode_partition_key_columns"
+      ]
+    },
+    {
+      "function": "libc_func_986b0",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.11617146120070097,
+      "physical_symbols": [
+        "libc_func_986b0"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.0767913048614803,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCs8UrdH1caGbs_4read"
+      ]
+    },
+    {
+      "function": "libc_malloc_internal_ad030",
+      "source_file": "",
+      "bucket": "allocator",
+      "share": 0.0708842814105972,
+      "physical_symbols": [
+        "libc_malloc_internal_ad030"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value.rs",
+      "bucket": "own_decoding",
+      "share": 0.0708842814105972,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.06300825014275306,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/vuint_length.rs",
+      "bucket": "own_decoding",
+      "share": 0.05119420324098687,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder12vuint_length26checked_vuint_exact_length"
+      ]
+    },
+    {
+      "function": "core::str::validations::run_utf8_validation",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/validations.rs",
+      "bucket": "other",
+      "share": 0.039380156339220665,
+      "physical_symbols": [
+        "_RNvNtNtCs4NRVxsYgnAr_4core3str8converts9from_utf8"
+      ]
+    },
+    {
+      "function": "libc_func_a92d0",
+      "source_file": "",
+      "bucket": "other",
+      "share": 0.039380156339220665,
+      "physical_symbols": [
+        "libc_func_a92d0"
+      ]
+    },
+    {
+      "function": "gimli::read::abbrev::get_attribute_size",
+      "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/gimli-0.32.3/src/read/abbrev.rs",
+      "bucket": "bench_harness",
+      "share": 0.03741114852225964,
+      "physical_symbols": [
+        "_RINvNtNtCsjdQVitYQfOy_5gimli4read4unit15skip_attributesINtNtB4_12endian_slice11EndianSliceNtNtB6_9endianity12LittleEndianEECsbmQrzDkredu_9backtrace"
+      ]
+    },
+    {
+      "function": "core::ptr::copy_nonoverlapping::<u8>",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+      "bucket": "other",
+      "share": 0.0354421407052986,
+      "physical_symbols": [
+        "_RINvMNtNtCs4NRVxsYgnAr_4core4cell4onceINtB3_8OnceCellINtNtB7_6result6ResultNtNtCsg1zDtaKmHFi_9addr2line4line5LinesNtNtCsjdQVitYQfOy_5gimli4read5ErrorEE8try_initNCINvB2_11get_or_initNCINvMB1d_NtB1d_9LazyLines6borrowINtNtB1Q_12endian_slice11EndianSliceNtNtB1S_9endianity12LittleEndianEE0E0zECsbmQrzDkredu_9backtrace",
+        "_RNvMs4_NtNtCsjdQVitYQfOy_5gimli4read5dwarfINtB5_4UnitINtNtB7_12endian_slice11EndianSliceNtNtB9_9endianity12LittleEndianEjE3newCsbmQrzDkredu_9backtrace",
+        "_RNvMs1_NtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable11compressionNtB5_11Compression10decompress",
+        "_RNvNtNtCsavexwiQN6uN_9crc32fast11specialized9pclmulqdq9calculate",
+        "_RINvNtCsg1zDtaKmHFi_9addr2line4line11render_fileINtNtNtCsjdQVitYQfOy_5gimli4read12endian_slice11EndianSliceNtNtBR_9endianity12LittleEndianEECsbmQrzDkredu_9backtrace"
+      ]
+    },
+    {
+      "function": "<u64>::swap_bytes",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/num/uint_macros.rs",
+      "bucket": "other",
+      "share": 0.033473132888337566,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser18parse_row_metadata",
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser31read_vint_length_prefixed_bytes",
+        "_RNvNtNtCsaZczlVjrUBm_11cqlite_core6parser4vint10parse_vint"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Weak<[u8], &alloc::alloc::Global> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.033473132888337566,
+      "physical_symbols": [
+        "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcShE9drop_slowCseB5k6vhe8UZ_14regex_automata"
+      ]
+    },
+    {
+      "function": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/slice/iter/macros.rs",
+      "bucket": "other_cqlite",
+      "share": 0.0295351172544155,
+      "physical_symbols": [
+        "_RNvNtNtNtCsaZczlVjrUBm_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached"
+      ]
+    },
+    {
+      "function": "<alloc::sync::Arc<[u8]> as core::ops::drop::Drop>::drop",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+      "bucket": "other",
+      "share": 0.0295351172544155,
+      "physical_symbols": [
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6option6OptionTINtNtCscdodAO9FK5_5alloc4sync3ArcShEyINtNtB13_3vec3VecTIBZ_eENtNtCsaZczlVjrUBm_11cqlite_core5types5ValueEEEEEB21_",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsaZczlVjrUBm_11cqlite_core5query6result8QueryRowECs8UrdH1caGbs_4read",
+        "_RNvMNCNvXsb_NtNtNtCsdoL9WXi2cXw_5tokio4sync4mpsc4chanINtBa_2RxppENtNtNtCs4NRVxsYgnAr_4core3ops4drop4Drop4drop0INtB2_5GuardINtNtB17_6result6ResultINtNtCscdodAO9FK5_5alloc3vec3VecTNtNtCsaZczlVjrUBm_11cqlite_core5types6RowKeyNtB2S_7ScanRowEENtNtB2U_5error5ErrorENtNtBc_7bounded9SemaphoreE5drainB2U_",
+        "_RNCNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader11data_access9bti_point16partition_extentNtNtBa_5types13SSTableReader26bti_collect_partition_rowss0_0Bg_",
+        "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueSTNtNtCsaZczlVjrUBm_11cqlite_core5types6RowKeyNtBF_7ScanRowEEBH_"
+      ]
+    },
+    {
+      "function": "<core::hash::sip::Sip13Rounds as core::hash::sip::Sip>::d_rounds",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.0295351172544155,
+      "physical_symbols": [
+        "_RINvYNtNtNtCs2AWtUsOyxgP_3std4hash6random11RandomStateNtNtCs4NRVxsYgnAr_4core4hash11BuildHasher8hash_oneRINtNtCscdodAO9FK5_5alloc4sync3ArceEECsaZczlVjrUBm_11cqlite_core",
+        "_RNvNtNtNtCsaZczlVjrUBm_11cqlite_core5query15select_executor9row_build26build_row_from_scan_cached"
+      ]
+    },
+    {
+      "function": "core::hash::sip::u8to64_le",
+      "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+      "bucket": "other",
+      "share": 0.027566109437454467,
+      "physical_symbols": [
+        "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCs8UrdH1caGbs_4read"
+      ]
+    }
+  ],
+  "own_decoding_top": [
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs",
+      "bucket": "own_decoding",
+      "share": 0.13389253155335026,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value.rs",
+      "bucket": "own_decoding",
+      "share": 0.0708842814105972,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value_scalar.rs",
+      "bucket": "own_decoding",
+      "share": 0.06300825014275306,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+      ]
+    },
+    {
+      "function": "cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/vuint_length.rs",
+      "bucket": "own_decoding",
+      "share": 0.05119420324098687,
+      "physical_symbols": [
+        "_RNvNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder12vuint_length26checked_vuint_exact_length"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::read_vint_length_prefixed_bytes",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value.rs",
+      "bucket": "own_decoding",
+      "share": 0.025597101620493435,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser31read_vint_length_prefixed_bytes"
+      ]
+    },
+    {
+      "function": "cqlite_core::parser::vint::decode_unsigned",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/parser/vint.rs",
+      "bucket": "own_decoding",
+      "share": 0.019690078169610332,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser18parse_row_metadata",
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser31read_vint_length_prefixed_bytes"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.013783054718727233,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser18parse_row_metadata"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_flags",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.007876031267844133,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser15parse_row_flags"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_shadow::PartitionShadow>::fold_max",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/partition_shadow.rs",
+      "bucket": "own_decoding",
+      "share": 0.007876031267844133,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::block_partition_header",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed/partition_header_arm.rs",
+      "bucket": "own_decoding",
+      "share": 0.007876031267844133,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder19block_emit_windowed20partition_header_armNtB6_24V5CompressedLegacyParser22block_partition_header"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.0059070234508831,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser23parse_clustering_prefix"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::cell_kind::CellKind>::from_type",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_kind.rs",
+      "bucket": "own_decoding",
+      "share": 0.0059070234508831,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder9cell_kindNtB2_8CellKind9from_type"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs",
+      "bucket": "own_decoding",
+      "share": 0.0059070234508831,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10block_emitNtB4_24V5CompressedLegacyParser11parse_block"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#0}",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs",
+      "bucket": "own_decoding",
+      "share": 0.0059070234508831,
+      "physical_symbols": [
+        "_RNvXs0_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3mapINtB5_3MapINtNtB7_6filter6FilterINtNtNtBb_5slice4iter4IterNtNtNtCsaZczlVjrUBm_11cqlite_core6parser6header10ColumnInfoENCNCNvMNtNtNtNtNtB1O_7storage7sstable6reader7parsing11row_decoderNtB2N_19RowColumnResolution5build00ENCB2I_s_0ENtNtNtB9_6traits8iterator8Iterator4nextB1O_"
+      ]
+    },
+    {
+      "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::scan_partition_header",
+      "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs",
+      "bucket": "own_decoding",
+      "share": 0.003938015633922066,
+      "physical_symbols": [
+        "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder11row_framingNtB4_24V5CompressedLegacyParser21scan_partition_header"
+      ]
+    }
+  ],
+  "per_case_top_self": {
+    "read/clustering_point_bti": [
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 37.50607090820787,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 21.636716852841186,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 13.975230694511898,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 7.588635259834871,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 7.236522583778533,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.484701311316173,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 2.5133559980573095,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 1.3963088878096164,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 1.1534725594949005,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9bb0",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 0.4371053909664886,
+        "physical_symbols": [
+          "libc_malloc_internal_a9bb0"
+        ]
+      }
+    ],
+    "read/clustering_range_bti": [
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 28.31825959423124,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 22.42727939379125,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 17.624052798826693,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 9.985333659252017,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 7.932045954534344,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 4.289904668785138,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.752138841359081,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 1.2099731117086288,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 0.8677584942556832,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9bb0",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 0.7577609386458078,
+        "physical_symbols": [
+          "libc_malloc_internal_a9bb0"
+        ]
+      }
+    ],
+    "read/clustering_slice": [
+      {
+        "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl",
+        "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs",
+        "bucket": "own_decoding",
+        "share": 10.335195530726256,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+        ]
+      },
+      {
+        "function": "core::sync::atomic::atomic_add::<usize, usize>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+        "bucket": "other",
+        "share": 9.217877094972067,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl",
+          "_RNvNtNtNtCsdoL9WXi2cXw_5tokio7runtime4task5waker11clone_waker",
+          "_RINvNtNtNtCsdoL9WXi2cXw_5tokio7runtime4task3raw4pollINtNtNtB6_8blocking4task12BlockingTaskNCNvMNtNtNtB6_9scheduler12multi_thread6workerNtB1v_6Launch6launch0ENtNtBT_8schedule16BlockingScheduleEB8_"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 8.659217877094973,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 6.983240223463687,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "<alloc::sync::Arc<str> as core::ops::drop::Drop>::drop",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+        "bucket": "other",
+        "share": 6.145251396648045,
+        "physical_symbols": [
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsaZczlVjrUBm_11cqlite_core5types7ScanRowEBF_",
+          "_RNCINvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder19block_emit_windowedNtB7_24V5CompressedLegacyParser35parse_one_partition_with_timestampsNCNvMNtBb_20scan_stream_windowedNtNtBb_5types13SSTableReader17drain_scan_window0Es_0Bh_",
+          "_RNvMNCNvXsb_NtNtNtCsdoL9WXi2cXw_5tokio4sync4mpsc4chanINtBa_2RxppENtNtNtCs4NRVxsYgnAr_4core3ops4drop4Drop4drop0INtB2_5GuardINtNtB17_6result6ResultINtNtCscdodAO9FK5_5alloc3vec3VecTNtNtCsaZczlVjrUBm_11cqlite_core5types6RowKeyNtB2S_7ScanRowEENtNtB2U_5error5ErrorENtNtBc_7bounded9SemaphoreE5drainB2U_",
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsaZczlVjrUBm_11cqlite_core5query6result8QueryRowECs8UrdH1caGbs_4read"
+        ]
+      },
+      {
+        "function": "<core::result::Result<cqlite_core::types::Value, cqlite_core::error::Error> as core::ops::try_trait::Try>::branch",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/result.rs",
+        "bucket": "other",
+        "share": 5.027932960893855,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order"
+        ]
+      },
+      {
+        "function": "_Unwind_Find_FDE",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 4.748603351955308,
+        "physical_symbols": [
+          "_Unwind_Find_FDE"
+        ]
+      },
+      {
+        "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value",
+        "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value_scalar.rs",
+        "bucket": "own_decoding",
+        "share": 3.35195530726257,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder17cell_value_scalarNtB4_24V5CompressedLegacyParser24decode_scalar_cell_value"
+        ]
+      },
+      {
+        "function": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order",
+        "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/storage/sstable/reader/parsing/row_decoder/cell_value.rs",
+        "bucket": "own_decoding",
+        "share": 3.35195530726257,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10cell_valueNtB4_24V5CompressedLegacyParser29parse_cell_value_schema_order"
+        ]
+      },
+      {
+        "function": "core::str::validations::run_utf8_validation",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/str/validations.rs",
+        "bucket": "other",
+        "share": 2.793296089385475,
+        "physical_symbols": [
+          "_RNvNtNtCs4NRVxsYgnAr_4core3str8converts9from_utf8"
+        ]
+      }
+    ],
+    "read/full_scan": [
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 23.310859274135705,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 19.050351456032132,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 15.17716253048343,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 12.953665184335103,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 6.440969731745804,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9bb0",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.844498637211304,
+        "physical_symbols": [
+          "libc_malloc_internal_a9bb0"
+        ]
+      },
+      {
+        "function": "core::sync::atomic::atomic_add::<usize, usize>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+        "bucket": "other",
+        "share": 2.2665327786544256,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl",
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder10block_emitNtB4_24V5CompressedLegacyParser11parse_block",
+          "_RNCNvMNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader11data_access10sequentialNtNtB8_5types13SSTableReader15sequential_scan0Cs8UrdH1caGbs_4read"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 2.108736192798738,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 2.051355616123942,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "cqlite_core::memory::estimate_value_size",
+        "source_file": "/home/dev/projects/machsmith/work/cqlite-r2-wt/7f9abe366325/cqlite-core/src/memory/mod.rs",
+        "bucket": "other_cqlite",
+        "share": 1.2910629751829006,
+        "physical_symbols": [
+          "_RNvNtCsaZczlVjrUBm_11cqlite_core6memory19estimate_value_size"
+        ]
+      }
+    ],
+    "read/get_partition_big": [
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 26.92348173876434,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 23.544890011577728,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 13.177560256815072,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 13.093358593832228,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 10.66203557520261,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 2.883906957162404,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 2.26291969266393,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 1.8629617934954215,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 1.7787601305125775,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "__libc_calloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 0.5473108093884854,
+        "physical_symbols": [
+          "__libc_calloc"
+        ]
+      }
+    ],
+    "read/get_partition_bti": [
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 42.76923076923077,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 5.384615384615385,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 5.076923076923077,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 3.8461538461538463,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.8461538461538463,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.5384615384615383,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 2.4615384615384617,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 1.0769230769230769,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCs8UrdH1caGbs_4read"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 1.0769230769230769,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "core::sync::atomic::atomic_add::<u64, u64>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+        "bucket": "other",
+        "share": 0.6153846153846154,
+        "physical_symbols": [
+          "_RNvMs_NtNtCsaZczlVjrUBm_11cqlite_core5query6engineNtB4_11QueryEngine22update_execution_stats"
+        ]
+      }
+    ],
+    "read/point_lookup_repeated": [
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 25.937533772830434,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 25.47281962606722,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 12.968766886415217,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 11.542202528909543,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 8.170323138441587,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.5556035880255052,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 3.1881551929104073,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 2.4424510969415323,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 1.7832054468820924,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "__libc_calloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 0.46471414676321193,
+        "physical_symbols": [
+          "__libc_calloc"
+        ]
+      }
+    ],
+    "read/scan_partition_dense_stream": [
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 15.384615384615385,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "other",
+        "share": 13.286713286713287,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      },
+      {
+        "function": "_Unwind_Find_FDE",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 12.587412587412587,
+        "physical_symbols": [
+          "_Unwind_Find_FDE"
+        ]
+      },
+      {
+        "function": "gimli::read::abbrev::get_attribute_size",
+        "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/gimli-0.32.3/src/read/abbrev.rs",
+        "bucket": "bench_harness",
+        "share": 3.4965034965034967,
+        "physical_symbols": [
+          "_RINvNtNtCsjdQVitYQfOy_5gimli4read4unit15skip_attributesINtNtB4_12endian_slice11EndianSliceNtNtB6_9endianity12LittleEndianEECsbmQrzDkredu_9backtrace"
+        ]
+      },
+      {
+        "function": "gimli::read::unit::skip_attributes::<gimli::read::endian_slice::EndianSlice<gimli::endianity::LittleEndian>>",
+        "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/gimli-0.32.3/src/read/endian_slice.rs",
+        "bucket": "bench_harness",
+        "share": 2.097902097902098,
+        "physical_symbols": [
+          "_RINvNtNtCsjdQVitYQfOy_5gimli4read4unit15skip_attributesINtNtB4_12endian_slice11EndianSliceNtNtB6_9endianity12LittleEndianEECsbmQrzDkredu_9backtrace"
+        ]
+      },
+      {
+        "function": "core::hash::sip::u8to64_le",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/hash/sip.rs",
+        "bucket": "other",
+        "share": 2.097902097902098,
+        "physical_symbols": [
+          "_RNvXs3_NtNtCs4NRVxsYgnAr_4core4hash3sipINtB5_6HasherNtB5_11Sip13RoundsENtB7_6Hasher5writeCs8UrdH1caGbs_4read"
+        ]
+      },
+      {
+        "function": "core::ptr::drop_glue::<cqlite_core::types::Value>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/ptr/mod.rs",
+        "bucket": "other",
+        "share": 1.3986013986013985,
+        "physical_symbols": [
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsaZczlVjrUBm_11cqlite_core5types5ValueECs8UrdH1caGbs_4read",
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCsaZczlVjrUBm_11cqlite_core5types5ValueEBF_"
+        ]
+      },
+      {
+        "function": "<alloc::sync::Arc<str> as core::ops::drop::Drop>::drop",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/alloc/src/sync.rs",
+        "bucket": "other",
+        "share": 1.3986013986013985,
+        "physical_symbols": [
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCsaZczlVjrUBm_11cqlite_core5query6result8QueryRowECs8UrdH1caGbs_4read",
+          "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder13ColumnToParseEEB1j_"
+        ]
+      },
+      {
+        "function": "<gimli::read::abbrev::Attributes as core::ops::deref::Deref>::deref",
+        "source_file": "/home/dev/.cache-dev/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/gimli-0.32.3/src/read/abbrev.rs",
+        "bucket": "bench_harness",
+        "share": 1.3986013986013985,
+        "physical_symbols": [
+          "_RINvMNtNtCs4NRVxsYgnAr_4core4cell4onceINtB3_8OnceCellINtNtB7_6result6ResultINtNtCsg1zDtaKmHFi_9addr2line8function9FunctionsINtNtNtCsjdQVitYQfOy_5gimli4read12endian_slice11EndianSliceNtNtB24_9endianity12LittleEndianEENtB22_5ErrorEE8try_initNCINvB2_11get_or_initNCNvMB1e_INtB1e_13LazyFunctionsB1X_E6borrow0E0zECsbmQrzDkredu_9backtrace",
+          "_RNvMs1_NtCsg1zDtaKmHFi_9addr2line8functionINtB5_8FunctionINtNtNtCsjdQVitYQfOy_5gimli4read12endian_slice11EndianSliceNtNtB10_9endianity12LittleEndianEE14parse_childrenCsbmQrzDkredu_9backtrace"
+        ]
+      },
+      {
+        "function": "core::sync::atomic::atomic_add::<usize, usize>",
+        "source_file": "/rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library/core/src/sync/atomic.rs",
+        "bucket": "other",
+        "share": 1.3986013986013985,
+        "physical_symbols": [
+          "_RNvMNtNtNtNtNtNtCsaZczlVjrUBm_11cqlite_core7storage7sstable6reader7parsing11row_decoder8row_dataNtB4_24V5CompressedLegacyParser31parse_row_data_with_offset_impl"
+        ]
+      }
+    ],
+    "read/type_heavy": [
+      {
+        "function": "malloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 32.97744561590818,
+        "physical_symbols": [
+          "malloc"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab250",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 27.77258774856533,
+        "physical_symbols": [
+          "libc_malloc_internal_ab250"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_ab650",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 11.197117309488856,
+        "physical_symbols": [
+          "libc_malloc_internal_ab650"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9c90",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 8.821566795675965,
+        "physical_symbols": [
+          "libc_malloc_internal_a9c90"
+        ]
+      },
+      {
+        "function": "cfree",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 7.380221540104097,
+        "physical_symbols": [
+          "cfree"
+        ]
+      },
+      {
+        "function": "__memcpy_ifunc_target",
+        "source_file": "",
+        "bucket": "memcpy",
+        "share": 4.751101027625784,
+        "physical_symbols": [
+          "__memcpy_ifunc_target"
+        ]
+      },
+      {
+        "function": "libc_malloc_internal_a9bb0",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 3.229681035633258,
+        "physical_symbols": [
+          "libc_malloc_internal_a9bb0"
+        ]
+      },
+      {
+        "function": "realloc",
+        "source_file": "",
+        "bucket": "allocator",
+        "share": 0.8941678900306953,
+        "physical_symbols": [
+          "realloc"
+        ]
+      },
+      {
+        "function": "__bcmp_ifunc_target",
+        "source_file": "",
+        "bucket": "other",
+        "share": 0.8541305218203656,
+        "physical_symbols": [
+          "__bcmp_ifunc_target"
+        ]
+      },
+      {
+        "function": "[unknown]",
+        "source_file": "",
+        "bucket": "bench_harness",
+        "share": 0.44041105031362604,
+        "physical_symbols": [
+          "[unknown]"
+        ]
+      }
+    ]
+  },
+  "per_case_meta": {
+    "read/clustering_point_bti": {
+      "samples": 8236,
+      "no_samples": false,
+      "chain_reaches_root": 0.0,
+      "median_chain_depth": 1.0,
+      "inclusive_harness_samples": 0.7163671685284119
+    },
+    "read/clustering_range_bti": {
+      "samples": 8182,
+      "no_samples": false,
+      "chain_reaches_root": 0.024443901246638963,
+      "median_chain_depth": 1.0,
+      "inclusive_harness_samples": 0.6722072842825715
+    },
+    "read/clustering_slice": {
+      "samples": 358,
+      "no_samples": false,
+      "chain_reaches_root": 0.27932960893854747,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 18.156424581005588
+    },
+    "read/full_scan": {
+      "samples": 6971,
+      "no_samples": false,
+      "chain_reaches_root": 2.438674508678812,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 1.0902309568211161
+    },
+    "read/get_partition_big": {
+      "samples": 9501,
+      "no_samples": false,
+      "chain_reaches_root": 0.04210083149142196,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 0.6736133038627513
+    },
+    "read/get_partition_bti": {
+      "samples": 650,
+      "no_samples": false,
+      "chain_reaches_root": 0.46153846153846156,
+      "median_chain_depth": 1.0,
+      "inclusive_harness_samples": 9.692307692307692
+    },
+    "read/point_lookup_repeated": {
+      "samples": 9253,
+      "no_samples": false,
+      "chain_reaches_root": 0.03242191721603804,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 0.7024748730141576
+    },
+    "read/scan_partition_dense_stream": {
+      "samples": 143,
+      "no_samples": false,
+      "chain_reaches_root": 0.0,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 46.85314685314685
+    },
+    "read/type_heavy": {
+      "samples": 7493,
+      "no_samples": false,
+      "chain_reaches_root": 0.013345789403443213,
+      "median_chain_depth": 2.0,
+      "inclusive_harness_samples": 1.054317362872014
+    }
+  },
+  "inclusive": {
+    "allocator": 74.5879851143009,
+    "core::hash::sip": 0.2480949849370902,
+    "bcmp/memcmp": 2.11471439541615,
+    "CqlType::parse_with_depth": 0.0,
+    "Arc<str> clone/drop": 0.9136196270699195,
+    "Value::into_owned": 0.0,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 0.5788882981865437,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 0.5060350089589856,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block": 0.3622974383208301,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.3622974383208301,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.3622974383208301,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 0.3111032350798433,
+    "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.297320180361116,
+    "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.22840490676747988,
+    "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.22643589895051883,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 0.2185598676826747,
+    "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 0.19690078169610334,
+    "cqlite:cqlite_core::memory::estimate_value_size": 0.18508673479433713,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy as cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_driver::SlidingPartitionPolicy>::on_data_row": 0.14570657845511648,
+    "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 0.1299545159194282,
+    "cqlite:<cqlite_core::types::Value>::into_owned": 0.1240474924685451,
+    "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 0.1004193986650127,
+    "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 0.09845039084805167,
+    "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 0.09648138303109063,
+    "cqlite:<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.0945123752141296,
+    "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for": 0.09057435958020753,
+    "cqlite:cqlite_core::parser::vint::decode_unsigned": 0.09057435958020753,
+    "cqlite:cqlite_core::parser::vint::parse_vuint": 0.09057435958020753,
+    "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 0.0886053517632465,
+    "cqlite:<cqlite_core::schema::Column as core::clone::Clone>::clone": 0.0826983283123634,
+    "cqlite:<cqlite_core::schema::TableSchema as core::clone::Clone>::clone": 0.07482229704451927,
+    "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_single_partition_clustering::{closure#0}": 0.07482229704451927,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>": 0.0708842814105972,
+    "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata": 0.0708842814105972,
+    "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows": 0.0708842814105972,
+    "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 0.05710122669186997
+  },
+  "inclusive_per_case": {
+    "read/clustering_point_bti": {
+      "allocator": 57.892180670228264,
+      "core::hash::sip": 0.02428363283147159,
+      "bcmp/memcmp": 2.5133559980573095,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 0.02428363283147159,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata": 0.12141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::prime_shadow_before_window": 0.12141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0}": 0.12141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::skip_row_framing": 0.10927634774162215,
+      "cqlite:cqlite_core::parser::vint::decode_unsigned": 0.10927634774162215,
+      "cqlite:cqlite_core::parser::vint::parse_vuint": 0.10927634774162215,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix": 0.07285089849441477,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.06070908207867897,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.04856726566294318,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_value": 0.04856726566294318,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 0.036425449247207385,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 0.036425449247207385,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::raw_view_base_name::{closure#0}": 0.02428363283147159,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 0.02428363283147159,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 0.02428363283147159,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 0.02428363283147159,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 0.02428363283147159,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 0.02428363283147159,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.02428363283147159,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_type": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::bounded::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0}": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::update_execution_stats": 0.012141816415735794,
+      "cqlite:<cqlite_core::query::select_ast::WhereExpression as core::clone::Clone>::clone": 0.012141816415735794,
+      "cqlite:<cqlite_core::storage::cache::DecompressedChunkCache>::get": 0.012141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::is_end_of_partition": 0.012141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_partition_header_full": 0.012141816415735794,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::read_vint_length_prefixed_bytes": 0.012141816415735794
+    },
+    "read/clustering_range_bti": {
+      "allocator": 65.91297971156196,
+      "core::hash::sip": 0.036665851869958445,
+      "bcmp/memcmp": 4.289904668785138,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 0.08555365436323638,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.10999755560987534,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.09777560498655585,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix": 0.08555365436323638,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 0.07333170373991689,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_value": 0.07333170373991689,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 0.06110975311659741,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0}": 0.06110975311659741,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata": 0.048887802493277926,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.048887802493277926,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::bounded::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.036665851869958445,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 0.036665851869958445,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0}": 0.036665851869958445,
+      "cqlite:<cqlite_core::storage::cache::DecompressedChunkCache>::get": 0.036665851869958445,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 0.036665851869958445,
+      "cqlite:cqlite_core::parser::vint::decode_unsigned": 0.036665851869958445,
+      "cqlite:cqlite_core::parser::vint::parse_vuint": 0.036665851869958445,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.036665851869958445,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.036665851869958445,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}::{closure#1}": 0.036665851869958445,
+      "cqlite:cqlite_core::query::select_executor::limit_pushdown::collect_capped_materialized::<(cqlite_core::types::RowKey, cqlite_core::types::ScanRow), <cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}::{closure#1}>": 0.036665851869958445,
+      "cqlite:<cqlite_core::query::select_ast::WhereExpression as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.024443901246638963,
+      "cqlite:<cqlite_core::query::select_ast::WhereExpression as core::clone::Clone>::clone": 0.024443901246638963,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 0.024443901246638963,
+      "cqlite:<cqlite_core::query::select_optimizer::SSTablePredicate as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>": 0.024443901246638963,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows": 0.024443901246638963
+    },
+    "read/clustering_slice": {
+      "allocator": 1.3966480446927374,
+      "core::hash::sip": 1.3966480446927374,
+      "bcmp/memcmp": 0.0,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 15.083798882681565,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 22.625698324022345,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy as cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_driver::SlidingPartitionPolicy>::on_data_row": 19.553072625698324,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 17.877094972067038,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 9.497206703910615,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window": 5.307262569832402,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 4.748603351955308,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::drive_partition_sliding::<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy, <cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_one_partition_with_timestamps<<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}>::{closure#1}>": 4.189944134078212,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_one_partition_with_timestamps::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}>": 4.189944134078212,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata": 2.5139664804469275,
+      "cqlite:cqlite_core::parser::vint::decode_unsigned": 2.5139664804469275,
+      "cqlite:cqlite_core::parser::vint::parse_vuint": 2.5139664804469275,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix": 1.675977653631285,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_one_partition_with_timestamps::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}>::{closure#1}": 1.3966480446927374,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::read_vint_length_prefixed_bytes": 1.3966480446927374,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}": 1.3966480446927374,
+      "cqlite:<cqlite_core::types::RowKey as core::clone::Clone>::clone": 1.3966480446927374,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 1.3966480446927374,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window_blocking": 1.1173184357541899,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window_blocking::{closure#0}": 1.1173184357541899,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::run_scan_stream_windowed::{closure#0}::{closure#2}": 1.1173184357541899,
+      "cqlite:<cqlite_core::storage::sstable::reader::data_access::joined_scan_stream::JoinedStream<(cqlite_core::types::RowKey, cqlite_core::types::ScanRow)> as core::ops::drop::Drop>::drop": 0.8379888268156425,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for": 0.5586592178770949,
+      "cqlite:<cqlite_core::storage::sstable::reader::data_access::joined_scan_stream::JoinedStream<(cqlite_core::types::RowKey, cqlite_core::types::ScanRow)>>::recv::{closure#0}": 0.5586592178770949,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_flags": 0.5586592178770949,
+      "cqlite:cqlite_core::memory::estimate_value_size": 0.5586592178770949,
+      "cqlite:cqlite_core::query::select_executor::row_build::pk_schema_fingerprint": 0.5586592178770949,
+      "cqlite:cqlite_core::storage::sstable::reader::scan_stream_windowed::scan_stream_forwarder::spawn_windowed_forwarder::{closure#0}": 0.5586592178770949,
+      "cqlite:cqlite_core::storage::sstable::reader::value_borrow::borrow_active": 0.5586592178770949,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::columns_for": 0.27932960893854747,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_value": 0.27932960893854747
+    },
+    "read/full_scan": {
+      "allocator": 79.37168268541099,
+      "core::hash::sip": 0.9180892267967293,
+      "bcmp/memcmp": 0.6742217759288481,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 5.035145603213312,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 2.610816238703199,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block": 2.582125950365801,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 2.582125950365801,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 2.582125950365801,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 2.3812939320040165,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 1.491894993544685,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 1.362788696026395,
+      "cqlite:cqlite_core::memory::estimate_value_size": 1.2910629751829006,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 1.233682398508105,
+      "cqlite:<cqlite_core::types::Value>::into_owned": 0.9037440826280304,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for": 0.5020800459044613,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.4016640367235691,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.3873188925548702,
+      "cqlite:cqlite_core::query::result_budget::enforce_materialized_rows": 0.3299383158800746,
+      "cqlite:cqlite_core::query::result_budget::estimate_result_bytes": 0.3299383158800746,
+      "cqlite:cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length": 0.3299383158800746,
+      "cqlite:cqlite_core::query::result_budget::estimate_query_row_bytes": 0.3155931717113757,
+      "cqlite:cqlite_core::query::result_budget::estimate_result_bytes::{closure#0}": 0.3155931717113757,
+      "cqlite:<cqlite_core::storage::sstable::compression::Compression>::decompress": 0.3012480275426768,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_partition_header_full": 0.3012480275426768,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::read_vint_length_prefixed_bytes": 0.3012480275426768,
+      "cqlite:cqlite_core::storage::sstable::compression::snappy_decompress_raw": 0.3012480275426768,
+      "cqlite:cqlite_core::parser::vint::decode_unsigned": 0.2869028833739779,
+      "cqlite:cqlite_core::parser::vint::parse_vuint": 0.2869028833739779,
+      "cqlite:cqlite_core::storage::partition_key_codec::decode_partition_key_columns": 0.22952230669918233,
+      "cqlite:<cqlite_core::types::RowKey>::new": 0.17214173002438674,
+      "cqlite:<cqlite_core::types::Value>::into_owned::compact": 0.17214173002438674,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for::{closure#1}": 0.14345144168698895,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan::{closure#0}": 0.14345144168698895,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_inner::{closure#0}": 0.14345144168698895
+    },
+    "read/get_partition_big": {
+      "allocator": 83.46489843174403,
+      "core::hash::sip": 0.14735291021997685,
+      "bcmp/memcmp": 1.8629617934954215,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 0.14735291021997685,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::schema::CqlType>::parse_with_depth": 0.17892853383854332,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.17892853383854332,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 0.15787811809283234,
+      "cqlite:<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.15787811809283234,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>": 0.15787811809283234,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows": 0.15787811809283234,
+      "cqlite:<cqlite_core::schema::Column as core::clone::Clone>::clone": 0.14735291021997685,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::successor_partition_offset::{closure#0}": 0.14735291021997685,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 0.12630249447426586,
+      "cqlite:<cqlite_core::schema::TableSchema as core::clone::Clone>::clone": 0.11577728660141037,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 0.11577728660141037,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1}": 0.1052520787285549,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.08420166298284391,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.08420166298284391,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 0.08420166298284391,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 0.08420166298284391,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 0.07367645510998842,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 0.07367645510998842,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 0.07367645510998842,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_single_partition_clustering::{closure#0}": 0.07367645510998842,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 0.04210083149142196,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::bounded::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.031575623618566466,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 0.031575623618566466,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::cell_kind::CellKind>::from_type": 0.031575623618566466,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}": 0.031575623618566466,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.031575623618566466,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.031575623618566466,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_cql_type_internal": 0.02105041574571098,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_primitive_type::{closure#0}": 0.02105041574571098,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_type": 0.02105041574571098
+    },
+    "read/get_partition_bti": {
+      "allocator": 16.923076923076923,
+      "core::hash::sip": 1.8461538461538463,
+      "bcmp/memcmp": 0.3076923076923077,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 1.3846153846153846,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 5.846153846153846,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 3.8461538461538463,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 3.6923076923076925,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 2.3076923076923075,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 2.1538461538461537,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 2.1538461538461537,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 2.1538461538461537,
+      "cqlite:<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 2.0,
+      "cqlite:<cqlite_core::schema::Column as core::clone::Clone>::clone": 2.0,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 2.0,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 1.5384615384615385,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_single_partition_clustering::{closure#0}": 1.5384615384615385,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 1.5384615384615385,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::bounded::<cqlite_core::query::result::QueryResult>::{closure#0}": 1.2307692307692308,
+      "cqlite:cqlite_core::query::select_executor::lookup::classify_partition_lookup": 1.2307692307692308,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0}": 1.0769230769230769,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked::<cqlite_core::query::result::QueryResult>::{closure#0}": 1.0769230769230769,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}": 1.0769230769230769,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}::{closure#1}": 1.0769230769230769,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::update_execution_stats": 0.9230769230769231,
+      "cqlite:<cqlite_core::schema::TableSchema as core::clone::Clone>::clone": 0.9230769230769231,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build": 0.9230769230769231,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>": 0.9230769230769231,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows": 0.9230769230769231,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_cql_type_internal": 0.7692307692307693,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_primitive_type::{closure#0}": 0.7692307692307693,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_type": 0.7692307692307693,
+      "cqlite:<cqlite_core::parser::complex_types::ComplexTypeParser>::parse_type_with_context": 0.7692307692307693,
+      "cqlite:<cqlite_core::query::select_optimizer::SSTablePredicate as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.7692307692307693,
+      "cqlite:<cqlite_core::storage::cache::global_key_offset::GlobalKeyOffsetCache>::get": 0.7692307692307693
+    },
+    "read/point_lookup_repeated": {
+      "allocator": 77.69372095536583,
+      "core::hash::sip": 0.19453150329622826,
+      "bcmp/memcmp": 2.4424510969415323,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 0.2269534205122663,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}::{closure#0}": 0.46471414676321193,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0}": 0.4539068410245326,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0}": 0.3674483951150978,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}": 0.33502647789905976,
+      "cqlite:<cqlite_core::query::select_executor::SelectExecutor>::targeted_partition_rows::{closure#0}": 0.2701826434669837,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering::{closure#0}": 0.2701826434669837,
+      "cqlite:<cqlite_core::storage::StorageEngine>::scan_partition_clustering_recorded::{closure#0}": 0.25937533772830434,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::scan_partition_clustering::{closure#0}": 0.2269534205122663,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_single_partition_clustering::{closure#0}": 0.19453150329622826,
+      "cqlite:<cqlite_core::schema::TableSchema as core::clone::Clone>::clone": 0.1837241975575489,
+      "cqlite:<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>": 0.16210958608019022,
+      "cqlite:<cqlite_core::schema::Column as core::clone::Clone>::clone": 0.15130228034151086,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows::{closure#2}>": 0.1404949746028315,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_collect_partition_rows": 0.1404949746028315,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.1404949746028315,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::bounded::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.12968766886415217,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0}": 0.11888036312547282,
+      "cqlite:<cqlite_core::storage::cache::global_key_offset::GlobalKeyOffsetCache>::get": 0.11888036312547282,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.11888036312547282,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}": 0.11888036312547282,
+      "cqlite:<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0}": 0.09726575164811413,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::decode_clustering_seek_target::{closure#0}": 0.09726575164811413,
+      "cqlite:cqlite_core::query::engine::deadline::bound_tracked_until::<cqlite_core::query::result::QueryResult>::{closure#0}::{closure#1}": 0.09726575164811413,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 0.08645844590943477,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::build_v5_parser": 0.07565114017075543,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::decode_clustering_seek_attempt::{closure#0}": 0.07565114017075543,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 0.06484383443207609,
+      "cqlite:<cqlite_core::storage::sstable::SSTableManager>::resolve_reader_snapshot::{closure#0}": 0.054036528693396736,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 0.054036528693396736,
+      "cqlite:<cqlite_core::types::TableId as core::clone::Clone>::clone": 0.054036528693396736
+    },
+    "read/scan_partition_dense_stream": {
+      "allocator": 2.797202797202797,
+      "core::hash::sip": 5.594405594405594,
+      "bcmp/memcmp": 0.0,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 3.4965034965034967,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 3.4965034965034967,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 3.4965034965034967,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_cell_value_schema_order": 2.797202797202797,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy as cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_driver::SlidingPartitionPolicy>::on_data_row": 2.797202797202797,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 2.797202797202797,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build": 1.3986013986013985,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_metadata": 1.3986013986013985,
+      "cqlite:<cqlite_core::query::result::QueryResultIterator>::next_async::{closure#0}": 0.6993006993006993,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::compression::Compression>::decompress": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::decode_scalar_cell_value": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::drive_partition_sliding::<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy, <cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_one_partition_with_timestamps<<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}>::{closure#1}>": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::extract_map_types": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::is_complex_column": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column_inner": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column_inner::fold_element_expiry": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_one_partition_with_timestamps::<<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0}>": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::cell_kind::CellKind>::from_type": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::complex_column::ExpiryHomogeneity>::fold": 0.6993006993006993,
+      "cqlite:<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window": 0.6993006993006993,
+      "cqlite:<cqlite_core::types::Value>::into_owned::compact": 0.6993006993006993,
+      "cqlite:cqlite_core::parser::vint::decode_unsigned": 0.6993006993006993,
+      "cqlite:cqlite_core::parser::vint::parse_vuint": 0.6993006993006993,
+      "cqlite:cqlite_core::storage::sstable::compression::snappy_decompress_raw": 0.6993006993006993,
+      "cqlite:cqlite_core::storage::sstable::index_reader::parse::parse_big_index_entry": 0.6993006993006993,
+      "cqlite:cqlite_core::storage::sstable::reader::parsing::row_decoder::vuint_length::checked_vuint_exact_length": 0.6993006993006993
+    },
+    "read/type_heavy": {
+      "allocator": 92.73989056452689,
+      "core::hash::sip": 0.0,
+      "bcmp/memcmp": 0.8541305218203656,
+      "CqlType::parse_with_depth": 0.0,
+      "Arc<str> clone/drop": 0.013345789403443213,
+      "Value::into_owned": 0.0,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_value_from_raw_bytes_reporting": 0.06672894701721607,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block": 0.04003736821032964,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.04003736821032964,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>": 0.04003736821032964,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::extract_collection_element_type": 0.026691578806886426,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset": 0.026691578806886426,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl": 0.026691578806886426,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for": 0.013345789403443213,
+      "cqlite:<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for::{closure#1}": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::StorageEngine>::snapshot_for_probe::{closure#0}": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::compression::Compression>::decompress": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>::{closure#3}": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block_emit_windowed::<<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0}>::{closure#3}::{closure#0}": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column_inner": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_complex_column_inner::fold_element_expiry": 0.013345789403443213,
+      "cqlite:<cqlite_core::storage::sstable::reader::parsing::row_decoder::complex_column::ExpiryHomogeneity>::fold": 0.013345789403443213,
+      "cqlite:cqlite_core::query::select_executor::row_build::build_row_from_scan_cached": 0.013345789403443213,
+      "cqlite:cqlite_core::storage::sstable::compression::snappy_decompress_raw": 0.013345789403443213
+    }
+  },
+  "chain_reaches_root": 0.3622974383208301,
+  "median_chain_depth": 2.0,
+  "inclusive_harness_samples": 1.1676216354578928
+}
