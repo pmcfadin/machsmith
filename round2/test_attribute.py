@@ -183,5 +183,19 @@ class ParseTest(unittest.TestCase):
         self.assertEqual([len(b) for b in blocks], [1, 1])
 
 
+class BranchDirTest(unittest.TestCase):
+    def test_refuses_branch_profile_dir(self):
+        import json
+        import tempfile
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "host.json"), "w") as fh:
+            json.dump({"branch": True}, fh)
+        with open(os.path.join(d, "x.script"), "w") as fh:
+            fh.write("     55aa10 foo+0x10 (/w/bench) 0x10/0x20/P/-/-/0\n")
+        out = os.path.join(d, "out.json")
+        self.assertNotEqual(attribute.main(["attribute.py", d, "/nonexistent-bin", out]), 0)
+        self.assertFalse(os.path.exists(out))
+
+
 if __name__ == "__main__":
     unittest.main()

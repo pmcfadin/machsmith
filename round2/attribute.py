@@ -512,6 +512,15 @@ def detect_callgraph(dirpath):
         return any(p.endswith("-cg") for p in parts)
 
 
+def detect_branch(dirpath):
+    try:
+        with open(os.path.join(dirpath, "host.json")) as fh:
+            return bool(json.load(fh).get("branch"))
+    except (OSError, ValueError):
+        parts = os.path.abspath(dirpath).split(os.sep)
+        return any(p.endswith("-br") for p in parts)
+
+
 def entry(fn, b, st, n):
     return {"function": fn, "source_file": st["src"], "bucket": b, "share": 100.0 * st["count"] / n,
             "physical_symbols": [x for x, _ in st["phys"].most_common(5)]}
@@ -519,6 +528,10 @@ def entry(fn, b, st, n):
 
 def main(argv):
     dirpath, binary, out_path = argv[1:4]
+    if detect_branch(dirpath):
+        print("attribute: %s is a branch-stack profile (host.json branch: true); its brstack lines do not "
+              "parse here. Use callers.py" % dirpath, file=sys.stderr)
+        return 2
     callgraph = detect_callgraph(dirpath)
     slugs = sorted(f[:-len(".script")] for f in os.listdir(dirpath) if f.endswith(".script"))
     if not slugs:

@@ -3,6 +3,8 @@
 #   <bin>  the cargo-bench-profile binary the referee measures (build.sh output, spec D5)
 # Output: $MSX_WORK/r2-profile/<tag>/<workload>/<case-slug>.{data,script,mmap}, cases.json, host.json
 # Env:    R2_PROFILE_CALLGRAPH=1  dwarf call graphs at -F 999, written under <tag>-cg/
+#         R2_PROFILE_BRANCH=1     branch stacks (-j any_call,u, AMD LBRv2) at -F 999, written under <tag>-br/;
+#                                 the script gains a brstack field (callers.py). Not with R2_PROFILE_CALLGRAPH.
 #         R2_PROFILE_SHORT=1      first case only, --profile-time 2
 #         R2_TEST_MODE=1          skip the quiet wait (host.json records test_mode true); short checks only
 set -euo pipefail
@@ -13,10 +15,15 @@ bin=$1 workload=$2 tag=$3
 [ -x "$bin" ] || { echo "profile.sh: $bin is not an executable" >&2; exit 1; }
 case "$workload" in read|decode|partition_lookup) ;; *) echo "profile.sh: unknown workload $workload" >&2; exit 2 ;; esac
 command -v jq >/dev/null || { echo "profile.sh: jq is required" >&2; exit 1; }
-r2_require_unlocked || exit 1
 
 test_mode=${R2_TEST_MODE:-0}
 callgraph=${R2_PROFILE_CALLGRAPH:-0}
+branch=${R2_PROFILE_BRANCH:-0}
+if [ "$callgraph" = 1 ] && [ "$branch" = 1 ]; then
+    echo "profile.sh: R2_PROFILE_BRANCH=1 and R2_PROFILE_CALLGRAPH=1 are mutually exclusive; set one" >&2
+    exit 2
+fi
+r2_require_unlocked || exit 1
 short=${R2_PROFILE_SHORT:-0}
 r2bin=${R2_BIN:-$MSX_WORK/target/r2-tool/debug/r2}
 
@@ -40,8 +47,11 @@ fi
 [ -n "$core" ] || { [ -x "$r2bin" ] && core=$("$r2bin" choose-core); }
 [ -n "$core" ] || { echo "profile.sh: cannot choose a core (r2 binary missing)" >&2; exit 1; }
 
+scriptfields=ip,sym,symoff,dso
 if [ "$callgraph" = 1 ]; then
     tagdir="$tag-cg"; freq=999; cgargs=(--call-graph dwarf,16384)
+elif [ "$branch" = 1 ]; then
+    tagdir="$tag-br"; freq=999; cgargs=(-j any_call,u); scriptfields=ip,sym,symoff,dso,brstack
 else
     tagdir="$tag"; freq=4999; cgargs=()
 fi
@@ -51,8 +61,9 @@ ptime=20; [ "$short" = 1 ] && ptime=2
 
 jq --arg tag "$tagdir" --arg workload "$workload" --arg bin "$bin" --argjson test "$([ "$test_mode" = 1 ] && echo true || echo false)" \
     --argjson core "$core" --arg csrc "$core_source" --argjson freq "$freq" --argjson ptime "$ptime" --argjson cg "$([ "$callgraph" = 1 ] && echo true || echo false)" \
+    --argjson br "$([ "$branch" = 1 ] && echo true || echo false)" \
     --arg perf "$(perf --version)" --arg kernel "$(uname -r)" \
-    '. + {tag:$tag, workload:$workload, bin:$bin, test_mode:$test, core:$core, core_source:$csrc, freq:$freq, profile_time:$ptime, callgraph:$cg, perf:$perf, kernel:$kernel}' \
+    '. + {tag:$tag, workload:$workload, bin:$bin, test_mode:$test, core:$core, core_source:$csrc, freq:$freq, profile_time:$ptime, callgraph:$cg, branch:$br, perf:$perf, kernel:$kernel}' \
     <<<"$snap" > "$out/host.json"
 
 # Case ids: lines ending ": benchmark" (Criterion's --list), without the suffix.
@@ -74,7 +85,7 @@ for id in "${ids[@]}"; do
     echo "profile.sh: $slug ($ptime s, core $core)" >&2
     taskset -c "$core" perf record -e cycles:u -F "$freq" "${cgargs[@]}" -o "$out/$slug.data" -- \
         "$bin" --bench --profile-time "$ptime" "$re" >"$out/$slug.run.log" 2>&1
-    perf script --no-demangle -i "$out/$slug.data" -F ip,sym,symoff,dso > "$out/$slug.script" 2>/dev/null
+    perf script --no-demangle -i "$out/$slug.data" -F "$scriptfields" > "$out/$slug.script" 2>/dev/null
     # Load addresses of the executable mappings; attribute.py needs the libc bias to name stripped-libc functions.
     perf script --show-mmap-events -i "$out/$slug.data" -F ip 2>/dev/null | command grep 'PERF_RECORD_MMAP2.* r-xp ' \
         > "$out/$slug.mmap" || true
