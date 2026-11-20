@@ -1,0 +1,4 @@
+#!/bin/sh
+# Round 2's perf (DECISIONS R26): the perf 7.0.14 binary every round 2 profile and run used.
+# Ubuntu's /usr/bin/perf wrapper refuses to run when no linux-tools package matches `uname -r`.
+exec "${R2_PERF:?R2_PERF unset; source round2/env.sh}" "$@"

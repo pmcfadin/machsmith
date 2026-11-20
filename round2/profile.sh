@@ -51,7 +51,8 @@ ptime=20; [ "$short" = 1 ] && ptime=2
 
 jq --arg tag "$tagdir" --arg workload "$workload" --arg bin "$bin" --argjson test "$([ "$test_mode" = 1 ] && echo true || echo false)" \
     --argjson core "$core" --arg csrc "$core_source" --argjson freq "$freq" --argjson ptime "$ptime" --argjson cg "$([ "$callgraph" = 1 ] && echo true || echo false)" \
-    '. + {tag:$tag, workload:$workload, bin:$bin, test_mode:$test, core:$core, core_source:$csrc, freq:$freq, profile_time:$ptime, callgraph:$cg}' \
+    --arg perf "$(perf --version)" --arg kernel "$(uname -r)" \
+    '. + {tag:$tag, workload:$workload, bin:$bin, test_mode:$test, core:$core, core_source:$csrc, freq:$freq, profile_time:$ptime, callgraph:$cg, perf:$perf, kernel:$kernel}' \
     <<<"$snap" > "$out/host.json"
 
 # Case ids: lines ending ": benchmark" (Criterion's --list), without the suffix.

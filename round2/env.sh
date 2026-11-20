@@ -9,6 +9,9 @@ export R2_LOCK=$MSX_WORK/r2.lock
 export R2_LEDGER=$R2_ROOT/results/ledger.jsonl
 export CQLITE_DATASETS_ROOT=/home/dev/projects/cqlite/test-data/datasets
 export R2_BASE=7f9abe3663254724439dbe71aff77bb93faa1c2d
+# DECISIONS R26: pin perf 7.0.14 (the kernel moved to 7.0.0-43 with no matching linux-tools).
+export R2_PERF=${R2_PERF:-/usr/lib/linux-tools/7.0.0-42-generic/perf}
+case ":$PATH:" in *":$R2_ROOT/bin:"*) ;; *) export PATH=$R2_ROOT/bin:$PATH ;; esac
 
 # Returns 1 with a message when a measurement run holds $R2_LOCK.
 r2_require_unlocked() {
