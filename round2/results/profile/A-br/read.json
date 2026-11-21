@@ -1,0 +1,1246 @@
+{
+  "samples": 178433,
+  "bucket_samples": {
+    "allocator": 56856,
+    "memcpy": 9663
+  },
+  "brstack_empty_pct": 0.03306563247829718,
+  "no_caller_pct": {
+    "allocator": 4.3147118834869485,
+    "memcpy": 0.0206996481059822
+  },
+  "inconsistent_pct": {
+    "allocator": 28.730739463871103,
+    "memcpy": 23.45270130407783
+  },
+  "sites": {
+    "allocator": [
+      {
+        "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+        "share_of_bucket": 8.22310560754239,
+        "share_of_workload": 2.6200310480684625
+      },
+      {
+        "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+        "share_of_bucket": 7.621543657215225,
+        "share_of_workload": 2.428362466584096
+      },
+      {
+        "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+        "share_of_bucket": 6.597832969816365,
+        "share_of_workload": 2.1021896173914016
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::schema::Column> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 4.404418490114684,
+        "share_of_workload": 1.4033278597568835
+      },
+      {
+        "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+        "share_of_bucket": 2.636670653626961,
+        "share_of_workload": 0.8400912387282622
+      },
+      {
+        "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+        "share_of_bucket": 2.5065081263631885,
+        "share_of_workload": 0.7986190895181945
+      },
+      {
+        "site": "<hashbrown::raw::RawTableInner>::free_buckets::<alloc::alloc::Global> (/rust/deps/hashbrown-0.17.1/src/raw.rs:3114)",
+        "share_of_bucket": 2.26904946176036,
+        "share_of_workload": 0.7229604389322603
+      },
+      {
+        "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+        "share_of_bucket": 2.1881376204882854,
+        "share_of_workload": 0.6971804542881642
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:75)",
+        "share_of_bucket": 1.8820797861113066,
+        "share_of_workload": 0.5996648601996267
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs:218)",
+        "share_of_bucket": 1.866249208471118,
+        "share_of_workload": 0.5946209501605645
+      },
+      {
+        "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+        "share_of_bucket": 1.493351157391121,
+        "share_of_workload": 0.4758088470182085
+      },
+      {
+        "site": "<cqlite_core::types::RowKey>::new (cqlite-core/src/types.rs:1707)",
+        "share_of_bucket": 1.104622528670935,
+        "share_of_workload": 0.35195283383679027
+      },
+      {
+        "site": "<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for::{closure#1} (cqlite-core/src/query/select_executor/row_build.rs:161)",
+        "share_of_bucket": 1.0377823119679166,
+        "share_of_workload": 0.33065632478297174
+      },
+      {
+        "site": "<cqlite_core::types::Value>::into_owned::compact (cqlite-core/src/types.rs:1330)",
+        "share_of_bucket": 0.960388376838106,
+        "share_of_workload": 0.30599720903644506
+      },
+      {
+        "site": "<alloc::vec::Vec<u8>>::append_elements (library/alloc/src/vec/mod.rs:2932)",
+        "share_of_bucket": 0.8671638640681066,
+        "share_of_workload": 0.2762941832508561
+      },
+      {
+        "site": "<cqlite_core::query::select_optimizer::SSTablePredicate as core::clone::Clone>::clone (cqlite-core/src/query/select_optimizer.rs:93)",
+        "share_of_bucket": 0.8390206149299937,
+        "share_of_workload": 0.2673272320703009
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::SSTablePredicate> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.8143952719341448,
+        "share_of_workload": 0.2594811497873151
+      },
+      {
+        "site": "<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:425)",
+        "share_of_bucket": 0.7405192429465982,
+        "share_of_workload": 0.23594290293835782
+      },
+      {
+        "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+        "share_of_bucket": 0.7246886653064096,
+        "share_of_workload": 0.23089899289929552
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::schema::TableSchema> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.7141349468796172,
+        "share_of_workload": 0.22753638620658734
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs:214)",
+        "share_of_bucket": 0.6947864630971645,
+        "share_of_workload": 0.22137160726995567
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::is_complex_column (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/udt.rs:605)",
+        "share_of_bucket": 0.6490536832477309,
+        "share_of_workload": 0.20680031160155352
+      },
+      {
+        "site": "core::ptr::drop_glue::<[alloc::string::String]> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.6420178709632027,
+        "share_of_workload": 0.20455857380641473
+      },
+      {
+        "site": "<cqlite_core::types::TableId>::new::<alloc::string::String> (cqlite-core/src/types.rs:1786)",
+        "share_of_bucket": 0.6367410117498065,
+        "share_of_workload": 0.20287727046006063
+      },
+      {
+        "site": "core::ptr::drop_glue::<(alloc::string::String, alloc::string::String)> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.5822134665447126,
+        "share_of_workload": 0.185503802547735
+      }
+    ],
+    "memcpy": [
+      {
+        "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/bti_point.rs:787)",
+        "share_of_bucket": 36.24508383357483,
+        "share_of_workload": 1.962641439644012
+      },
+      {
+        "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+        "share_of_bucket": 6.820534050921134,
+        "share_of_workload": 0.3693263017491159
+      },
+      {
+        "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+        "share_of_bucket": 3.125646864003312,
+        "share_of_workload": 0.16925120353297876
+      },
+      {
+        "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+        "share_of_bucket": 2.1941626992341132,
+        "share_of_workload": 0.11881210314235595
+      },
+      {
+        "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+        "share_of_bucket": 1.7077209687435313,
+        "share_of_workload": 0.09247168404947516
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+        "share_of_bucket": 1.252328710411923,
+        "share_of_workload": 0.06781256830294845
+      },
+      {
+        "site": "cqlite_core::storage::sstable::compression::snappy_decompress_raw (cqlite-core/src/storage/sstable/compression.rs:148)",
+        "share_of_bucket": 1.252328710411923,
+        "share_of_workload": 0.06781256830294845
+      },
+      {
+        "site": "<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0} (cqlite-core/src/query/engine.rs:376)",
+        "share_of_bucket": 1.2005795901469676,
+        "share_of_workload": 0.06501039605902495
+      },
+      {
+        "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+        "share_of_bucket": 1.148830469882012,
+        "share_of_workload": 0.062208223815101465
+      },
+      {
+        "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+        "share_of_bucket": 0.9625336369281722,
+        "share_of_workload": 0.052120403736976906
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::skip_row_framing (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs:870)",
+        "share_of_bucket": 0.94183398882219,
+        "share_of_workload": 0.05099953483940751
+      },
+      {
+        "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+        "share_of_bucket": 0.7658869799213414,
+        "share_of_workload": 0.041472149210067644
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::SSTablePredicate> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.734837507762368,
+        "share_of_workload": 0.03979084586371355
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::storage::sstable::version_gate::VersionGates> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.724487683709377,
+        "share_of_workload": 0.039230411414928855
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1343)",
+        "share_of_bucket": 0.6623887393914304,
+        "share_of_workload": 0.03586780472222067
+      },
+      {
+        "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:412)",
+        "share_of_bucket": 0.6520389153384393,
+        "share_of_workload": 0.035307370273435966
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::read_at::MmapReadAt as cqlite_core::storage::sstable::reader::read_at::ReadAt>::read_at (cqlite-core/src/storage/sstable/reader/read_at.rs:364)",
+        "share_of_bucket": 0.6416890912854482,
+        "share_of_workload": 0.03474693582465127
+      },
+      {
+        "site": "<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0} (cqlite-core/src/query/engine.rs:277)",
+        "share_of_bucket": 0.631339267232457,
+        "share_of_workload": 0.034186501375866575
+      },
+      {
+        "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:53)",
+        "share_of_bucket": 0.6106396191264748,
+        "share_of_workload": 0.03306563247829718
+      },
+      {
+        "site": "<cqlite_core::schema::SchemaManager>::find_schema_by_table::{closure#0} (cqlite-core/src/schema/mod.rs:1008)",
+        "share_of_bucket": 0.6106396191264748,
+        "share_of_workload": 0.03306563247829718
+      },
+      {
+        "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+        "share_of_bucket": 0.5899399710204927,
+        "share_of_workload": 0.03194476358072778
+      },
+      {
+        "site": "<cqlite_core::query::result::QueryResultIterator>::next_async::{closure#0} (cqlite-core/src/query/result.rs:351)",
+        "share_of_bucket": 0.5795901469675016,
+        "share_of_workload": 0.031384329131943084
+      },
+      {
+        "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::OptimizedQueryPlan> (library/core/src/ptr/mod.rs:825)",
+        "share_of_bucket": 0.5692403229145104,
+        "share_of_workload": 0.030823894683158385
+      },
+      {
+        "site": "<cqlite_core::storage::sstable::reader::source::MmapCursor as tokio::io::async_read::AsyncRead>::poll_read (cqlite-core/src/storage/sstable/reader/source.rs:310)",
+        "share_of_bucket": 0.4760919064375906,
+        "share_of_workload": 0.0257799846440961
+      },
+      {
+        "site": "<cqlite_core::query::select_optimizer::OptimizedQueryPlan as core::clone::Clone>::clone (cqlite-core/src/query/select_optimizer.rs:33)",
+        "share_of_bucket": 0.46574208238459947,
+        "share_of_workload": 0.025219550195311406
+      }
+    ]
+  },
+  "other_sites_pct": {
+    "allocator": 14.258073594596496,
+    "memcpy": 10.960463672117575
+  },
+  "per_case_sites": {
+    "read/clustering_point_bti": {
+      "allocator": [
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 14.2,
+          "share_of_case": 3.130511463844797
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 6.177777777777778,
+          "share_of_case": 1.361943954536547
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 4.466666666666667,
+          "share_of_case": 0.9847148736037625
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 3.466666666666667,
+          "share_of_case": 0.7642563198118754
+        },
+        {
+          "site": "cqlite_core::query::select_executor::limit_pushdown::collect_capped_materialized::<(cqlite_core::types::RowKey, cqlite_core::types::ScanRow), <cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}::{closure#1}> (cqlite-core/src/query/select_executor/limit_pushdown/mod.rs:559)",
+          "share_of_bucket": 2.7777777777777777,
+          "share_of_case": 0.6123848716441309
+        },
+        {
+          "site": "<cqlite_core::types::Value as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:425)",
+          "share_of_bucket": 2.4444444444444446,
+          "share_of_case": 0.5388986870468352
+        },
+        {
+          "site": "<cqlite_core::types::Value>::into_owned::compact (cqlite-core/src/types.rs:1330)",
+          "share_of_bucket": 2.3555555555555556,
+          "share_of_case": 0.519302371154223
+        },
+        {
+          "site": "<cqlite_core::types::RowKey>::new (cqlite-core/src/types.rs:1707)",
+          "share_of_bucket": 2.1555555555555554,
+          "share_of_case": 0.4752106603958456
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_value (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1556)",
+          "share_of_bucket": 2.1333333333333333,
+          "share_of_case": 0.4703115814226925
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 2.0444444444444443,
+          "share_of_case": 0.45071526553008034
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/bti_point.rs:787)",
+          "share_of_bucket": 72.97101449275362,
+          "share_of_case": 9.866745051930238
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 1.7753623188405796,
+          "share_of_case": 0.24005486968449932
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::skip_row_framing (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs:870)",
+          "share_of_bucket": 1.5579710144927537,
+          "share_of_case": 0.21066039584558102
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1343)",
+          "share_of_bucket": 1.4130434782608696,
+          "share_of_case": 0.19106407995296884
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 0.9782608695652174,
+          "share_of_case": 0.13227513227513227
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+          "share_of_bucket": 0.9057971014492754,
+          "share_of_case": 0.12247697432882618
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+          "share_of_bucket": 0.5434782608695652,
+          "share_of_case": 0.07348618459729571
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:53)",
+          "share_of_bucket": 0.2898550724637681,
+          "share_of_case": 0.03919263178522438
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::OptimizedQueryPlan> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 0.2898550724637681,
+          "share_of_case": 0.03919263178522438
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 0.2898550724637681,
+          "share_of_case": 0.03919263178522438
+        }
+      ]
+    },
+    "read/clustering_range_bti": {
+      "allocator": [
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 19.387755102040817,
+          "share_of_case": 5.229015136622764
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 5.430029154518951,
+          "share_of_case": 1.4645173972872028
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 3.3345481049562684,
+          "share_of_case": 0.8993512875958325
+        },
+        {
+          "site": "<cqlite_core::types::Value>::into_owned::compact (cqlite-core/src/types.rs:1330)",
+          "share_of_bucket": 3.1705539358600583,
+          "share_of_case": 0.8551208964025948
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 2.806122448979592,
+          "share_of_case": 0.7568311381954
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+          "share_of_bucket": 2.423469387755102,
+          "share_of_case": 0.6536268920778455
+        },
+        {
+          "site": "<cqlite_core::query::select_optimizer::SSTablePredicate as core::clone::Clone>::clone (cqlite-core/src/query/select_optimizer.rs:93)",
+          "share_of_bucket": 2.0043731778425657,
+          "share_of_case": 0.5405936701395715
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 1.9861516034985423,
+          "share_of_case": 0.5356791822292117
+        },
+        {
+          "site": "cqlite_core::query::select_executor::limit_pushdown::collect_capped_materialized::<(cqlite_core::types::RowKey, cqlite_core::types::ScanRow), <cqlite_core::query::select_executor::SelectExecutor>::execute_sstable_scan::{closure#0}::{closure#1}> (cqlite-core/src/query/select_executor/limit_pushdown/mod.rs:559)",
+          "share_of_bucket": 1.967930029154519,
+          "share_of_case": 0.530764694318852
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 1.858600583090379,
+          "share_of_case": 0.5012777668566936
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/bti_point.rs:787)",
+          "share_of_bucket": 65.46264225630875,
+          "share_of_case": 6.5018675054059365
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::skip_row_framing (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit_windowed.rs:870)",
+          "share_of_bucket": 2.375061850569025,
+          "share_of_case": 0.23589541969726754
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 2.226620484908461,
+          "share_of_case": 0.22115195596618833
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 1.4844136566056407,
+          "share_of_case": 0.1474346373107922
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 1.4349332013854528,
+          "share_of_case": 0.14252014940043248
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 1.3359722909450766,
+          "share_of_case": 0.132691173579713
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+          "share_of_bucket": 1.0885700148441366,
+          "share_of_case": 0.10811873402791429
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1343)",
+          "share_of_bucket": 0.8906481939633845,
+          "share_of_case": 0.08846078238647533
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 0.5442850074220683,
+          "share_of_case": 0.054059367013957145
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+          "share_of_bucket": 0.44532409698169223,
+          "share_of_case": 0.04423039119323766
+        }
+      ]
+    },
+    "read/clustering_slice": {
+      "allocator": [
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:75)",
+          "share_of_bucket": 13.889481544698102,
+          "share_of_case": 3.229967749937981
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 10.945167484531684,
+          "share_of_case": 2.5452741255271643
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 6.720716876466823,
+          "share_of_case": 1.5628876209377325
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy as cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_driver::SlidingPartitionPolicy>::on_data_row (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/timestamp_policy.rs:266)",
+          "share_of_bucket": 2.8163004053765737,
+          "share_of_case": 0.6549243363929546
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 1.7921911670578194,
+          "share_of_case": 0.41677003225006204
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::types::ScanRow> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.3441433752933647,
+          "share_of_case": 0.31257752418754653
+        },
+        {
+          "site": "<hashbrown::raw::RawTableInner>::free_buckets::<alloc::alloc::Global> (/rust/deps/hashbrown-0.17.1/src/raw.rs:3114)",
+          "share_of_bucket": 1.1521228931085983,
+          "share_of_case": 0.2679235921607542
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+          "share_of_bucket": 0.874759974397269,
+          "share_of_case": 0.20342346812205409
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 0.8320887561339876,
+          "share_of_case": 0.19350037211610022
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_value (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1556)",
+          "share_of_bucket": 0.8320887561339876,
+          "share_of_case": 0.19350037211610022
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::timestamp_policy::TimestampPolicy as cqlite_core::storage::sstable::reader::parsing::row_decoder::partition_driver::SlidingPartitionPolicy>::on_data_row (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/timestamp_policy.rs:266)",
+          "share_of_bucket": 11.692307692307692,
+          "share_of_case": 0.18853882411312328
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::read_at::MmapReadAt as cqlite_core::storage::sstable::reader::read_at::ReadAt>::read_at (cqlite-core/src/storage/sstable/reader/read_at.rs:364)",
+          "share_of_bucket": 11.076923076923077,
+          "share_of_case": 0.17861572810716944
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 8.923076923076923,
+          "share_of_case": 0.14388489208633093
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::read_compressed_chunk_sync (cqlite-core/src/storage/sstable/reader/scan_stream_windowed_read.rs:265)",
+          "share_of_bucket": 4.923076923076923,
+          "share_of_case": 0.07938476804763087
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::window_cursor::WindowCursor>::refill_owned (cqlite-core/src/storage/sstable/reader/window_cursor.rs:269)",
+          "share_of_bucket": 3.6923076923076925,
+          "share_of_case": 0.05953857603572314
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_clustering_prefix (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:1343)",
+          "share_of_bucket": 2.1538461538461537,
+          "share_of_case": 0.0347308360208385
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 2.1538461538461537,
+          "share_of_case": 0.0347308360208385
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 1.8461538461538463,
+          "share_of_case": 0.02976928801786157
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::drain_scan_window::{closure#0} (cqlite-core/src/storage/sstable/reader/scan_stream_windowed.rs:978)",
+          "share_of_bucket": 1.8461538461538463,
+          "share_of_case": 0.02976928801786157
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::scan_stream_admitted (cqlite-core/src/storage/sstable/reader/data_access/per_row_scan_stream.rs:122)",
+          "share_of_bucket": 1.5384615384615385,
+          "share_of_case": 0.024807740014884644
+        }
+      ]
+    },
+    "read/full_scan": {
+      "allocator": [
+        {
+          "site": "<hashbrown::raw::RawTableInner>::free_buckets::<alloc::alloc::Global> (/rust/deps/hashbrown-0.17.1/src/raw.rs:3114)",
+          "share_of_bucket": 14.177598385469222,
+          "share_of_case": 4.211630695443645
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 11.268079381096536,
+          "share_of_case": 3.347322142286171
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+          "share_of_bucket": 8.812647157753112,
+          "share_of_case": 2.617905675459632
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 5.5163134880591995,
+          "share_of_case": 1.6386890487609913
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for::{closure#1} (cqlite-core/src/query/select_executor/row_build.rs:161)",
+          "share_of_bucket": 4.086781029263371,
+          "share_of_case": 1.2140287769784173
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:75)",
+          "share_of_bucket": 3.632694248234107,
+          "share_of_case": 1.079136690647482
+        },
+        {
+          "site": "<cqlite_core::types::RowKey>::new (cqlite-core/src/types.rs:1707)",
+          "share_of_bucket": 3.1281533804238144,
+          "share_of_case": 0.9292565947242206
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_partition_header_full (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_framing.rs:735)",
+          "share_of_bucket": 2.6404305415405314,
+          "share_of_case": 0.7843725019984013
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 2.119071644803229,
+          "share_of_case": 0.6294964028776978
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:261)",
+          "share_of_bucket": 1.5472586612848973,
+          "share_of_case": 0.4596322941646683
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "cqlite_core::storage::sstable::compression::snappy_decompress_raw (cqlite-core/src/storage/sstable/compression.rs:148)",
+          "share_of_bucket": 22.121896162528216,
+          "share_of_case": 0.48960831334932053
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::source::MmapCursor as tokio::io::async_read::AsyncRead>::poll_read (cqlite-core/src/storage/sstable/reader/source.rs:310)",
+          "share_of_bucket": 9.706546275395034,
+          "share_of_case": 0.21482813749000798
+        },
+        {
+          "site": "cqlite_core::storage::sstable::reader::block_io::read_nb_format_chunk_data::{closure#0} (cqlite-core/src/storage/sstable/reader/block_io.rs:512)",
+          "share_of_bucket": 7.900677200902934,
+          "share_of_case": 0.17486011191047163
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::stitch_all_chunks_cancellable::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/mod.rs:444)",
+          "share_of_bucket": 5.8690744920993225,
+          "share_of_case": 0.1298960831334932
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 4.74040632054176,
+          "share_of_case": 0.10491606714628297
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 3.6117381489841986,
+          "share_of_case": 0.07993605115907274
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 2.9345372460496613,
+          "share_of_case": 0.0649480415667466
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 1.3544018058690745,
+          "share_of_case": 0.02997601918465228
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_block::{closure#0} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/block_emit.rs:30)",
+          "share_of_bucket": 1.1286681715575622,
+          "share_of_case": 0.02498001598721023
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::sequential_scan::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/sequential.rs:642)",
+          "share_of_bucket": 0.6772009029345373,
+          "share_of_case": 0.01498800959232614
+        }
+      ]
+    },
+    "read/get_partition_big": {
+      "allocator": [
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::schema::Column> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 14.609948355531394,
+          "share_of_case": 5.78112395805324
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 13.291655341125306,
+          "share_of_case": 5.259478354396343
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+          "share_of_bucket": 9.33677629790704,
+          "share_of_case": 3.694541543425652
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+          "share_of_bucket": 6.142973634139712,
+          "share_of_case": 2.4307609572465716
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 5.24599075835825,
+          "share_of_case": 2.0758268351707447
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 4.294645284044577,
+          "share_of_case": 1.6993815541812316
+        },
+        {
+          "site": "<cqlite_core::schema::Column as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:425)",
+          "share_of_bucket": 4.117966838814896,
+          "share_of_case": 1.6294702877117504
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs:218)",
+          "share_of_bucket": 2.4191356346833377,
+          "share_of_case": 0.9572465716590481
+        },
+        {
+          "site": "<alloc::vec::Vec<u8>>::append_elements (library/alloc/src/vec/mod.rs:2932)",
+          "share_of_bucket": 1.4949714596357706,
+          "share_of_case": 0.591556870126378
+        },
+        {
+          "site": "core::ptr::drop_glue::<(alloc::string::String, alloc::string::String)> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.359064963305246,
+          "share_of_case": 0.5377789728421619
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::bti_pull_decompressed_chunk::{closure#0} (cqlite-core/src/storage/sstable/reader/data_access/bti_point.rs:787)",
+          "share_of_bucket": 16.633064516129032,
+          "share_of_case": 0.887335305189567
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 10.584677419354838,
+          "share_of_case": 0.5646679214842699
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+          "share_of_bucket": 7.258064516129032,
+          "share_of_case": 0.38720086044635654
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+          "share_of_bucket": 6.754032258064516,
+          "share_of_case": 0.36031191180424843
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+          "share_of_bucket": 3.024193548387097,
+          "share_of_case": 0.16133369185264856
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 2.8225806451612905,
+          "share_of_case": 0.15057811239580532
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 2.5201612903225805,
+          "share_of_case": 0.13444474321054048
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0} (cqlite-core/src/query/engine.rs:376)",
+          "share_of_bucket": 2.318548387096774,
+          "share_of_case": 0.12368916375369723
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 1.6129032258064515,
+          "share_of_case": 0.0860446356547459
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::SSTablePredicate> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.6129032258064515,
+          "share_of_case": 0.0860446356547459
+        }
+      ]
+    },
+    "read/get_partition_bti": {
+      "allocator": [
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 20.214612592709486,
+          "share_of_case": 6.8553997645295945
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::schema::Column> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 9.263058229446111,
+          "share_of_case": 3.1413892753933426
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 6.580400820577561,
+          "share_of_case": 2.231617253558814
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 5.065488401451791,
+          "share_of_case": 1.7178636412287274
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+          "share_of_bucket": 3.787281047814423,
+          "share_of_case": 1.2843840308252168
+        },
+        {
+          "site": "<cqlite_core::types::TableId>::new::<alloc::string::String> (cqlite-core/src/types.rs:1786)",
+          "share_of_bucket": 2.524854031876282,
+          "share_of_case": 0.8562560205501445
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 2.3670506548840144,
+          "share_of_case": 0.8027400192657604
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::schema::TableSchema> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 2.067224238598706,
+          "share_of_case": 0.7010596168254308
+        },
+        {
+          "site": "cqlite_core::query::select_executor::lookup::classify_partition_lookup (cqlite-core/src/query/select_executor/lookup.rs:108)",
+          "share_of_bucket": 1.940981537004892,
+          "share_of_case": 0.6582468157979235
+        },
+        {
+          "site": "<cqlite_core::query::select_optimizer::SSTablePredicate as core::clone::Clone>::clone (cqlite-core/src/query/select_optimizer.rs:93)",
+          "share_of_bucket": 1.7200568092157171,
+          "share_of_case": 0.583324413999786
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 22.440273037542664,
+          "share_of_case": 1.4074708337793
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+          "share_of_bucket": 6.825938566552901,
+          "share_of_case": 0.42812801027507225
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+          "share_of_bucket": 5.546075085324232,
+          "share_of_case": 0.3478540083484962
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 3.583617747440273,
+          "share_of_case": 0.22476720539441292
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0} (cqlite-core/src/query/engine.rs:376)",
+          "share_of_bucket": 3.0716723549488054,
+          "share_of_case": 0.1926576046237825
+        },
+        {
+          "site": "<cqlite_core::schema::SchemaManager>::find_schema_by_table::{closure#0} (cqlite-core/src/schema/mod.rs:1008)",
+          "share_of_bucket": 2.04778156996587,
+          "share_of_case": 0.12843840308252166
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::SSTablePredicate> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.7918088737201365,
+          "share_of_case": 0.11238360269720646
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0} (cqlite-core/src/query/engine.rs:277)",
+          "share_of_bucket": 1.621160409556314,
+          "share_of_case": 0.10168040244032966
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:412)",
+          "share_of_bucket": 1.4505119453924915,
+          "share_of_case": 0.09097720218345286
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::storage::sstable::version_gate::VersionGates> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.4505119453924915,
+          "share_of_case": 0.09097720218345286
+        }
+      ]
+    },
+    "read/point_lookup_repeated": {
+      "allocator": [
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 18.543142072553838,
+          "share_of_case": 6.332987807887852
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::schema::Column> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 9.379968203497615,
+          "share_of_case": 3.2035144873883215
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:239)",
+          "share_of_bucket": 7.081948258418847,
+          "share_of_case": 2.4186781183671453
+        },
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 5.737823384882208,
+          "share_of_case": 1.9596228836566465
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+          "share_of_bucket": 2.9773088596618007,
+          "share_of_case": 1.0168320252727183
+        },
+        {
+          "site": "<cqlite_core::types::TableId>::new::<alloc::string::String> (cqlite-core/src/types.rs:1786)",
+          "share_of_bucket": 2.4425495013730307,
+          "share_of_case": 0.8341971469470358
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 2.0378667437490967,
+          "share_of_case": 0.6959869687546276
+        },
+        {
+          "site": "cqlite_core::query::select_executor::lookup::classify_partition_lookup (cqlite-core/src/query/select_executor/lookup.rs:108)",
+          "share_of_bucket": 1.936696054343113,
+          "share_of_case": 0.6614344242065255
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::query::select_optimizer::SSTablePredicate> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.8788842318254082,
+          "share_of_case": 0.6416901130361814
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::schema::TableSchema> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 1.8499783205665559,
+          "share_of_case": 0.6318179574510094
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 15.083798882681565,
+          "share_of_case": 0.9329187027987561
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:44)",
+          "share_of_bucket": 7.980845969672785,
+          "share_of_case": 0.4936077792586011
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0} (cqlite-core/src/query/engine/deadline.rs:293)",
+          "share_of_bucket": 3.6711891460494814,
+          "share_of_case": 0.22705957845895652
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute_select_query::{closure#0} (cqlite-core/src/query/engine.rs:376)",
+          "share_of_bucket": 3.5913806863527533,
+          "share_of_case": 0.22212350066637052
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 3.5913806863527533,
+          "share_of_case": 0.22212350066637052
+        },
+        {
+          "site": "core::ptr::drop_glue::<cqlite_core::storage::sstable::version_gate::VersionGates> (library/core/src/ptr/mod.rs:825)",
+          "share_of_bucket": 2.713487629688747,
+          "share_of_case": 0.16782664494792437
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute_inner::{closure#0} (cqlite-core/src/query/engine.rs:277)",
+          "share_of_bucket": 2.154828411811652,
+          "share_of_case": 0.1332741003998223
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 1.9952114924181963,
+          "share_of_case": 0.12340194481465028
+        },
+        {
+          "site": "<cqlite_core::schema::Column as core::clone::Clone>::clone (cqlite-core/src/schema/mod.rs:243)",
+          "share_of_bucket": 1.9154030327214684,
+          "share_of_case": 0.11846586702206427
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::SelectExecutor>::execute::{closure#0} (cqlite-core/src/query/select_executor/execute.rs:53)",
+          "share_of_bucket": 1.7557861133280128,
+          "share_of_case": 0.10859371143689224
+        }
+      ]
+    },
+    "read/scan_partition_dense_stream": {
+      "allocator": [
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 13.13181367690783,
+          "share_of_case": 5.335749521796034
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs:218)",
+          "share_of_bucket": 9.402874132804758,
+          "share_of_case": 3.820598006644518
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::RowColumnResolution>::build::{closure#0}::{closure#1} (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/mod.rs:214)",
+          "share_of_bucket": 3.976709613478692,
+          "share_of_case": 1.6158260344306856
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 3.927155599603568,
+          "share_of_case": 1.5956911305748516
+        },
+        {
+          "site": "<alloc::vec::Vec<u8>>::append_elements (library/alloc/src/vec/mod.rs:2932)",
+          "share_of_bucket": 2.911298315163528,
+          "share_of_case": 1.1829256015302527
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::is_complex_column (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/udt.rs:605)",
+          "share_of_bucket": 2.8617443012884043,
+          "share_of_case": 1.1627906976744187
+        },
+        {
+          "site": "cqlite_core::query::select_executor::row_build::build_row_from_scan_cached (cqlite-core/src/query/select_executor/row_build.rs:246)",
+          "share_of_bucket": 2.725470763131814,
+          "share_of_case": 1.1074197120708749
+        },
+        {
+          "site": "<cqlite_core::types::RowKey>::new (cqlite-core/src/types.rs:1707)",
+          "share_of_bucket": 1.8458870168483648,
+          "share_of_case": 0.7500251686298198
+        },
+        {
+          "site": "<cqlite_core::query::select_executor::row_build::PartitionKeyCache>::columns_for::{closure#1} (cqlite-core/src/query/select_executor/row_build.rs:161)",
+          "share_of_bucket": 1.5733399405351833,
+          "share_of_case": 0.6392831974227323
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:75)",
+          "share_of_bucket": 1.350346878097126,
+          "share_of_case": 0.5486761300714789
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "<cqlite_core::query::result::QueryResultIterator>::next_async::{closure#0} (cqlite-core/src/query/result.rs:351)",
+          "share_of_bucket": 12.903225806451612,
+          "share_of_case": 0.28188865398167723
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::read_at::MmapReadAt as cqlite_core::storage::sstable::reader::read_at::ReadAt>::read_at (cqlite-core/src/storage/sstable/reader/read_at.rs:364)",
+          "share_of_bucket": 5.990783410138249,
+          "share_of_case": 0.1308768750629216
+        },
+        {
+          "site": "<cqlite_core::query::result::QueryResultIterator>::next_async::{closure#0} (cqlite-core/src/query/result.rs:356)",
+          "share_of_bucket": 5.0691244239631335,
+          "share_of_case": 0.11074197120708748
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::window_cursor::WindowCursor>::refill_owned (cqlite-core/src/storage/sstable/reader/window_cursor.rs:269)",
+          "share_of_bucket": 4.377880184331797,
+          "share_of_case": 0.09564079331521191
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:833)",
+          "share_of_bucket": 3.225806451612903,
+          "share_of_case": 0.07047216349541931
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::types::SSTableReader>::read_compressed_chunk_sync (cqlite-core/src/storage/sstable/reader/scan_stream_windowed_read.rs:265)",
+          "share_of_bucket": 2.5345622119815667,
+          "share_of_case": 0.05537098560354374
+        },
+        {
+          "site": "core::ptr::write::<core::mem::maybe_uninit::MaybeUninit<core::result::Result<cqlite_core::query::result::QueryRow, cqlite_core::error::Error>>> (library/core/src/ptr/mod.rs:1933)",
+          "share_of_bucket": 2.0737327188940093,
+          "share_of_case": 0.0453035336756267
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 1.8433179723502304,
+          "share_of_case": 0.040269807711668174
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 1.6129032258064515,
+          "share_of_case": 0.035236081747709654
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 1.6129032258064515,
+          "share_of_case": 0.035236081747709654
+        }
+      ]
+    },
+    "read/type_heavy": {
+      "allocator": [
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 13.439363817097416,
+          "share_of_case": 5.04578025477707
+        },
+        {
+          "site": "<cqlite_core::query::engine::QueryEngine>::execute::{closure#0}::{closure#0} (cqlite-core/src/query/engine/deadline.rs:303)",
+          "share_of_bucket": 5.195493704440026,
+          "share_of_case": 1.9506369426751593
+        },
+        {
+          "site": "<u8 as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> (library/alloc/src/slice.rs:448)",
+          "share_of_bucket": 5.0894632206759445,
+          "share_of_case": 1.910828025477707
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 4.652087475149106,
+          "share_of_case": 1.7466162420382165
+        },
+        {
+          "site": "<hashbrown::raw::RawTableInner>::free_buckets::<alloc::alloc::Global> (/rust/deps/hashbrown-0.17.1/src/raw.rs:3114)",
+          "share_of_bucket": 3.472498343273691,
+          "share_of_case": 1.3037420382165605
+        },
+        {
+          "site": "<cqlite_core::types::Value>::into_owned::compact (cqlite-core/src/types.rs:1330)",
+          "share_of_bucket": 3.0616302186878728,
+          "share_of_case": 1.149482484076433
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_value_from_raw_bytes_reporting (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/raw_value/reporting.rs:544)",
+          "share_of_bucket": 2.0145791915175613,
+          "share_of_case": 0.7563694267515924
+        },
+        {
+          "site": "<alloc::boxed::Box<bytes::bytes::Shared> as core::ops::drop::Drop>::drop (library/alloc/src/boxed.rs:1956)",
+          "share_of_bucket": 1.6964877402253147,
+          "share_of_case": 0.6369426751592356
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::extract_collection_element_type (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column.rs:1540)",
+          "share_of_bucket": 1.4049039098740888,
+          "share_of_case": 0.527468152866242
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::extract_map_types (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column.rs:1591)",
+          "share_of_bucket": 1.1398277004638833,
+          "share_of_case": 0.42794585987261147
+        }
+      ],
+      "memcpy": [
+        {
+          "site": "alloc::str::convert_while_ascii (library/alloc/src/str.rs:822)",
+          "share_of_bucket": 11.83206106870229,
+          "share_of_case": 0.15425955414012738
+        },
+        {
+          "site": "cqlite_core::storage::sstable::compression::snappy_decompress_raw (cqlite-core/src/storage/sstable/compression.rs:148)",
+          "share_of_bucket": 8.778625954198473,
+          "share_of_case": 0.11445063694267515
+        },
+        {
+          "site": "core::ptr::copy_nonoverlapping::<u8> (library/core/src/ptr/mod.rs:551)",
+          "share_of_bucket": 8.01526717557252,
+          "share_of_case": 0.1044984076433121
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_row_data_with_offset_impl (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/row_data.rs:656)",
+          "share_of_bucket": 6.488549618320611,
+          "share_of_case": 0.08459394904458599
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::parse_value_from_raw_bytes_reporting (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/raw_value/reporting.rs:544)",
+          "share_of_bucket": 6.106870229007634,
+          "share_of_case": 0.07961783439490445
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::cell_path_key_allowed_widths (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column/cell_path_key.rs:819)",
+          "share_of_bucket": 3.053435114503817,
+          "share_of_case": 0.03980891719745223
+        },
+        {
+          "site": "<cqlite_core::storage::sstable::reader::parsing::row_decoder::V5CompressedLegacyParser>::extract_map_types (cqlite-core/src/storage/sstable/reader/parsing/row_decoder/complex_column.rs:1591)",
+          "share_of_bucket": 2.2900763358778624,
+          "share_of_case": 0.029856687898089172
+        },
+        {
+          "site": "cqlite_core::parser::vint::decode_unsigned (cqlite-core/src/parser/vint.rs:57)",
+          "share_of_bucket": 2.2900763358778624,
+          "share_of_case": 0.029856687898089172
+        },
+        {
+          "site": "cqlite_core::storage::sstable::reader::block_io::read_nb_format_chunk_data::{closure#0} (cqlite-core/src/storage/sstable/reader/block_io.rs:512)",
+          "share_of_bucket": 2.2900763358778624,
+          "share_of_case": 0.029856687898089172
+        },
+        {
+          "site": "<alloc::vec::Vec<u8>>::append_elements (library/alloc/src/vec/mod.rs:2932)",
+          "share_of_bucket": 1.9083969465648856,
+          "share_of_case": 0.024880573248407645
+        }
+      ]
+    }
+  },
+  "workload_dir": "/home/dev/projects/machsmith/work/r2-profile/A-br/read",
+  "cqlite_commit": "7f9abe3663254724439dbe71aff77bb93faa1c2d",
+  "branch": true,
+  "case_samples": {
+    "read/clustering_point_bti": 20412,
+    "read/clustering_range_bti": 20348,
+    "read/clustering_slice": 20155,
+    "read/full_scan": 20016,
+    "read/get_partition_big": 18595,
+    "read/get_partition_bti": 18686,
+    "read/point_lookup_repeated": 20259,
+    "read/scan_partition_dense_stream": 19866,
+    "read/type_heavy": 20096
+  }
+}
