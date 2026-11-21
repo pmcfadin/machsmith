@@ -14,3 +14,4 @@ apart). "started" is the host snapshot time at the run's start.
 | decode | pre-2 | 2026-11-13T22:09:51Z | R2-000009 | NOISE_GATE_FAILED | — | pre-R20, counts toward nothing |
 | partition_lookup | pre-2 | 2026-11-13T22:57:54Z | R2-000010 | NOISE_GATE_FAILED | — | pre-R20, counts toward nothing |
 | read | pre-3 | 2026-11-14T01:08Z | — | killed, no record | — | pre-R20, counts toward nothing |
+| read | 1 | 2026-11-21T18:57:49Z | R2-000016 | OK (20 sessions, 1 rejected: load 4.19) | 0.0145 (T 0.05) | done: b ≤ 0.05; 0 counted tries (R20), 0 toward R21 |
