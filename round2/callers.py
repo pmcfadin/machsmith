@@ -375,6 +375,10 @@ def process_script(actx, script, case, delta, plt):
 
 
 def main(argv):
+    err = attribute.require_env()
+    if err:
+        print("callers: %s" % err, file=sys.stderr)
+        return 2
     if len(argv) != 4:
         print("usage: callers.py <dir> <bench-binary> <out.json>", file=sys.stderr)
         return 2

@@ -17,6 +17,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import attribute  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROFILE_DIR = os.path.join(ROOT, "work", "r2-profile")
 RESULTS_DIR = os.path.join(ROOT, "round2", "results", "profile")
@@ -78,6 +81,10 @@ def workload_entry(tag, workload, binaries):
 
 
 def main(argv):
+    err = attribute.require_env()
+    if err:
+        print("profile_record: %s" % err, file=sys.stderr)
+        raise SystemExit(2)
     if len(argv) < 3:
         raise SystemExit(__doc__)
     tag, out = argv[1], argv[2]

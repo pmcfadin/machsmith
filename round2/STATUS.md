@@ -14,4 +14,4 @@ task's commit. Ledger: `round2/results/ledger.jsonl`.
 | 7 Null runs (read, decode, partition_lookup) | not started | — | — | attempts in `results/attempts-null.md` |
 | 8 Ruler calibration | not started (needs Task 7) | — | — | |
 
-Usability fixes (2026-11-21): see DECISIONS R28 onward.
+Usability fixes (2026-11-21): `preflight.sh` (R28), early env check in the Python tools (R29), this file.

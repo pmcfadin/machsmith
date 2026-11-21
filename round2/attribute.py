@@ -526,7 +526,19 @@ def entry(fn, b, st, n):
             "physical_symbols": [x for x, _ in st["phys"].most_common(5)]}
 
 
+def require_env():
+    """Return an error message naming unset or empty MSX_LLVM_BIN / R2_PERF, or None when both are set."""
+    missing = [v for v in ("MSX_LLVM_BIN", "R2_PERF") if not os.environ.get(v)]
+    if not missing:
+        return None
+    return "%s unset or empty; run `source round2/env.sh` first" % " and ".join(missing)
+
+
 def main(argv):
+    err = require_env()
+    if err:
+        print("attribute: %s" % err, file=sys.stderr)
+        return 2
     dirpath, binary, out_path = argv[1:4]
     if detect_branch(dirpath):
         print("attribute: %s is a branch-stack profile (host.json branch: true); its brstack lines do not "
