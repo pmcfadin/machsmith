@@ -51,12 +51,12 @@ Run autonomously: commit after each task, stop only at the stop-and-ask points.
 **Interfaces:**
 - Produces: `python3 round2/profile_record.py <tag> <out.json> [workload ...]` writes a `kind: profile` body. Default workloads are the subdirectories of `work/r2-profile/<tag>/` that have a `host.json`. It exits non-zero if a binary's sha256 differs from `round2/results/profile/binaries.json`. For a tag whose `host.json` has `"branch": true`, the attribution file is the callers JSON (Task 4): it records that file's `samples`, `bucket_samples` and `brstack_empty_pct`, and no `case_samples` or chain stats.
 
-- [ ] **Step 1:** Copy the scratch `mkbody.py` (`/tmp/claude-1001/-home-dev-projects-machsmith/abc55852-b48d-43f5-ad75-8d70fb5e9d9c/scratchpad/mkbody.py`; if it is gone, rewrite it from the interface above) to `round2/profile_record.py` with optional workload args and the `note` keyed by tag (`A`, `B`, `A-cg` as now; `C`: "third decode profile for H2 (DECISIONS R22)"; `A-br`: "read branch-stack profile for H3/H5, structural only (DECISIONS R23)").
-- [ ] **Step 2:** Generate and append, in order: `for t in A B A-cg; do python3 round2/profile_record.py $t /tmp/…/body-$t.json && R2_LEDGER=round2/results/ledger.jsonl work/target/r2-tool/debug/r2 ledger-append --kind profile --body-file /tmp/…/body-$t.json; done`. Expected: prints `R2-000011`, `R2-000012`, `R2-000013`. If the ids differ, fix every id in HOTSPOTS.md to match.
-- [ ] **Step 3:** Replace `<!-- CASE-SAMPLES -->` with one table per workload: `| case | A samples | B samples |`, from `case_samples` in `round2/results/profile/{A,B}/<w>.json`.
-- [ ] **Step 4:** Replace HOTSPOTS.md's "Decisions for the owner" section with "Owner decisions (2026-11-17)", listing decisions 2-5 from Global Constraints with their DECISIONS row ids (R22-R24).
-- [ ] **Step 5: Verify:** `tail -3 round2/results/ledger.jsonl | jq -r '[.id,.kind,.tag]|@tsv'` shows the three records; `grep -c CASE-SAMPLES round2/results/profile/HOTSPOTS.md` prints 0.
-- [ ] **Step 6: Commit** `results: round 2 profile and hot-spot ranking` (HOTSPOTS.md, ledger.jsonl, profile_record.py).
+- [x] **Step 1:** Copy the scratch `mkbody.py` (`/tmp/claude-1001/-home-dev-projects-machsmith/abc55852-b48d-43f5-ad75-8d70fb5e9d9c/scratchpad/mkbody.py`; if it is gone, rewrite it from the interface above) to `round2/profile_record.py` with optional workload args and the `note` keyed by tag (`A`, `B`, `A-cg` as now; `C`: "third decode profile for H2 (DECISIONS R22)"; `A-br`: "read branch-stack profile for H3/H5, structural only (DECISIONS R23)").
+- [x] **Step 2:** Generate and append, in order: `for t in A B A-cg; do python3 round2/profile_record.py $t /tmp/…/body-$t.json && R2_LEDGER=round2/results/ledger.jsonl work/target/r2-tool/debug/r2 ledger-append --kind profile --body-file /tmp/…/body-$t.json; done`. Expected: prints `R2-000011`, `R2-000012`, `R2-000013`. If the ids differ, fix every id in HOTSPOTS.md to match.
+- [x] **Step 3:** Replace `<!-- CASE-SAMPLES -->` with one table per workload: `| case | A samples | B samples |`, from `case_samples` in `round2/results/profile/{A,B}/<w>.json`.
+- [x] **Step 4:** Replace HOTSPOTS.md's "Decisions for the owner" section with "Owner decisions (2026-11-17)", listing decisions 2-5 from Global Constraints with their DECISIONS row ids (R22-R24).
+- [x] **Step 5: Verify:** `tail -3 round2/results/ledger.jsonl | jq -r '[.id,.kind,.tag]|@tsv'` shows the three records; `grep -c CASE-SAMPLES round2/results/profile/HOTSPOTS.md` prints 0.
+- [x] **Step 6: Commit** `results: round 2 profile and hot-spot ranking` (HOTSPOTS.md, ledger.jsonl, profile_record.py).
 
 ### Task 2: Pre-register owner decisions (controller)
 
@@ -64,15 +64,15 @@ Run autonomously: commit after each task, stop only at the stop-and-ask points.
 - Modify: `round2/DECISIONS.md` (append R20-R24)
 - Create: `round2/results/attempts-null.md`
 
-- [ ] **Step 1:** Append rows R20-R24, one per owner decision 1-5 above, in the existing `| # | decision | why | cost if wrong |` format. R22 must list H2's six physical functions verbatim from HOTSPOTS.md ("H2" frames), the test (C ≥ 3% and |C − 64.31| < 2 or |C − 61.12| < 2), the C target rule (cases ≥ 3% in A, B and C), and "C is taken by `profile.sh <decode bin> decode C` under the normal quiet wait". R23 states the branch command (`-j any_call,u`), that its output is structural only, and the skip rule.
-- [ ] **Step 2:** Create `round2/results/attempts-null.md` with a table `| workload | attempt | started (UTC) | ledger id | status | b | counts toward |`, pre-filled with R2-000005..10 marked "pre-R20, counts toward nothing", and the 2026-11-14T01:08Z read attempt (killed, no record) marked the same way.
-- [ ] **Step 3: Commit** `round2: owner decisions R20-R24 (pre-registered)`. Record the commit hash; Task 5 checks it.
+- [x] **Step 1:** Append rows R20-R24, one per owner decision 1-5 above, in the existing `| # | decision | why | cost if wrong |` format. R22 must list H2's six physical functions verbatim from HOTSPOTS.md ("H2" frames), the test (C ≥ 3% and |C − 64.31| < 2 or |C − 61.12| < 2), the C target rule (cases ≥ 3% in A, B and C), and "C is taken by `profile.sh <decode bin> decode C` under the normal quiet wait". R23 states the branch command (`-j any_call,u`), that its output is structural only, and the skip rule.
+- [x] **Step 2:** Create `round2/results/attempts-null.md` with a table `| workload | attempt | started (UTC) | ledger id | status | b | counts toward |`, pre-filled with R2-000005..10 marked "pre-R20, counts toward nothing", and the 2026-11-14T01:08Z read attempt (killed, no record) marked the same way.
+- [x] **Step 3: Commit** `round2: owner decisions R20-R24 (pre-registered)`. Record the commit hash; Task 5 checks it.
 
 ### Task 3: Branch-sampling feasibility gate (controller, ~1 min)
 
-- [ ] **Step 1:** Run, from `round2/` with `env.sh` sourced: `CQLITE_DATASETS_ROOT=… taskset -c 2 perf record -e cycles:u -F 999 -j any_call,u -o $R2_SCRATCH/br.data -- work/r2-bins/7f9abe366325/read --bench --profile-time 2 read/type_heavy`.
-- [ ] **Step 2:** `perf script -i $R2_SCRATCH/br.data -F ip,sym,dso,brstack | head -50`.
-- [ ] **Step 3: Gate.** Feasible iff `perf record` exited 0 and ≥ 90% of sample lines carry at least one `0x…/0x…/` brstack entry. Record the result (pass/fail, counts, the exact perf error if any) as a new DECISIONS row R25 ("observation, no code") and commit `round2: branch-sampling feasibility (R25)`. If infeasible: skip Task 4 and the branch half of Tasks 5-6; HOTSPOTS gets "H3/H5 skipped: branch sampling infeasible (R25)".
+- [x] **Step 1:** Run, from `round2/` with `env.sh` sourced: `CQLITE_DATASETS_ROOT=… taskset -c 2 perf record -e cycles:u -F 999 -j any_call,u -o $R2_SCRATCH/br.data -- work/r2-bins/7f9abe366325/read --bench --profile-time 2 read/type_heavy`.
+- [x] **Step 2:** `perf script -i $R2_SCRATCH/br.data -F ip,sym,dso,brstack | head -50`.
+- [x] **Step 3: Gate.** Feasible iff `perf record` exited 0 and ≥ 90% of sample lines carry at least one `0x…/0x…/` brstack entry. Record the result (pass/fail, counts, the exact perf error if any) as a new DECISIONS row R25 ("observation, no code") and commit `round2: branch-sampling feasibility (R25)`. If infeasible: skip Task 4 and the branch half of Tasks 5-6; HOTSPOTS gets "H3/H5 skipped: branch sampling infeasible (R25)".
 
 ### Task 4: Branch-stack profiling and caller attribution (subagent + reviewer)
 
@@ -90,30 +90,30 @@ Only if Task 3 passed.
   - `caller_site(ctx, leaf_dso: str, brstack: list[tuple[int, int]]) -> str | None`: the most recent entry whose `from` lies in the bench binary (not libc, not PLT), resolved through inlines to the innermost `cqlite_core` frame (`function` + `file:line`), else the innermost frame of any name; `None` if no entry qualifies.
   - CLI `callers.py <dir> <bin> <out.json>`: for samples whose leaf bucket is `allocator` or `memcpy`, a JSON `{ "samples": int, "bucket_samples": {bucket: int}, "brstack_empty_pct": float, "no_caller_pct": {bucket: float}, "sites": {bucket: [{"site": str, "share_of_bucket": float, "share_of_workload": float}] (top 25)}, "per_case_sites": {case: {bucket: top 10}} }`.
 
-- [ ] **Step 1: Write failing tests** in `round2/test_callers.py` (same style as `test_attribute.py`):
+- [x] **Step 1: Write failing tests** in `round2/test_callers.py` (same style as `test_attribute.py`):
   - `test_parse_brstack_order`: `parse_brstack("0x10/0x20/P/-/-/0 0x30/0x40/P/-/-/0")` gives `[(0x10, 0x20), (0x30, 0x40)]`.
   - `test_skips_libc_internal_calls`: with a stub context mapping 0x1000-0x1fff to the bench binary and 0x9000-0x9fff to libc, `caller_site` on `[(0x9010, 0x9100), (0x1010, 0x8000)]` returns the site for 0x1010.
   - `test_empty_brstack_counts_as_no_branch_data`: a sample with no brstack entries goes into `brstack_empty_pct`, not into `no_caller_pct`.
   - `test_prefers_cqlite_frame_in_inline_chain`: an inline chain `[alloc::raw_vec::…, cqlite_core::x::y]` yields `cqlite_core::x::y`.
-- [ ] **Step 2:** `cd round2 && python3 -m unittest test_callers -v`. Expected: FAIL (module missing).
-- [ ] **Step 3:** Implement `round2/callers.py` per the interfaces.
-- [ ] **Step 4:** Run the tests again (`test_callers` and `test_attribute`). Expected: all PASS.
-- [ ] **Step 5:** Add the `R2_PROFILE_BRANCH` mode to `profile.sh`. It refuses (exit 2, message names both vars) when `R2_PROFILE_CALLGRAPH=1` is also set. Verify: `R2_TEST_MODE=1 R2_PROFILE_SHORT=1 R2_PROFILE_BRANCH=1 round2/profile.sh work/r2-bins/7f9abe366325/read read t4br` exits 0 and `work/r2-profile/t4br-br/read/*.script` lines carry brstack tokens. Then `python3 round2/callers.py work/r2-profile/t4br-br/read work/r2-bins/7f9abe366325/read /tmp/…/t4.json` prints a JSON whose `bucket_samples.allocator > 0`. Also verify the refusal.
-- [ ] **Step 6: Commit** `round2: branch-stack profiling and caller attribution`.
+- [x] **Step 2:** `cd round2 && python3 -m unittest test_callers -v`. Expected: FAIL (module missing).
+- [x] **Step 3:** Implement `round2/callers.py` per the interfaces.
+- [x] **Step 4:** Run the tests again (`test_callers` and `test_attribute`). Expected: all PASS.
+- [x] **Step 5:** Add the `R2_PROFILE_BRANCH` mode to `profile.sh`. It refuses (exit 2, message names both vars) when `R2_PROFILE_CALLGRAPH=1` is also set. Verify: `R2_TEST_MODE=1 R2_PROFILE_SHORT=1 R2_PROFILE_BRANCH=1 round2/profile.sh work/r2-bins/7f9abe366325/read read t4br` exits 0 and `work/r2-profile/t4br-br/read/*.script` lines carry brstack tokens. Then `python3 round2/callers.py work/r2-profile/t4br-br/read work/r2-bins/7f9abe366325/read /tmp/…/t4.json` prints a JSON whose `bucket_samples.allocator > 0`. Also verify the refusal.
+- [x] **Step 6: Commit** `round2: branch-stack profiling and caller attribution`.
 
 ### Task 5: Measurement window 1: decode C and read branch stacks (controller, background)
 
-- [ ] **Step 1:** `git log --oneline` contains Task 2's commit, and it is older than now. Otherwise stop.
-- [ ] **Step 2:** One background job, logged to `work/r2-logs/p2b-window1.log`: `round2/profile.sh work/r2-bins/7f9abe366325/decode decode C`, then (if Task 3 passed) `R2_PROFILE_BRANCH=1 round2/profile.sh work/r2-bins/7f9abe366325/read read A`. Each waits for a quiet host itself (`r2 quiet-wait`, 12 h timeout). Do not pin C's core: profile.sh chooses it, as for A.
-- [ ] **Step 3:** When it exits: `python3 round2/attribute.py work/r2-profile/C/decode work/r2-bins/7f9abe366325/decode round2/results/profile/C/decode.json`; if branch ran, `python3 round2/callers.py work/r2-profile/A-br/read work/r2-bins/7f9abe366325/read round2/results/profile/A-br/read.json`.
-- [ ] **Step 4:** Append `kind: profile` records for `C` and (if run) `A-br` with `profile_record.py`. Note the ids.
-- [ ] **Step 5: Commit** `results: decode profile C and read branch stacks` (results JSONs, ledger).
+- [x] **Step 1:** `git log --oneline` contains Task 2's commit, and it is older than now. Otherwise stop.
+- [x] **Step 2:** One background job, logged to `work/r2-logs/p2b-window1.log`: `round2/profile.sh work/r2-bins/7f9abe366325/decode decode C`, then (if Task 3 passed) `R2_PROFILE_BRANCH=1 round2/profile.sh work/r2-bins/7f9abe366325/read read A`. Each waits for a quiet host itself (`r2 quiet-wait`, 12 h timeout). Do not pin C's core: profile.sh chooses it, as for A.
+- [x] **Step 3:** When it exits: `python3 round2/attribute.py work/r2-profile/C/decode work/r2-bins/7f9abe366325/decode round2/results/profile/C/decode.json`; if branch ran, `python3 round2/callers.py work/r2-profile/A-br/read work/r2-bins/7f9abe366325/read round2/results/profile/A-br/read.json`.
+- [x] **Step 4:** Append `kind: profile` records for `C` and (if run) `A-br` with `profile_record.py`. Note the ids.
+- [x] **Step 5: Commit** `results: decode profile C and read branch stacks` (results JSONs, ledger).
 
 ### Task 6: Evaluate H2, attribute H3/H5 (controller)
 
-- [ ] **Step 1:** Compute C's H2 share with the same grouping as `groups.py` in the scratch dir (physical-function membership from R22). Apply R22's test. Compute the C-qualified target set (cases ≥ 3% in A, B and C).
-- [ ] **Step 2:** Append a section "Profile C (H2) and branch stacks (H3/H5)" to HOTSPOTS.md: C's share, the test result with arithmetic, the target set (or "H2 skipped per R22"); for H3/H5, the top 10 call sites per bucket with `share_of_bucket`, `brstack_empty_pct` and `no_caller_pct`, and whether a site covers ≥ 25% of its bucket (a candidate for a rule) or the cost is spread out (no rule). Do not edit the earlier ranking table; this section supersedes it where they differ.
-- [ ] **Step 3: Commit** `results: H2 profile C verdict, H3/H5 call sites`.
+- [x] **Step 1:** Compute C's H2 share with the same grouping as `groups.py` in the scratch dir (physical-function membership from R22). Apply R22's test. Compute the C-qualified target set (cases ≥ 3% in A, B and C).
+- [x] **Step 2:** Append a section "Profile C (H2) and branch stacks (H3/H5)" to HOTSPOTS.md: C's share, the test result with arithmetic, the target set (or "H2 skipped per R22"); for H3/H5, the top 10 call sites per bucket with `share_of_bucket`, `brstack_empty_pct` and `no_caller_pct`, and whether a site covers ≥ 25% of its bucket (a candidate for a rule) or the cost is spread out (no rule). Do not edit the earlier ranking table; this section supersedes it where they differ.
+- [x] **Step 3: Commit** `results: H2 profile C verdict, H3/H5 call sites`.
 
 ### Task 7: Null runs (controller, background)
 
