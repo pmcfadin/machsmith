@@ -1,0 +1,197 @@
+{
+ "A": {
+  "samples": 3115056,
+  "h2_share": 64.31348264686092,
+  "members": {
+   "CqlType::parse_with_depth": 28.01660708507327,
+   "SSTableReader::decode_value_for_bench": 21.421669465974286,
+   "str::to_lowercase": 5.649111926077733,
+   "vector_type::split_leading_identifier": 5.040294620706658,
+   "ComparatorType::from_cql_type": 2.4076934732473507,
+   "str::trim_matches": 1.7781060757816232
+  },
+  "matched_symbols": {
+   "CqlType::parse_with_depth": [
+    "<cqlite_core::schema::CqlType>::parse_with_depth"
+   ],
+   "SSTableReader::decode_value_for_bench": [
+    "<cqlite_core::storage::sstable::reader::types::SSTableReader>::decode_value_for_bench"
+   ],
+   "str::to_lowercase": [
+    "<str>::to_lowercase"
+   ],
+   "vector_type::split_leading_identifier": [
+    "cqlite_core::schema::vector_type::split_leading_identifier"
+   ],
+   "ComparatorType::from_cql_type": [
+    "<cqlite_core::types::comparator::ComparatorType>::from_cql_type"
+   ],
+   "str::trim_matches": [
+    "<str>::trim_matches::<<char>::is_whitespace>"
+   ]
+  },
+  "per_case": {
+   "decode/text_heavy": 60.60083698684735,
+   "decode/type_ascii": 62.62106627358257,
+   "decode/type_bigint": 77.19099897850901,
+   "decode/type_blob": 65.1368084681446,
+   "decode/type_boolean": 80.17915783765328,
+   "decode/type_counter": 76.93769226129442,
+   "decode/type_date": 76.05753646677472,
+   "decode/type_decimal": 70.687425437849,
+   "decode/type_double": 79.49163436238375,
+   "decode/type_duration": 75.07063857269718,
+   "decode/type_float": 76.45645584761827,
+   "decode/type_frozen": 33.50577320627237,
+   "decode/type_inet": 60.34192126235575,
+   "decode/type_int": 73.32534212366397,
+   "decode/type_json": 37.318937834909086,
+   "decode/type_list": 54.77548219097891,
+   "decode/type_map": 42.236806884313005,
+   "decode/type_set": 56.508087913834906,
+   "decode/type_smallint": 76.9124975084712,
+   "decode/type_text": 62.59731422739008,
+   "decode/type_time": 71.34511100236685,
+   "decode/type_timestamp": 78.2904058929343,
+   "decode/type_timeuuid": 75.65177895533687,
+   "decode/type_tinyint": 75.93987963951736,
+   "decode/type_tuple": 52.83854188585232,
+   "decode/type_udt": 57.61101759152614,
+   "decode/type_uuid": 75.00227059429021,
+   "decode/type_varchar": 64.24027192937953,
+   "decode/type_varint": 67.91304347826087,
+   "decode/vint_decode": 0.009110233829334954,
+   "decode/wide_row_primitives": 79.05547196705733
+  }
+ },
+ "B": {
+  "samples": 3196030,
+  "h2_share": 61.12326855505111,
+  "members": {
+   "CqlType::parse_with_depth": 25.483302722440026,
+   "SSTableReader::decode_value_for_bench": 19.702631076679506,
+   "str::to_lowercase": 5.873004946762077,
+   "vector_type::split_leading_identifier": 5.267722768559745,
+   "ComparatorType::from_cql_type": 2.6324846763015364,
+   "str::trim_matches": 2.16412236430822
+  },
+  "matched_symbols": {
+   "CqlType::parse_with_depth": [
+    "<cqlite_core::schema::CqlType>::parse_with_depth"
+   ],
+   "SSTableReader::decode_value_for_bench": [
+    "<cqlite_core::storage::sstable::reader::types::SSTableReader>::decode_value_for_bench"
+   ],
+   "str::to_lowercase": [
+    "<str>::to_lowercase"
+   ],
+   "vector_type::split_leading_identifier": [
+    "cqlite_core::schema::vector_type::split_leading_identifier"
+   ],
+   "ComparatorType::from_cql_type": [
+    "<cqlite_core::types::comparator::ComparatorType>::from_cql_type"
+   ],
+   "str::trim_matches": [
+    "<str>::trim_matches::<<char>::is_whitespace>"
+   ]
+  },
+  "per_case": {
+   "decode/text_heavy": 68.65216913564215,
+   "decode/type_ascii": 44.27626464850911,
+   "decode/type_bigint": 79.02913404890647,
+   "decode/type_blob": 49.43152044462088,
+   "decode/type_boolean": 76.79639819909956,
+   "decode/type_counter": 77.3474017719192,
+   "decode/type_date": 56.88543481541438,
+   "decode/type_decimal": 71.41412725743804,
+   "decode/type_double": 78.1396279700686,
+   "decode/type_duration": 75.70782325747506,
+   "decode/type_float": 77.46357582736695,
+   "decode/type_frozen": 34.3417914766661,
+   "decode/type_inet": 60.63975673741951,
+   "decode/type_int": 73.80475556323638,
+   "decode/type_json": 38.0888331546692,
+   "decode/type_list": 54.05267871682136,
+   "decode/type_map": 41.72559131254029,
+   "decode/type_set": 55.79304421565323,
+   "decode/type_smallint": 76.42810832377438,
+   "decode/type_text": 43.98310794552192,
+   "decode/type_time": 64.8408228668379,
+   "decode/type_timestamp": 67.08474721876208,
+   "decode/type_timeuuid": 76.08515464816996,
+   "decode/type_tinyint": 79.84850172663474,
+   "decode/type_tuple": 57.85775063817008,
+   "decode/type_udt": 59.776513776271734,
+   "decode/type_uuid": 71.46053604524982,
+   "decode/type_varchar": 48.66208600324249,
+   "decode/type_varint": 66.17155958730001,
+   "decode/vint_decode": 0.006016424839812688,
+   "decode/wide_row_primitives": 82.57179233272034
+  }
+ },
+ "C": {
+  "samples": 3081892,
+  "h2_share": 69.63495151679552,
+  "members": {
+   "CqlType::parse_with_depth": 37.78321887983096,
+   "SSTableReader::decode_value_for_bench": 22.42580207223355,
+   "str::to_lowercase": 3.729072920141264,
+   "vector_type::split_leading_identifier": 2.3171480376340248,
+   "ComparatorType::from_cql_type": 2.212796554843583,
+   "str::trim_matches": 1.166913052112144
+  },
+  "matched_symbols": {
+   "CqlType::parse_with_depth": [
+    "<cqlite_core::schema::CqlType>::parse_with_depth"
+   ],
+   "SSTableReader::decode_value_for_bench": [
+    "<cqlite_core::storage::sstable::reader::types::SSTableReader>::decode_value_for_bench"
+   ],
+   "str::to_lowercase": [
+    "<str>::to_lowercase"
+   ],
+   "vector_type::split_leading_identifier": [
+    "cqlite_core::schema::vector_type::split_leading_identifier"
+   ],
+   "ComparatorType::from_cql_type": [
+    "<cqlite_core::types::comparator::ComparatorType>::from_cql_type"
+   ],
+   "str::trim_matches": [
+    "<str>::trim_matches::<<char>::is_whitespace>"
+   ]
+  },
+  "per_case": {
+   "decode/text_heavy": 72.44432438921903,
+   "decode/type_ascii": 65.38966439859306,
+   "decode/type_bigint": 82.08007714406251,
+   "decode/type_blob": 66.63691520834378,
+   "decode/type_boolean": 82.56379465625938,
+   "decode/type_counter": 85.7729261130975,
+   "decode/type_date": 80.0110987791343,
+   "decode/type_decimal": 76.48889997505613,
+   "decode/type_double": 82.13237010553733,
+   "decode/type_duration": 80.63316025608711,
+   "decode/type_float": 81.2214583228785,
+   "decode/type_frozen": 36.96805018232507,
+   "decode/type_inet": 65.83368543892477,
+   "decode/type_int": 79.09836885820074,
+   "decode/type_json": 42.77499424959747,
+   "decode/type_list": 58.97957943357238,
+   "decode/type_map": 49.50340363798683,
+   "decode/type_set": 64.74445997205031,
+   "decode/type_smallint": 82.1048951048951,
+   "decode/type_text": 66.8398856754542,
+   "decode/type_time": 76.38531024733565,
+   "decode/type_timestamp": 78.4769470903706,
+   "decode/type_timeuuid": 86.42006057224835,
+   "decode/type_tinyint": 82.45980497504443,
+   "decode/type_tuple": 64.66994739521466,
+   "decode/type_udt": 62.22202060525414,
+   "decode/type_uuid": 81.01294981321422,
+   "decode/type_varchar": 69.87954022988505,
+   "decode/type_varint": 66.83619005418035,
+   "decode/vint_decode": 0.007006796592694914,
+   "decode/wide_row_primitives": 89.65688811049635
+  }
+ }
+}
