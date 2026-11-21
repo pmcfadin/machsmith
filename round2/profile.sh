@@ -23,6 +23,7 @@ if [ "$callgraph" = 1 ] && [ "$branch" = 1 ]; then
     echo "profile.sh: R2_PROFILE_BRANCH=1 and R2_PROFILE_CALLGRAPH=1 are mutually exclusive; set one" >&2
     exit 2
 fi
+"$R2_ROOT/preflight.sh" || exit 1
 r2_require_unlocked || exit 1
 short=${R2_PROFILE_SHORT:-0}
 r2bin=${R2_BIN:-$MSX_WORK/target/r2-tool/debug/r2}
