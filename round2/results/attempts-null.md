@@ -20,3 +20,4 @@ apart). "started" is the host snapshot time at the run's start.
 | decode | 2 | 2026-11-21T22:18:57Z | R2-000019 | NOISE_GATE_FAILED (12 sessions, 4 rejected: load 4.17, 4.22, 4.06; cargo/rustc seen) | — | R21: 2 of 3; 0 counted tries (R20). Next decode attempt not before 2026-11-22T00:18:57Z; a third failure is stop-and-ask |
 | partition_lookup | 2 | 2026-11-22T09:41:19Z | R2-000020 | NOISE_GATE_FAILED (2 sessions, 4 rejected: load 4.51, 4.39, 10.4, 8.82; 10 h in the quiet wait first) | — | R21: 1 of 3; counted tries stay at 1 of 3 (R20). Next attempt not before 11:41:19Z |
 | decode | 3 | 2026-11-22T10:48:39Z | R2-000021 | OK (20 sessions, 3 rejected: load 4.03, 4.12, 4.01) | 0.0219 (T 0.05) | done: b ≤ 0.05; 0 counted tries (R20); R21 stays at 2 of 3 |
+| partition_lookup | 3 | 2026-11-22T12:48:06Z | R2-000022 | OK (20 sessions, 0 rejected) | 0.0416 (T 0.0832) | done: b ≤ 0.05; counted tries end at 1 of 3 (R20); R21 at 1 of 3 |

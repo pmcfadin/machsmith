@@ -119,12 +119,12 @@ Only if Task 3 passed.
 
 **Files:** `round2/results/attempts-null.md` (one row per attempt), ledger via `r2 run`.
 
-- [ ] **Step 1:** For each workload in order read, decode, partition_lookup: the candidate is `work/r2-bins/7f9abe366325/<w>.copy`, as used by R2-000005..10 (it exists; check that its sha256 equals the base's before the first run). Launch `r2 run --kind null --workload <w> --base <bin> --cand <bin>.copy --sessions 20` in a background job logged to `work/r2-logs/p2b-null-<w>-<n>.log`.
-- [ ] **Step 2:** After each run, add an `attempts-null.md` row. Then:
+- [x] **Step 1:** For each workload in order read, decode, partition_lookup: the candidate is `work/r2-bins/7f9abe366325/<w>.copy`, as used by R2-000005..10 (it exists; check that its sha256 equals the base's before the first run). Launch `r2 run --kind null --workload <w> --base <bin> --cand <bin>.copy --sessions 20` in a background job logged to `work/r2-logs/p2b-null-<w>-<n>.log`.
+- [x] **Step 2:** After each run, add an `attempts-null.md` row. Then:
   - `OK`: `r2 nullband --null <id> --workload <w>`. Record `b` and `T`. If `b ≤ 0.05`, that workload is done. If `b > 0.05`, that is a counted try (R20). Retry ≥ 2 h later. Three counted tries over: **stop and report: ruler broken.**
   - `NOISE_GATE_FAILED`: count it toward R21's cap. Retry ≥ 2 h after this attempt's start. The third such failure for a workload: **stop and ask.**
   - `aborted` or killed with no record: add a row and count it toward R21. Then retry.
-- [ ] **Step 3:** Commit after each workload finishes (`results: null <w> (R2-…)`), including `attempts-null.md` and the ledger.
+- [x] **Step 3:** Commit after each workload finishes (`results: null <w> (R2-…)`), including `attempts-null.md` and the ledger.
 
 ### Task 8: Ruler calibration (subagent for CQLite code + reviewer; controller runs)
 
