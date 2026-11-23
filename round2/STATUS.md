@@ -17,3 +17,16 @@ task's commit. Ledger: `round2/results/ledger.jsonl`.
 Usability fixes (2026-11-21): `preflight.sh` (R28), early env check in the Python tools (R29), this file.
 
 Phase 2 is complete. Phase 3 candidates in rank order: H1, H4, H5, H6 (H2 skipped per R22; H3 no rule). See the last section of `results/profile/HOTSPOTS.md`.
+
+## Phase 3 (hot spots), finished 2026-11-23
+
+| hot spot | rule | result | records |
+|---|---|---|---|
+| H1 | `default-siphash-on-hot-map` | **WON** 0.4419 (0.4371 to 0.4458), T 0.0832; no REGRESSION | R2-000031; cross-checks R2-000032, R2-000033 |
+| H4 | `per-cell-arc-str-clone` | not attempted: internal route predicted 0.971 to 0.985, above 1 − T; public route is a proposal | rule entry |
+| H5 | `copy-cached-chunk-into-window` | TIED 1.0132 (0.9922 to 1.0364), T 0.0881 | R2-000041; cross-checks R2-000044, R2-000045 |
+| H6 | `type-name-match-per-clustering-value` | INCONCLUSIVE 0.9110 (0.8909 to 0.9313), T 0.0881 | R2-000042; cross-checks R2-000046, R2-000047 |
+
+Three fixes attempted (cap 4); no ranked hot spot is left (H2 skipped by R22, H3 has no rule).
+Proposals: `docs/rules/proposals/default-siphash-on-hot-map.md`, `per-cell-arc-str-clone.md` (not sized).
+Next: Phase 4 (`docs/plans/2026-11-12-round-2/phase-4-writeup.md`).

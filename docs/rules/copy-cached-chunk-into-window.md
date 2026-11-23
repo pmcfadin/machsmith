@@ -72,3 +72,35 @@ public items, and must keep `work_counters::add_chunk_decompressed` counting as 
 ## Outcome
 
 (appended after the confirmation run)
+
+### Outcome, 2026-11-23
+
+Branch `r2/copy-cached-chunk-into-window` at `c1d91fb2` (one attempt). Fix: a private
+`ChunkWindow` that keeps the first cached chunk without copying and stitches only when a second
+chunk arrives.
+
+| | value | record |
+|---|---|---|
+| screen (attempt 1) | targets 1.0008, provisional; no attempt 2 (the agent found no in-scope second fix) | R2-000034 |
+| review | internal only, no format change, no weakened tests; minor notes only | — |
+| tests | one failure outside the base's list, shown to be intermittent on the base too (DECISIONS R31) | R2-000035 |
+| confirm tries 1 and 2 | `NOISE_GATE_FAILED` | R2-000036, R2-000039 |
+| **confirm try 3, targets** | **TIED**: ratio **1.0132**, 95% interval 0.9922 to 1.0364; b 0.0441, T 0.0881; 20 sessions, 0 rejected | R2-000041 |
+| confirm, whole workload | TIED: 0.9993 (0.9885 to 1.0072) | R2-000041 |
+| cross-check decode | try 1 `NOISE_GATE_FAILED` (R2-000043); try 2 no REGRESSION, workload 1.0027 (0.9951 to 1.0093), T 0.05 | R2-000045 |
+| cross-check partition_lookup | no REGRESSION, workload 0.9985 (0.9856 to 1.0111), T 0.0832 | R2-000044 |
+| `perf-gate` 10% column | no case flagged in any run | R2-000041, 44, 45 |
+
+Per-case confirm ratios on the targets: `clustering_point_bti` 1.018 (0.994 to 1.045),
+`clustering_range_bti` 1.008 (0.988 to 1.030).
+
+- **Prediction held: no.** 1.0132 is outside the predicted range (0.893 to 0.934).
+- **Paid off: no.** TIED.
+- **Why the prediction was wrong** (agent's probe on warm repeat queries, not a ledger record): in
+  both target cases the window is never one chunk. The point query stitches about 20 chunks and the
+  range query about 15, because the window runs from the partition header's chunk to the block the
+  query needs. The fix removes the copy only for a one-chunk window, so `f` was about 0, not
+  0.8 to 1.0. The rule entry assumed the common case was one chunk without checking it.
+- The copy itself is still there and still 6 to 10% of these cases. Removing it needs a parser that
+  can read a window made of several chunks, or a window that skips the chunks between the header
+  and the target block; neither is a change to this one site.
