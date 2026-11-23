@@ -109,3 +109,9 @@ Per-case confirm ratios: `borrow_trait_lookup` 0.340, `position_0` 0.350, `hot_k
 - The read and decode cross-check intervals sit just below 1 and inside T. The read null's own
   interval (R2-000016, 0.9855 to 0.9975) does too, so this is not evidence of an effect there.
 - Not measured: the memory and build time of the second map (the bench does not exercise them).
+
+### Correction, 2026-11-23 (final review)
+
+The note above explains both cross-check intervals by the read null sitting just below 1. That
+holds for read (R2-000016) only. The decode null's interval is above 1 (R2-000021), so the decode
+cross-check's small shift (R2-000033) is unexplained. It is inside T and nothing is claimed from it.

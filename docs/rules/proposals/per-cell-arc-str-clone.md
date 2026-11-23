@@ -89,3 +89,13 @@ Per-case point ratios (R2-000052): `scan_partition_dense_stream` 0.926, `cluster
 - The branch is a measurement vehicle, not a design: cold paths (merge, compaction, export, CLI)
   now clone names where they did not before, and owned iteration of `RowValues` allocates.
 
+### Corrections, 2026-11-23 (final review)
+
+- "The two scan cases with the largest profile share moved the most" above is wrong. By share the
+  order is `clustering_slice` 34.53, `full_scan` 21.31, `scan_partition_dense_stream` 12.92. The
+  lowest point ratios were `scan_partition_dense_stream` 0.926 and `clustering_slice` 0.937, and
+  `full_scan` measured 0.980 (R2-000052). Per-case ratios are not claims.
+- "load from other work on the host" for tries 1 and 2: the rejections were for load (R2-000050,
+  R2-000051); the ledger does not record where the load came from.
+- The three-try cap that made try 3 the last was applied by analogy with confirmation runs and was
+  written down only after the runs (DECISIONS R32, R33).

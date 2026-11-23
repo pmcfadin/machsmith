@@ -68,3 +68,8 @@ Per-case ratios: `borrow_trait_lookup` 0.347, `position_0` 0.355, `hot_keys` 0.4
 - Tested only by the `index_reader` tests (30 passed; 2 passed in
   `index_reader_memory_optimization_tests`) and a workspace `cargo check`. The full suite was not
   run on this branch, and no cross-check runs were made.
+
+### Correction, 2026-11-23 (final review)
+
+"Neither route is shown to be faster": the two ratios come from separate runs against the base
+(R2-000031, R2-000049), not from a run of one route against the other.
