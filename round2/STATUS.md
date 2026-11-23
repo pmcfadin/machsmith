@@ -30,3 +30,15 @@ Phase 2 is complete. Phase 3 candidates in rank order: H1, H4, H5, H6 (H2 skippe
 Three fixes attempted (cap 4); no ranked hot spot is left (H2 skipped by R22, H3 has no rule).
 Proposals: `docs/rules/proposals/default-siphash-on-hot-map.md`, `per-cell-arc-str-clone.md` (not sized).
 Next: Phase 4 (`docs/plans/2026-11-12-round-2/phase-4-writeup.md`).
+
+## Phase 4 (write-up), 2026-11-23
+
+| item | result | records |
+|---|---|---|
+| Proposal sizing, `default-siphash-on-hot-map` | 0.4459 (0.4428 to 0.4493), T 0.0832; proposal, not a fix | R2-000049 (try 1 R2-000048 `NOISE_GATE_FAILED`) |
+| Proposal sizing, `per-cell-arc-str-clone` | TIED 0.9826 (0.9750 to 0.9907), T 0.05; proposal, not a fix | R2-000052 (tries R2-000050, R2-000051 `NOISE_GATE_FAILED`) |
+| Rule catalogue | `docs/rules/README.md` | — |
+| Write-up | `docs/results/2026-11-round-2-cqlite-hotspots.md` | checked by `round2/check_citations.py` |
+
+Proposal branches in `work/cqlite-r2`: `r2-proposal/default-siphash-on-hot-map` `a9878039`,
+`r2-proposal/per-cell-arc-str-clone` `806bd8b9` (R32).
