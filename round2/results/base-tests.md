@@ -39,3 +39,7 @@ These fail on the unchanged base and are therefore "pre-existing" for every bran
 - `wide_range_tombstone_matches_the_sstabledump_golden`
 
 The suite is usable as a referee: 16,050 passing tests, 29 failing results across 17 names, all on the base. Why they fail on the base was not investigated (out of scope; CQLite's gate applies a CI skip-list that this fallback does not).
+
+## Added 2026-11-23: intermittent on the base (DECISIONS R31)
+
+- `phase_active_and_in_flight_read_true_concurrent_count_then_settle` (`cqlite-flight`, workspace step): passed in R2-000004, failed in the `c1d91fb2` run R2-000035. Rerun alone: 1 failure in 5 on base `7f9abe36`, 2 in 3 on `c1d91fb2`; each failure is the test's 30 s "holder timed out waiting for release". Treated as pre-existing.
