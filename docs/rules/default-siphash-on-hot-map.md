@@ -83,3 +83,29 @@ cheaper public route is in `docs/rules/proposals/default-siphash-on-hot-map.md`.
 ## Outcome
 
 (appended after the confirmation run)
+
+### Outcome, 2026-11-23
+
+Branch `r2/default-siphash-on-hot-map` at `8d2137eb` (one attempt). Fix: a private `FxHashMap`
+beside `key_lookup` in `MaterializedIndex`, read by `lookup_partition`.
+
+| | value | record |
+|---|---|---|
+| screen (attempt 1) | none: `NOISE_GATE_FAILED`; not rescreened, no attempt 2 | R2-000029 |
+| review | internal only, no format change, no weakened tests; three minor notes | — |
+| tests | no failure outside the base's list (16 failing, all pre-existing) | R2-000030 |
+| **confirm, targets** | **WON**: ratio **0.4419**, 95% interval 0.4371 to 0.4458; b 0.0416, T 0.0832; 20 sessions, 0 rejected | R2-000031 |
+| confirm, whole workload | WON, same numbers (the target set is the whole workload) | R2-000031 |
+| cross-check read | no REGRESSION; workload ratio 0.9895 (0.9830 to 0.9958), T 0.05; per-case points 0.958 to 1.005; 10 sessions | R2-000032 |
+| cross-check decode | no REGRESSION; workload ratio 0.9905 (0.9839 to 0.9960), T 0.05; per-case points 0.952 to 1.015; 10 sessions | R2-000033 |
+| `perf-gate` 10% column | no case flagged in any of the three runs | R2-000031..33 |
+
+Per-case confirm ratios: `borrow_trait_lookup` 0.340, `position_0` 0.350, `hot_keys` 0.473,
+`sequential_access` 0.482, `random_access` 0.519, `1000_lookups` 0.528.
+
+- **Prediction held: no.** The point estimate 0.4419 is below the predicted range (0.46 to 0.72):
+  the change removed more than predicted. The prediction assumed the key compare would not change.
+- **Paid off: yes.** WON with no REGRESSION.
+- The read and decode cross-check intervals sit just below 1 and inside T. The read null's own
+  interval (R2-000016, 0.9855 to 0.9975) does too, so this is not evidence of an effect there.
+- Not measured: the memory and build time of the second map (the bench does not exercise them).
